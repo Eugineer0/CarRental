@@ -1,0 +1,19 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" href="">Car rental Admin®</a>  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/welcome" routerLinkActive="active">Welcome</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/secret" routerLinkActive="active">Secret</a>
+      </li>
+    </ul>
+    <ul class="navbar-nav">
+      <a class="nav-link" *ngIf="authService.isLoggedOut()" routerLink="/login" routerLinkActive="active">Login</a>
+      <a class="nav-link" *ngIf="authService.isLoggedIn()" routerLink="/welcome" routerLinkActive="active" (click)="authService.logout()">Logout</a>
+    </ul>
+  </div>
+</nav>
+<div class="container">
+  <router-outlet></router-outlet>
+</div>
