@@ -11,5 +11,4 @@ export class SecretComponent implements OnInit {
 
   ngOnInit(): void {
   }
-
 }

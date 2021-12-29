@@ -1,43 +1,57 @@
 <div class="row">
-  <div class="col-md-6 mx-auto">
-    <div class="card rounded-0">
+  <div class="col-md-5  mx-auto">
+    <div class=" card rounded-1">
       <div class="card-header">
         <h3>Login</h3>
       </div>
       <div class="card-body">
         <div *ngIf="authFailed"
              class="alert alert-danger">
-          Login, Password or both are incorrect
+          Incorrect username or password
         </div>
         <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
           <div class="form-group">
 
             <label class="mb-0" for="login">Admin</label>
-            <input #login="ngModel" type="text" class="form-control" id="login"
-                   required minlength="4" appForbiddenName="qwerty"
-                   [(ngModel)]="admin.login" name="login" (ngModelChange)="resetAuthStatus()">
-            <div *ngIf="login.invalid && (login.dirty || login.touched)"
-                 class="alert alert-danger">
-
+            <input
+              #login="ngModel"
+              required
+              minlength="4"
+              type="text"
+              name="login"
+              class="form-control"
+              id="login"
+              (ngModelChange)="resetAuthStatus()"
+              [(ngModel)]="admin.login"
+            >
+            <div
+              *ngIf="login.invalid && (login.dirty || login.touched)"
+              class="alert alert-danger"
+            >
               <div *ngIf="login.errors?.['required']">
                 Login is required.
               </div>
               <div *ngIf="login.errors?.['minlength']">
                 Login must be at least 4 characters long.
               </div>
-              <div *ngIf="login.errors?.['forbiddenName']">
-                Login cannot contain qwerty.
-              </div>
-
             </div>
-
             <label class="mb-0 mt-2" for="password">Password</label>
-            <input #password="ngModel" type="text" class="form-control" id="password"
-                   required minlength="4" appForbiddenName="qwerty"
-                   [(ngModel)]="admin.password" name="password" (ngModelChange)="resetAuthStatus()">
-            <div *ngIf="password.invalid && (password.dirty || password.touched)"
-                 class="alert alert-danger">
-
+            <input
+              #password="ngModel"
+              required
+              minlength="4"
+              type="password"
+              appForbiddenName="qwerty"
+              name="password"
+              class="form-control"
+              id="password"
+              (ngModelChange)="resetAuthStatus()"
+              [(ngModel)]="admin.password"
+            >
+            <div
+              *ngIf="password.invalid && (password.dirty || password.touched)"
+              class="alert alert-danger"
+            >
               <div *ngIf="password.errors?.['required']">
                 Password is required.
               </div>
@@ -45,7 +59,7 @@
                 Password must be at least 4 characters long.
               </div>
               <div *ngIf="password.errors?.['forbiddenName']">
-                Password cannot contain qwerty.
+                Password cannot be "qwerty".
               </div>
             </div>
           </div>
@@ -56,4 +70,3 @@
     </div>
   </div>
 </div>
-
