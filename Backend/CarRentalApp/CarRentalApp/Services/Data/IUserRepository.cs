@@ -4,8 +4,10 @@ namespace CarRentalApp.Services.Data
 {
     public interface IUserRepository
     {
-        Task<User> GetByEmail (string email);
-        Task<User> GetByUsername (string username); 
-        Task<User> CreateUser (User user);
+        Task<User?> GetByEmailAsync(string email);
+
+        Task<User?> GetByUsernameAsync(string username);
+
+        Task<User> CreateUserAsync(User user);
     }
 }

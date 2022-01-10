@@ -11,30 +11,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
-
 builder.Services.AddScoped<IUserRepository, UserRepositoryService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 
-var bindJwtSettings = new JwtConfig();
-builder.Configuration.Bind("JwtConfig", bindJwtSettings);
+var accessJwtConfig = new JwtConfig();
+builder.Configuration.Bind("AccessJwtConfig", accessJwtConfig);
+
+var accessJwtValidationParams = accessJwtConfig.ValidationParameters;
+accessJwtValidationParams.IssuerSigningKey = new SymmetricSecurityKey(
+    Encoding.UTF8.GetBytes(accessJwtConfig.GenerationParameters.Secret)
+);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
-    options.TokenValidationParameters = new TokenValidationParameters()
-    {
-        ValidateActor = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ClockSkew = TimeSpan.Zero,
-        ValidIssuer = bindJwtSettings.Issuer,
-        ValidAudience = bindJwtSettings.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(bindJwtSettings.Secret))
-    };
+    options.TokenValidationParameters = accessJwtValidationParams;
 });
 
 builder.Services.AddCors(options =>

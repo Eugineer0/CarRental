@@ -18,19 +18,21 @@ namespace CarRentalApp.Services.Authentication
             _tokenService = tokenService;
         }
 
-        public async Task<AuthenticationResponse?> Authenticate(UserLoginDTO model)
+        public async Task<AuthenticationResponse?> AuthenticateAsync(UserLoginDTO userDTO)
         {
-            var user = await _userService.ValidateAndReturn(model);
-
+            var user = await _userService.GetValidUserAsync(userDTO);
             if (user == null)
             {
                 return null;
             }
 
-            var token = _tokenService.Generate(user);
+            var token = _tokenService.GenerateAccessToken(user);
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-            return new AuthenticationResponse(tokenString, token.ValidTo);
+            return new AuthenticationResponse()
+            { 
+                AccessToken = tokenString
+            };
         }
     }
 }

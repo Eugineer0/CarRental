@@ -5,6 +5,6 @@ namespace CarRentalApp.Services.Identity
 {
     public interface IUserService
     {
-        Task<User?> ValidateAndReturn(UserLoginDTO user);
+        Task<User?> GetValidUserAsync(UserLoginDTO user);
     }
 }

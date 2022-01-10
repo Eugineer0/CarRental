@@ -2,7 +2,6 @@
 using System.Security.Claims;
 using System.Text;
 using CarRentalApp.Configuration;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using CarRentalApp.Models.Data;
 
@@ -10,37 +9,47 @@ namespace CarRentalApp.Services.Token
 {
     public class TokenService : ITokenService
     {
-        private readonly JwtConfig _appSettings;
+        private readonly IConfiguration _configuration;
 
-        public TokenService(IOptions<JwtConfig> appSettings)
+        public TokenService(IConfiguration configuration)
         {
-            _appSettings = appSettings.Value;
+            _configuration = configuration;
         }
-        
-        public JwtSecurityToken Generate(User user)
-        {                       
-            var key = Encoding.UTF8.GetBytes(_appSettings.Secret);
+
+        public JwtSecurityToken GenerateAccessToken(User user)
+        {
+            var accessJwtGenerationParams = new TokenGenerationParameters();
+
+            _configuration.GetSection("AccessJwtConfig:GenerationParameters").Bind(accessJwtGenerationParams);
 
             var claims = new List<Claim>()
             {
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("role", user.Role.ToString())
-            };                           
+            };
+
+            return Generate(accessJwtGenerationParams, claims);
+        }
+        
+        private JwtSecurityToken Generate(TokenGenerationParameters jwtConfig, IEnumerable<Claim> jwtClaims)
+        {
+            var key = Encoding.UTF8.GetBytes(jwtConfig.Secret);
 
             var credentials = new SigningCredentials(
                 new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha512Signature
+                SecurityAlgorithms.HmacSha256Signature
             );
 
             var token = new JwtSecurityToken(
-                issuer: _appSettings.Issuer,
-                audience: _appSettings.Audience,
-                claims: claims,
-                expires: DateTime.Now.AddSeconds(_appSettings.TokenLifeTimeSeconds),
+                issuer: jwtConfig.Issuer,
+                audience: jwtConfig.Audience,
+                claims: jwtClaims,
+                expires: DateTime.Now.AddSeconds(jwtConfig.TokenLifeTimeSeconds),
                 signingCredentials: credentials
             );
-            
+
             return token;
-        }        
-    }
+        }
+    }  
 }

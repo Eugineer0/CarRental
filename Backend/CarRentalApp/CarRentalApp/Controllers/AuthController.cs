@@ -19,12 +19,7 @@ namespace CarRentalApp.Controllers
         [Route("[action]")]
         public async Task<IActionResult> Login([FromBody] UserLoginDTO model)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Incorrect format");
-            } 
-
-            var authResponse = await _authenticationService.Authenticate(model);
+            var authResponse = await _authenticationService.AuthenticateAsync(model);
             if (authResponse == null)
             {
                 return Unauthorized("Incorrect username or password");

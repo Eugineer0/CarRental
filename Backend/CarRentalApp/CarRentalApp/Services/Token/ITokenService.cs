@@ -5,6 +5,6 @@ namespace CarRentalApp.Services.Token
 {
     public interface ITokenService
     {
-        JwtSecurityToken Generate(User user);
+        JwtSecurityToken GenerateAccessToken(User user);
     }
 }

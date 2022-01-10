@@ -5,6 +5,6 @@ namespace CarRentalApp.Services.Authentication
 {
     public interface IAuthenticationService
     {
-        Task<AuthenticationResponse?> Authenticate(UserLoginDTO user);        
+        Task<AuthenticationResponse?> AuthenticateAsync(UserLoginDTO userDTO);
     }
 }
