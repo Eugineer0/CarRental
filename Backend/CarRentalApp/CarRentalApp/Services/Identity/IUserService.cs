@@ -5,6 +5,7 @@ namespace CarRentalApp.Services.Identity
 {
     public interface IUserService
     {
-        Task<User?> GetValidUserAsync(UserLoginDTO user);
+        Task<User?> GetExistingUserAsync(UserLoginDTO user);
+        bool Validate(User user, UserLoginDTO userDTO);
     }
 }

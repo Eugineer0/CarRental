@@ -6,6 +6,7 @@ using CarRentalApp.Services.Data;
 using CarRentalApp.Services.Identity;
 using CarRentalApp.Services.Token;
 using CarRentalApp.Services.Authentication;
+using WebApplicationTest.Services.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

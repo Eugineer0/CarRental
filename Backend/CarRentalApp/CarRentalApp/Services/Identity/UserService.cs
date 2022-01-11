@@ -1,8 +1,6 @@
 ﻿using CarRentalApp.Models.Data;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Services.Data;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace CarRentalApp.Services.Identity
 {
@@ -15,30 +13,20 @@ namespace CarRentalApp.Services.Identity
             _userRepository = userRepository;
         }
 
-        public async Task<User?> GetValidUserAsync(UserLoginDTO user2Login)
-        {
-            var existingUser = await _userRepository.GetByUsernameAsync(user2Login.Username);
-
-            return
-                existingUser != null &&
-                Validate(user2Login, existingUser) ?
-                existingUser :
-                null;
+        public async Task<User?> GetExistingUserAsync(UserLoginDTO user2Login)
+        {            
+            return await _userRepository.GetByUsernameAsync(user2Login.Username);
         }
 
-        private bool Validate(UserLoginDTO userDTO, User existingUser)
+        public bool Validate(User existingUser, UserLoginDTO userDTO)
         {
             var hashedPassword = DigestPassword(userDTO.Password, existingUser.Salt);
-            return hashedPassword.SequenceEqual(existingUser.HashedPassword);
+            return hashedPassword.Equals(existingUser.HashedPassword);
         }
 
-        private byte[] DigestPassword(string password, string salt)
+        private string DigestPassword(string password, string salt)
         {
-            byte[] data = Encoding.UTF8.GetBytes(password + salt);
-
-            HashAlgorithm sha = SHA256.Create();
-
-            return sha.ComputeHash(data);
+            return BCrypt.Net.BCrypt.HashPassword(password + salt);
         }
     }
 }

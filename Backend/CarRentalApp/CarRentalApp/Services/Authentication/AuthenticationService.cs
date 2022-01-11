@@ -20,8 +20,8 @@ namespace CarRentalApp.Services.Authentication
 
         public async Task<AuthenticationResponse?> AuthenticateAsync(UserLoginDTO userDTO)
         {
-            var user = await _userService.GetValidUserAsync(userDTO);
-            if (user == null)
+            var user = await _userService.GetExistingUserAsync(userDTO);
+            if (user == null || !_userService.Validate(user, userDTO))
             {
                 return null;
             }
