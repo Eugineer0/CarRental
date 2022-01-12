@@ -8,9 +8,9 @@ namespace CarRentalApp.Controllers
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthenticationService _authenticationService;
+        private readonly AuthenticationService _authenticationService;
 
-        public AuthController(IAuthenticationService authenticationService)
+        public AuthController(AuthenticationService authenticationService)
         {
             _authenticationService = authenticationService;
         }

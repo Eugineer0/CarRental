@@ -1,15 +1,14 @@
 ﻿using CarRentalApp.Models.Contexts;
-using CarRentalApp.Models.Data;
-using CarRentalApp.Services.Data;
+using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace WebApplicationTest.Services.Data
+namespace CarRentalApp.Services.Data
 {
-    public class UserRepositoryService : IUserRepository
+    public class UserRepository
     {
         private readonly AuthenticationDbContext _authenticationDbContext;
 
-        public UserRepositoryService(AuthenticationDbContext authenticationDbContext)
+        public UserRepository(AuthenticationDbContext authenticationDbContext)
         {
             _authenticationDbContext = authenticationDbContext;
         }

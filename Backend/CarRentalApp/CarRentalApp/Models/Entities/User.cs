@@ -1,4 +1,4 @@
-﻿namespace CarRentalApp.Models.Data
+﻿namespace CarRentalApp.Models.Entities
 {
     public class User
     {

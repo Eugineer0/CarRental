@@ -1,32 +1,33 @@
-﻿using CarRentalApp.Models.Data;
-using CarRentalApp.Models.DTOs.Requests;
+﻿using CarRentalApp.Models.DTOs.Requests;
+using CarRentalApp.Models.Entities;
+using CarRentalApp.Services.Authentication;
 using CarRentalApp.Services.Data;
 
 namespace CarRentalApp.Services.Identity
 {
-    public class UserService : IUserService
+    public class UserService
     {
-        private IUserRepository _userRepository;
+        private UserRepository _userRepository;
+        private PasswordService _passwordService;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(UserRepository userRepository, PasswordService passwordService)
         {
             _userRepository = userRepository;
+            _passwordService = passwordService;
         }
 
         public async Task<User?> GetExistingUserAsync(UserLoginDTO user2Login)
-        {            
+        {
             return await _userRepository.GetByUsernameAsync(user2Login.Username);
         }
 
-        public bool Validate(User existingUser, UserLoginDTO userDTO)
+        public bool Validate(User existingUser, UserLoginDTO user2Validate)
         {
-            var hashedPassword = DigestPassword(userDTO.Password, existingUser.Salt);
-            return hashedPassword.Equals(existingUser.HashedPassword);
-        }
-
-        private string DigestPassword(string password, string salt)
-        {
-            return BCrypt.Net.BCrypt.HashPassword(password + salt);
-        }
+            return _passwordService.VerifyPassword(
+                existingUser.HashedPassword,
+                existingUser.Salt,
+                user2Validate.Password
+            );
+        }        
     }
 }

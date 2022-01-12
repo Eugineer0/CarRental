@@ -1,18 +1,19 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Models.DTOs.Responces;
+using CarRentalApp.Models.Entities;
 using CarRentalApp.Services.Identity;
 using CarRentalApp.Services.Token;
 
 namespace CarRentalApp.Services.Authentication
 {
 
-    public class AuthenticationService : IAuthenticationService
+    public class AuthenticationService
     {
-        private readonly IUserService _userService;
-        private readonly ITokenService _tokenService;
+        private readonly UserService _userService;
+        private readonly TokenService _tokenService;
 
-        public AuthenticationService(IUserService userService, ITokenService tokenService)
+        public AuthenticationService(UserService userService, TokenService tokenService)
         {
             _userService = userService;
             _tokenService = tokenService;
@@ -26,12 +27,17 @@ namespace CarRentalApp.Services.Authentication
                 return null;
             }
 
-            var token = _tokenService.GenerateAccessToken(user);
-            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+            return await GetAccess(user);
+        }
+
+        public async Task<AuthenticationResponse> GetAccess(User user)
+        {
+            var accessToken = _tokenService.GenerateAccessToken(user);
+            var accessTokenString = new JwtSecurityTokenHandler().WriteToken(accessToken);           
 
             return new AuthenticationResponse()
-            { 
-                AccessToken = tokenString
+            {
+                AccessToken = accessTokenString
             };
         }
     }

@@ -1,4 +1,4 @@
-﻿using CarRentalApp.Models.Data;
+﻿using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalApp.Models.Contexts
