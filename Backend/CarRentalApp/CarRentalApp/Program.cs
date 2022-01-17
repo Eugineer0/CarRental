@@ -37,21 +37,27 @@ accessJwtValidationParams.IssuerSigningKey = new SymmetricSecurityKey(
     Encoding.UTF8.GetBytes(accessJwtConfig.GenerationParameters.Secret)
 );
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = accessJwtValidationParams;
-});
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = accessJwtValidationParams;
+        }
+    );
 
 builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        });
-});
+    {
+        options.AddDefaultPolicy(
+            builder =>
+            {
+                builder
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            }
+        );
+    }
+);
 
 var app = builder.Build();
 
