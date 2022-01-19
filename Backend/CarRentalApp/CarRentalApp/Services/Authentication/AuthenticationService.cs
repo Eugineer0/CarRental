@@ -30,14 +30,37 @@ namespace CarRentalApp.Services.Authentication
             return await GetAccess(user);
         }
 
+        public async Task<AuthenticationResponse?> AuthenticateAsync(RefreshTokenDTO tokenDTO)
+        {
+            var token = await _tokenService.GetExistingTokenAsync(tokenDTO);
+            if (token == null || !_tokenService.Validate(token))
+            {
+                return null;
+            }
+
+            var user = await _userService.GetByRefreshTokenAsync(token);
+            if (user == null)
+            {
+                return null;
+            }
+
+            return await GetAccess(user);
+        }
+
         public async Task<AuthenticationResponse> GetAccess(User user)
         {
             var accessToken = _tokenService.GenerateAccessToken(user);
-            var accessTokenString = new JwtSecurityTokenHandler().WriteToken(accessToken);           
+            var accessTokenString = new JwtSecurityTokenHandler().WriteToken(accessToken);
+
+            var refreshToken = _tokenService.GenerateRefreshToken(user);
+            var refreshTokenString = new JwtSecurityTokenHandler().WriteToken(refreshToken);
+
+            await _tokenService.StoreRefreshTokenAsync(refreshTokenString, user);
 
             return new AuthenticationResponse()
             {
-                AccessToken = accessTokenString
+                AccessToken = accessTokenString,
+                RefreshToken = refreshTokenString
             };
         }
     }

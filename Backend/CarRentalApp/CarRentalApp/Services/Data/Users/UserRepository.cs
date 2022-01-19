@@ -1,4 +1,4 @@
-﻿using CarRentalApp.Models.Contexts;
+﻿using CarRentalApp.Contexts;
 using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,11 +19,25 @@ namespace CarRentalApp.Services.Data
             await _authenticationDbContext.SaveChangesAsync();
 
             return user;
-        }        
+        }
+
+        public async Task<User?> GetByIdAsync(Guid id)
+        {
+            return await _authenticationDbContext.Users.FindAsync(id);
+        }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _authenticationDbContext
+                .Users
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
 
         public async Task<User?> GetByUsernameAsync(string username)
         {
-            return await _authenticationDbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _authenticationDbContext
+                .Users
+                .FirstOrDefaultAsync(u => u.Username == username);
         }
     }
 }

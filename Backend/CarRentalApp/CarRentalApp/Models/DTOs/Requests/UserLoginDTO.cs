@@ -8,6 +8,6 @@ namespace CarRentalApp.Models.DTOs.Requests
         public string Username { get; set; }
 
         [Required]        
-        public string Password { get; set; }
+        public virtual string Password { get; set; }
     }
 }

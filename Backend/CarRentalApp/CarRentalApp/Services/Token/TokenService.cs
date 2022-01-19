@@ -6,17 +6,59 @@ using Microsoft.IdentityModel.Tokens;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Configuration.JWT;
 using Microsoft.Extensions.Options;
+using CarRentalApp.Services.Data;
+using CarRentalApp.Configuration.JWT.Refresh;
+using CarRentalApp.Models.DTOs.Requests;
 
 namespace CarRentalApp.Services.Token
 {
     public class TokenService
     {
-        private readonly AccessJwtConfig _accessJwtConfig;
+        private readonly RefreshTokenRepository _refreshTokenRepository;
 
-        public TokenService(IOptions<AccessJwtConfig> accessJwtConfig)
+        private readonly AccessJwtConfig _accessJwtConfig;
+        private readonly RefreshJwtConfig _refreshJwtConfig;
+
+        public TokenService(
+            RefreshTokenRepository refreshTokenRepository,
+            IOptions<AccessJwtConfig> accessJwtConfig,
+            IOptions<RefreshJwtConfig> refreshJwtConfig
+        )
         {
+            _refreshTokenRepository = refreshTokenRepository;
             _accessJwtConfig = accessJwtConfig.Value;
-        }       
+            _refreshJwtConfig = refreshJwtConfig.Value;
+        }
+
+        private SigningCredentials GetCredentials(GenerationParameters jwtParams)
+        {
+            return new SigningCredentials(
+                GetKey(jwtParams),
+                SecurityAlgorithms.HmacSha256Signature
+            );
+        }
+
+        private SecurityKey GetKey(GenerationParameters jwtParams)
+        {
+            return new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtParams.Secret)
+            );
+        }
+
+        private async Task InvalidateUserAsync(RefreshTokenDTO tokenDTO)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = handler.ReadJwtToken(tokenDTO.Token);
+
+            var userIdString = jwtSecurityToken
+                .Claims
+                .First(claim => claim.Type == JwtRegisteredClaimNames.UniqueName)
+                .Value;
+
+            if (!Guid.TryParse(userIdString, out Guid userId)) return;
+
+            await _refreshTokenRepository.DeleteRelatedTokensAsync(userId);
+        }
 
         public JwtSecurityToken GenerateAccessToken(User user)
         {
@@ -37,15 +79,68 @@ namespace CarRentalApp.Services.Token
                 signingCredentials: GetCredentials(accessJwtGenerationParams)
             );
         }
-
-        private SigningCredentials GetCredentials(GenerationParameters jwtConfig)
+        public JwtSecurityToken GenerateRefreshToken(User user)
         {
-            var key = Encoding.UTF8.GetBytes(jwtConfig.Secret);
+            var refreshJwtGenerationParams = _refreshJwtConfig.GenerationParameters;
 
-            return new SigningCredentials(
-                new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha256Signature
+            var jwtClaims = new List<Claim>()
+            {
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.Id.ToString()),
+            };
+
+            return new JwtSecurityToken(
+                claims: jwtClaims,
+                expires: DateTime.Now.AddSeconds(refreshJwtGenerationParams.LifeTimeSeconds),
+                signingCredentials: GetCredentials(refreshJwtGenerationParams)
             );
+        }        
+
+        public async Task<RefreshToken?> GetExistingTokenAsync(RefreshTokenDTO tokenDTO)
+        {
+            var token = await _refreshTokenRepository.GetByTokenAsync(tokenDTO.Token);
+            if (token == null)
+            {
+                await InvalidateUserAsync(tokenDTO);
+                return null;
+            }
+            
+            await _refreshTokenRepository.DeleteAsync(token);
+
+            return token;
         }
-    }  
+
+        public bool Validate(RefreshToken token)
+        {
+            var refreshJwtValidationParams = _refreshJwtConfig.ValidationParameters;
+
+            refreshJwtValidationParams.IssuerSigningKey = GetKey(_refreshJwtConfig.GenerationParameters);
+
+            try
+            {
+                new JwtSecurityTokenHandler()
+                    .ValidateToken(
+                        token.Token,
+                        refreshJwtValidationParams,
+                        out SecurityToken securityToken
+                    );
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return true;
+        }        
+
+        public async Task<RefreshToken> StoreRefreshTokenAsync(string refreshTokenString, User user)
+        {
+            var refreshToken = new RefreshToken()
+            {
+                Token = refreshTokenString,
+                UserId = user.Id
+            };
+
+            return await _refreshTokenRepository.CreateAsync(refreshToken);
+        }
+    }
 }
