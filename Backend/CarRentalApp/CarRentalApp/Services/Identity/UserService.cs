@@ -21,7 +21,7 @@ namespace CarRentalApp.Services.Identity
             return await _userRepository.GetByUsernameAsync(user2Login.Username);
         }
 
-        public bool Validate(User existingUser, UserLoginDTO user2Validate)
+        public bool ValidatePassword(User existingUser, UserLoginDTO user2Validate)
         {
             return _passwordService.VerifyPassword(
                 existingUser.HashedPassword,

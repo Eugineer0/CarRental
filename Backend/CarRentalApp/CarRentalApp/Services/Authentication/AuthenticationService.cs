@@ -22,7 +22,7 @@ namespace CarRentalApp.Services.Authentication
         public async Task<AuthenticationResponse?> AuthenticateAsync(UserLoginDTO userDTO)
         {
             var user = await _userService.GetExistingUserAsync(userDTO);
-            if (user == null || !_userService.Validate(user, userDTO))
+            if (user == null || !_userService.ValidatePassword(user, userDTO))
             {
                 return null;
             }
