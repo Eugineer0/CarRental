@@ -7,7 +7,6 @@ using CarRentalApp.Services.Token;
 
 namespace CarRentalApp.Services.Authentication
 {
-
     public class AuthenticationService
     {
         private readonly UserService _userService;

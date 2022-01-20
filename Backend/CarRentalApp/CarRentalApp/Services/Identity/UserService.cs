@@ -13,31 +13,35 @@ namespace CarRentalApp.Services.Identity
 
         private readonly IMapper _userMapper;
 
-        public UserService(UserRepository userRepository, PasswordService passwordService, IMapper userMapper)
+        public UserService(
+            UserRepository userRepository, 
+            PasswordService passwordService, 
+            IMapper userMapper
+        )
         {
             _userRepository = userRepository;
             _passwordService = passwordService;
             _userMapper = userMapper;
         }
 
-        private async Task<bool> CheckIfExistAsync(UserRegistrationDTO user2Register)
+        private async Task<bool> CheckIfExistAsync(UserRegistrationDTO userDTO)
         {
             return
-                await _userRepository.GetByEmailAsync(user2Register.Email) != null ||
-                await _userRepository.GetByUsernameAsync(user2Register.Username) != null;
+                await _userRepository.GetByEmailAsync(userDTO.Email) != null ||
+                await _userRepository.GetByUsernameAsync(userDTO.Username) != null;
         }
 
-        public Task<User?> GetExistingUserAsync(UserLoginDTO user2Login)
+        public Task<User?> GetExistingUserAsync(UserLoginDTO userDTO)
         {
-            return _userRepository.GetByUsernameAsync(user2Login.Username);
+            return _userRepository.GetByUsernameAsync(userDTO.Username);
         }
 
-        public bool ValidatePassword(User existingUser, UserLoginDTO user2Validate)
+        public bool ValidatePassword(User existingUser, UserLoginDTO userDTO)
         {
             return _passwordService.VerifyPassword(
                 existingUser.HashedPassword,
                 existingUser.Salt,
-                user2Validate.Password
+                userDTO.Password
             );
         }
 
@@ -46,14 +50,14 @@ namespace CarRentalApp.Services.Identity
             return _userRepository.GetByIdAsync(token.UserId);
         }
 
-        public async Task<User?> RegisterAsync(UserRegistrationDTO user2Register)
+        public async Task<User?> RegisterAsync(UserRegistrationDTO userDTO)
         {
-            if (await CheckIfExistAsync(user2Register))
+            if (await CheckIfExistAsync(userDTO))
             {
                 return null;
             }
 
-            var user = _userMapper.Map<UserRegistrationDTO, User>(user2Register);
+            var user = _userMapper.Map<UserRegistrationDTO, User>(userDTO);
 
             return await _userRepository.CreateUserAsync(user);
         }        

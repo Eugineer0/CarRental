@@ -6,9 +6,9 @@ namespace CarRentalApp.Services.Data
 {
     public class RefreshTokenRepository
     {
-        private readonly AuthenticationDbContext _authenticationDbContext;
+        private readonly CarRentalDbContext _authenticationDbContext;
 
-        public RefreshTokenRepository(AuthenticationDbContext authenticationDbContext)
+        public RefreshTokenRepository(CarRentalDbContext authenticationDbContext)
         {
             _authenticationDbContext = authenticationDbContext;
         }

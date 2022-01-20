@@ -6,9 +6,9 @@ namespace CarRentalApp.Services.Data
 {
     public class UserRepository
     {
-        private readonly AuthenticationDbContext _authenticationDbContext;
+        private readonly CarRentalDbContext _authenticationDbContext;
 
-        public UserRepository(AuthenticationDbContext authenticationDbContext)
+        public UserRepository(CarRentalDbContext authenticationDbContext)
         {
             _authenticationDbContext = authenticationDbContext;
         }
@@ -30,14 +30,14 @@ namespace CarRentalApp.Services.Data
         {
             return await _authenticationDbContext
                 .Users
-                .FirstOrDefaultAsync(u => u.Email == email);
+                .FirstOrDefaultAsync(u => u.Email.Equals(email));
         }
 
         public async Task<User?> GetByUsernameAsync(string username)
         {
             return await _authenticationDbContext
                 .Users
-                .FirstOrDefaultAsync(u => u.Username == username);
+                .FirstOrDefaultAsync(u => u.Username.Equals(username));
         }
     }
 }

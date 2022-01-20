@@ -30,7 +30,7 @@ namespace CarRentalApp.Services.Token
             _refreshJwtConfig = refreshJwtConfig.Value;
         }
 
-        private SigningCredentials GetCredentials(GenerationParameters jwtParams)
+        private static SigningCredentials GetCredentials(GenerationParameters jwtParams)
         {
             return new SigningCredentials(
                 GetKey(jwtParams),
@@ -38,14 +38,14 @@ namespace CarRentalApp.Services.Token
             );
         }
 
-        private SecurityKey GetKey(GenerationParameters jwtParams)
+        public static SecurityKey GetKey(GenerationParameters jwtParams)
         {
             return new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtParams.Secret)
             );
         }
 
-        private async Task InvalidateUserAsync(RefreshTokenDTO tokenDTO)
+        private Task InvalidateUserAsync(RefreshTokenDTO tokenDTO)
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtSecurityToken = handler.ReadJwtToken(tokenDTO.Token);
@@ -55,9 +55,12 @@ namespace CarRentalApp.Services.Token
                 .First(claim => claim.Type == JwtRegisteredClaimNames.UniqueName)
                 .Value;
 
-            if (!Guid.TryParse(userIdString, out Guid userId)) return;
+            if (Guid.TryParse(userIdString, out Guid userId))
+            {
+                return _refreshTokenRepository.DeleteRelatedTokensAsync(userId);
+            }
 
-            await _refreshTokenRepository.DeleteRelatedTokensAsync(userId);
+            return Task.CompletedTask;
         }
 
         public JwtSecurityToken GenerateAccessToken(User user)
@@ -113,7 +116,8 @@ namespace CarRentalApp.Services.Token
         {
             var refreshJwtValidationParams = _refreshJwtConfig.ValidationParameters;
 
-            refreshJwtValidationParams.IssuerSigningKey = GetKey(_refreshJwtConfig.GenerationParameters);
+            refreshJwtValidationParams.IssuerSigningKey
+                = GetKey(_refreshJwtConfig.GenerationParameters);
 
             try
             {
@@ -132,7 +136,10 @@ namespace CarRentalApp.Services.Token
             return true;
         }        
 
-        public async Task<RefreshToken> StoreRefreshTokenAsync(string refreshTokenString, User user)
+        public async Task<RefreshToken> StoreRefreshTokenAsync(
+            string refreshTokenString, 
+            User user
+        )
         {
             var refreshToken = new RefreshToken()
             {

@@ -26,17 +26,19 @@ builder.Services.AddScoped<RefreshTokenRepository>();
 builder.Services.AddScoped<TokenService>();
 
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<PasswordService>();
 builder.Services.AddScoped<UserService>();
 
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<AuthenticationService>();
 
-builder.Services.AddScoped<PasswordService, PasswordService>();
-
 builder.Services.AddAutoMapper(typeof(UserMapperProfile));
 
-var configurationString = builder.Configuration.GetConnectionString("sqlserver");
-builder.Services.AddDbContext<AuthenticationDbContext>(
+var configurationString = builder
+    .Configuration
+    .GetConnectionString("sqlserver");
+
+builder.Services.AddDbContext<CarRentalDbContext>(
     options => options.UseSqlServer(configurationString)
 );
 
@@ -44,9 +46,8 @@ var accessJwtConfig = new AccessJwtConfig();
 builder.Configuration.Bind(AccessJwtConfig.Section, accessJwtConfig);
 
 var accessJwtValidationParams = accessJwtConfig.ValidationParameters;
-accessJwtValidationParams.IssuerSigningKey = new SymmetricSecurityKey(
-    Encoding.UTF8.GetBytes(accessJwtConfig.GenerationParameters.Secret)
-);
+accessJwtValidationParams.IssuerSigningKey = TokenService
+    .GetKey(accessJwtConfig.GenerationParameters);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

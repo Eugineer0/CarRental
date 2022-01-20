@@ -3,13 +3,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalApp.Contexts
 {
-    public class AuthenticationDbContext : DbContext
+    public class CarRentalDbContext : DbContext
     {
         public DbSet<User> Users { get; set; }
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
-        public AuthenticationDbContext(DbContextOptions<AuthenticationDbContext> options)
+        public CarRentalDbContext(DbContextOptions<CarRentalDbContext> options)
             : base(options)
         {
         }

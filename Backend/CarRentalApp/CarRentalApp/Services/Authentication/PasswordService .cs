@@ -8,10 +8,11 @@ namespace CarRentalApp.Services.Authentication
     {
         public byte[] DigestPassword(string password, byte[] salt)
         {           
-            var data = (byte[])Encoding.UTF8.GetBytes(password).Concat(salt);
+            var data = Encoding.UTF8.GetBytes(password)
+                .Concat(salt)
+                .ToArray();
 
-            var hashFunc = SHA256.Create();   
-            
+            using var hashFunc = SHA256.Create();
             return hashFunc.ComputeHash(data);
         }
 
@@ -19,7 +20,7 @@ namespace CarRentalApp.Services.Authentication
         {
             var random = new Random();            
             
-            var salt = new byte[31];
+            var salt = new byte[32];
             
             random.NextBytes(salt);
             

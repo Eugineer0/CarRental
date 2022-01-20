@@ -11,25 +11,24 @@ namespace CarRentalApp.Models.DTOs.Requests
 
         [Required]
         [StringLength(
-            25, 
-            MinimumLength = 5, 
-            ErrorMessage = "Incorrect format: Username " +
-            "must have length between 5 and 25 symbols"
+            25,
+            ErrorMessage = "Incorrect format: " +
+            "The {0} value cannot exceed {1} characters"
         )]
         public string Username { get; set; }
 
         [Required]
-        [RegularExpression(                     
+        [RegularExpression(
+            ".{5,25}" +
             "(?=.*[0-9])" +
             "(?=.*[a-z])" +
-            "(?=.*[A-Z])" +
-            ".{5,25}",                        
-            ErrorMessage = "Incorrect format: Password " +
-            "must contain at least " +
-                "one digit, " +
-                "one lowercase letter, " +
-                "one uppercase leter, " +
-            "and has length between 5 and 25 symbols"
+            "(?=.*[A-Z])",                        
+            ErrorMessage = "Incorrect format: The {0} value must " +
+            "have length between 5 and 25 characters " +
+            "and contain at least " +
+            "one digit, " +
+            "one lowercase letter, " +
+            "one uppercase leter"
         )]
         public string Password { get; set; }
 

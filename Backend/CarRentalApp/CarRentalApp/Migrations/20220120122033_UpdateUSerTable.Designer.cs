@@ -11,9 +11,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CarRentalApp.Migrations
 {
-    [DbContext(typeof(AuthenticationDbContext))]
-    [Migration("20220120072857_UpdateAuthenticationDB")]
-    partial class UpdateAuthenticationDB
+    [DbContext(typeof(CarRentalDbContext))]
+    [Migration("20220120122033_UpdateUSerTable")]
+    partial class UpdateUSerTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
