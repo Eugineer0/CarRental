@@ -10,7 +10,7 @@ namespace CarRentalApp.Contexts
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         public AuthenticationDbContext(DbContextOptions<AuthenticationDbContext> options)
-        : base(options)
+            : base(options)
         {
         }
     }

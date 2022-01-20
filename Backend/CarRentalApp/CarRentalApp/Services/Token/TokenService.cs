@@ -82,7 +82,7 @@ namespace CarRentalApp.Services.Token
         public JwtSecurityToken GenerateRefreshToken(User user)
         {
             var refreshJwtGenerationParams = _refreshJwtConfig.GenerationParameters;
-
+ 
             var jwtClaims = new List<Claim>()
             {
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.Id.ToString()),

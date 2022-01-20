@@ -27,9 +27,9 @@ namespace CarRentalApp.Services.Identity
                 await _userRepository.GetByUsernameAsync(user2Register.Username) != null;
         }
 
-        public async Task<User?> GetExistingUserAsync(UserLoginDTO user2Login)
+        public Task<User?> GetExistingUserAsync(UserLoginDTO user2Login)
         {
-            return await _userRepository.GetByUsernameAsync(user2Login.Username);
+            return _userRepository.GetByUsernameAsync(user2Login.Username);
         }
 
         public bool ValidatePassword(User existingUser, UserLoginDTO user2Validate)
@@ -41,9 +41,9 @@ namespace CarRentalApp.Services.Identity
             );
         }
 
-        public async Task<User?> GetByRefreshTokenAsync(RefreshToken token)
+        public Task<User?> GetByRefreshTokenAsync(RefreshToken token)
         {
-            return await _userRepository.GetByIdAsync(token.UserId);
+            return _userRepository.GetByIdAsync(token.UserId);
         }
 
         public async Task<User?> RegisterAsync(UserRegistrationDTO user2Register)

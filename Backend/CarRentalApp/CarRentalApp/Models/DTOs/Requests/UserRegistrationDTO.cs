@@ -3,11 +3,20 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CarRentalApp.Models.DTOs.Requests
 {
-    public class UserRegistrationDTO : UserLoginDTO
+    public class UserRegistrationDTO
     {
         [Required]
         [EmailAddress]
         public string Email { get; set; }
+
+        [Required]
+        [StringLength(
+            25, 
+            MinimumLength = 5, 
+            ErrorMessage = "Incorrect format: Username " +
+            "must have length between 5 and 25 symbols"
+        )]
+        public string Username { get; set; }
 
         [Required]
         [RegularExpression(                     
@@ -22,10 +31,7 @@ namespace CarRentalApp.Models.DTOs.Requests
                 "one uppercase leter, " +
             "and has length between 5 and 25 symbols"
         )]
-        public override string Password { 
-            get => base.Password;
-            set => base.Password = value; 
-        }
+        public string Password { get; set; }
 
         [Required]
         public DateTime Birthday { get; set; }

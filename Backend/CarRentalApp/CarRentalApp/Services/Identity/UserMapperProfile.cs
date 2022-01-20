@@ -9,9 +9,9 @@ namespace CarRentalApp.Services.Identity
     {            
         public UserMapperProfile()
         {   
-            var passwordService = new ShaPasswordService();
+            var passwordService = new PasswordService();
 
-            string salt = passwordService.GenerateSalt();
+            byte[] salt = passwordService.GenerateSalt();
 
             CreateMap<UserRegistrationDTO, User>()
                 .ForMember(

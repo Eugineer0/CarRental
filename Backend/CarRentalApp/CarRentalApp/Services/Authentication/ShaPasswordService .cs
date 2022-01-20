@@ -1,30 +1,35 @@
-﻿using System.Security.Cryptography;
+﻿using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace CarRentalApp.Services.Authentication
 {
-    public class ShaPasswordService : PasswordService
+    public class PasswordService
     {
-        public override string DigestPassword(string password, string salt)
-        {
-            var hashFunc = SHA256.Create();
+        public byte[] DigestPassword(string password, byte[] salt)
+        {           
+            var data = (byte[])Encoding.UTF8.GetBytes(password).Concat(salt);
 
-            var data = Encoding.UTF8.GetBytes(password + salt);
-
-            var hashedPassword = hashFunc.ComputeHash(data);
-
-            return Convert.ToBase64String(hashedPassword);
+            var hashFunc = SHA256.Create();   
+            
+            return hashFunc.ComputeHash(data);
         }
 
-        public override string GenerateSalt()
+        public byte[] GenerateSalt()
         {
             var random = new Random();            
             
-            var salt = new byte[32];
+            var salt = new byte[31];
             
             random.NextBytes(salt);
             
-            return Convert.ToBase64String(salt);
-        }        
+            return salt;
+        }
+
+        public bool VerifyPassword(byte[] validPassword, byte[] salt, string password)
+        {
+            var hashedPassword = DigestPassword(password, salt);
+            return validPassword.SequenceEqual(hashedPassword);
+        }
     }
 }
