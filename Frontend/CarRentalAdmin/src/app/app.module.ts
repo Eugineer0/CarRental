@@ -5,7 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 
-import {AuthService} from './auth.service';
+import {AuthService} from './services/auth.service';
 
 import { ForbiddenNameDirective } from './forbidden-name.directive';
 
