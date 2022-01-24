@@ -1,10 +1,10 @@
-﻿using CarRentalApp.Models.Entities;
+﻿using System.Threading.Tasks;
+using CarRentalApp.Models.Entities;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Services.Identity;
 
 namespace CarRentalApp.Services.Registration
-{
-    
+{    
     public class RegistrationService
     {
         private readonly UserService _userService;
@@ -14,8 +14,13 @@ namespace CarRentalApp.Services.Registration
             _userService = userService;
         }        
 
-        public async Task<User?> RegisterAsync(UserRegistrationDTO userDTO)
-        {           
+        public async Task<User?> TryRegisterAsync(UserRegistrationDTO userDTO)
+        {
+            if (await _userService.CheckIfExistsAsync(userDTO))
+            {
+                return null;
+            }
+
             return await _userService.RegisterAsync(userDTO);
         }
     }

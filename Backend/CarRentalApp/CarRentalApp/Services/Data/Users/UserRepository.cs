@@ -1,43 +1,50 @@
-﻿using CarRentalApp.Contexts;
+﻿using System;
+using System.Threading.Tasks;
+using CarRentalApp.Contexts;
+using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace CarRentalApp.Services.Data
+namespace CarRentalApp.Services.Data.Users
 {
     public class UserRepository
     {
-        private readonly CarRentalDbContext _authenticationDbContext;
+        private readonly CarRentalDbContext _carRentalDbContext;
 
         public UserRepository(CarRentalDbContext authenticationDbContext)
         {
-            _authenticationDbContext = authenticationDbContext;
+            _carRentalDbContext = authenticationDbContext;
         }
 
         public async Task<User> CreateUserAsync(User user)
         {
-            _authenticationDbContext.Users.Add(user);
-            await _authenticationDbContext.SaveChangesAsync();
+            _carRentalDbContext.Users.Add(user);
+            await _carRentalDbContext.SaveChangesAsync();
 
             return user;
         }
 
-        public async Task<User?> GetByIdAsync(Guid id)
+        public ValueTask<User?> GetByIdAsync(Guid id)
         {
-            return await _authenticationDbContext.Users.FindAsync(id);
+            return _carRentalDbContext.Users.FindAsync(id);
         }
 
-        public async Task<User?> GetByEmailAsync(string email)
+        public Task<User?> GetByEmailAsync(string email)
         {
-            return await _authenticationDbContext
-                .Users
+            return _carRentalDbContext.Users
                 .FirstOrDefaultAsync(u => u.Email.Equals(email));
         }
 
-        public async Task<User?> GetByUsernameAsync(string username)
+        public Task<User?> GetByUsernameAsync(string username)
         {
-            return await _authenticationDbContext
-                .Users
+            return _carRentalDbContext.Users
                 .FirstOrDefaultAsync(u => u.Username.Equals(username));
+        }
+
+        public Task<bool> IsUniqueCredentialsAsync(string username, string email)
+        {
+             return _carRentalDbContext.Users
+                .AnyAsync(u => u.Username.Equals(username) || u.Email.Equals(email));
         }
     }
 }

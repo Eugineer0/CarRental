@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Services.Authentication;
@@ -6,7 +7,7 @@ using CarRentalApp.Services.Registration;
 namespace CarRentalApp.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("[controller]/[action]")]
     public class AuthController : ControllerBase
     {
         private readonly AuthenticationService _authenticationService;
@@ -22,10 +23,10 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
-        [Route("[action]")]
+        [Route("")]
         public async Task<IActionResult> Login([FromBody] UserLoginDTO model)
         {
-            var authResponse = await _authenticationService.AuthenticateAsync(model);
+            var authResponse = await _authenticationService.TryAuthenticateAsync(model);
             if (authResponse == null)
             {
                 return Unauthorized("Incorrect username or password");
@@ -35,10 +36,10 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
-        [Route("[action]")]
+        [Route("")]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenDTO model)
         {
-            var authResponse = await _authenticationService.AuthenticateAsync(model);
+            var authResponse = await _authenticationService.TryAuthenticateAsync(model);
             if (authResponse == null)
             {
                 return Unauthorized("Invalid refresh token");
@@ -48,10 +49,10 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
-        [Route("[action]")]
+        [Route("")]
         public async Task<IActionResult> Register([FromBody] UserRegistrationDTO model)
         {
-            var user = await _registrationService.RegisterAsync(model);
+            var user = await _registrationService.TryRegisterAsync(model);
             if (user == null)
             {
                 return Conflict("User already exists");

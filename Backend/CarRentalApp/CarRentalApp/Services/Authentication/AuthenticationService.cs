@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Threading.Tasks;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Models.DTOs.Responces;
 using CarRentalApp.Models.Entities;
@@ -18,7 +19,7 @@ namespace CarRentalApp.Services.Authentication
             _tokenService = tokenService;
         }
 
-        public async Task<AuthenticationResponse?> AuthenticateAsync(UserLoginDTO userDTO)
+        public async Task<AuthenticationResponse?> TryAuthenticateAsync(UserLoginDTO userDTO)
         {
             var user = await _userService.GetExistingUserAsync(userDTO);
             if (user == null || !_userService.ValidatePassword(user, userDTO))
@@ -29,7 +30,7 @@ namespace CarRentalApp.Services.Authentication
             return await GetAccess(user);
         }
 
-        public async Task<AuthenticationResponse?> AuthenticateAsync(RefreshTokenDTO tokenDTO)
+        public async Task<AuthenticationResponse?> TryAuthenticateAsync(RefreshTokenDTO tokenDTO)
         {
             var token = await _tokenService.GetExistingTokenAsync(tokenDTO);
             if (token == null || !_tokenService.Validate(token))

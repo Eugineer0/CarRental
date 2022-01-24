@@ -1,8 +1,11 @@
-using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using CarRentalApp.Contexts;
 using CarRentalApp.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
-namespace CarRentalApp.Services.Data
+namespace CarRentalApp.Services.Data.Tokens
 {
     public class RefreshTokenRepository
     {

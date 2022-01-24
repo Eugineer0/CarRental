@@ -1,6 +1,10 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using CarRentalApp.Configuration.JWT.Access;
 using Microsoft.IdentityModel.Tokens;
 using CarRentalApp.Models.Entities;
@@ -9,6 +13,7 @@ using Microsoft.Extensions.Options;
 using CarRentalApp.Services.Data;
 using CarRentalApp.Configuration.JWT.Refresh;
 using CarRentalApp.Models.DTOs.Requests;
+using CarRentalApp.Services.Data.Tokens;
 
 namespace CarRentalApp.Services.Token
 {
@@ -30,37 +35,11 @@ namespace CarRentalApp.Services.Token
             _refreshJwtConfig = refreshJwtConfig.Value;
         }
 
-        private static SigningCredentials GetCredentials(GenerationParameters jwtParams)
-        {
-            return new SigningCredentials(
-                GetKey(jwtParams),
-                SecurityAlgorithms.HmacSha256Signature
-            );
-        }
-
         public static SecurityKey GetKey(GenerationParameters jwtParams)
         {
             return new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtParams.Secret)
             );
-        }
-
-        private Task InvalidateUserAsync(RefreshTokenDTO tokenDTO)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = handler.ReadJwtToken(tokenDTO.Token);
-
-            var userIdString = jwtSecurityToken
-                .Claims
-                .First(claim => claim.Type == JwtRegisteredClaimNames.UniqueName)
-                .Value;
-
-            if (Guid.TryParse(userIdString, out Guid userId))
-            {
-                return _refreshTokenRepository.DeleteRelatedTokensAsync(userId);
-            }
-
-            return Task.CompletedTask;
         }
 
         public JwtSecurityToken GenerateAccessToken(User user)
@@ -82,13 +61,14 @@ namespace CarRentalApp.Services.Token
                 signingCredentials: GetCredentials(accessJwtGenerationParams)
             );
         }
+
         public JwtSecurityToken GenerateRefreshToken(User user)
         {
             var refreshJwtGenerationParams = _refreshJwtConfig.GenerationParameters;
- 
+
             var jwtClaims = new List<Claim>()
             {
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sid, user.Id.ToString()),
             };
 
             return new JwtSecurityToken(
@@ -96,7 +76,7 @@ namespace CarRentalApp.Services.Token
                 expires: DateTime.Now.AddSeconds(refreshJwtGenerationParams.LifeTimeSeconds),
                 signingCredentials: GetCredentials(refreshJwtGenerationParams)
             );
-        }        
+        }
 
         public async Task<RefreshToken?> GetExistingTokenAsync(RefreshTokenDTO tokenDTO)
         {
@@ -106,7 +86,7 @@ namespace CarRentalApp.Services.Token
                 await InvalidateUserAsync(tokenDTO);
                 return null;
             }
-            
+
             await _refreshTokenRepository.DeleteAsync(token);
 
             return token;
@@ -134,10 +114,10 @@ namespace CarRentalApp.Services.Token
             }
 
             return true;
-        }        
+        }
 
         public async Task<RefreshToken> StoreRefreshTokenAsync(
-            string refreshTokenString, 
+            string refreshTokenString,
             User user
         )
         {
@@ -148,6 +128,30 @@ namespace CarRentalApp.Services.Token
             };
 
             return await _refreshTokenRepository.CreateAsync(refreshToken);
+        }
+
+        private Task InvalidateUserAsync(RefreshTokenDTO tokenDTO)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = handler.ReadJwtToken(tokenDTO.Token);
+
+            var userIdString = jwtSecurityToken.Claims
+                .FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sid)?.Value;
+
+            if (Guid.TryParse(userIdString, out Guid userId))
+            {
+                return _refreshTokenRepository.DeleteRelatedTokensAsync(userId);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private SigningCredentials GetCredentials(GenerationParameters jwtParams)
+        {
+            return new SigningCredentials(
+                GetKey(jwtParams),
+                SecurityAlgorithms.HmacSha256Signature
+            );
         }
     }
 }

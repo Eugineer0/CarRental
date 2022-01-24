@@ -1,8 +1,9 @@
-﻿using AutoMapper;
+﻿using System.Threading.Tasks;
+using AutoMapper;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Services.Authentication;
-using CarRentalApp.Services.Data;
+using CarRentalApp.Services.Data.Users;
 
 namespace CarRentalApp.Services.Identity
 {
@@ -14,21 +15,14 @@ namespace CarRentalApp.Services.Identity
         private readonly IMapper _userMapper;
 
         public UserService(
-            UserRepository userRepository, 
-            PasswordService passwordService, 
+            UserRepository userRepository,
+            PasswordService passwordService,
             IMapper userMapper
         )
         {
             _userRepository = userRepository;
             _passwordService = passwordService;
             _userMapper = userMapper;
-        }
-
-        private async Task<bool> CheckIfExistAsync(UserRegistrationDTO userDTO)
-        {
-            return
-                await _userRepository.GetByEmailAsync(userDTO.Email) != null ||
-                await _userRepository.GetByUsernameAsync(userDTO.Username) != null;
         }
 
         public Task<User?> GetExistingUserAsync(UserLoginDTO userDTO)
@@ -45,21 +39,38 @@ namespace CarRentalApp.Services.Identity
             );
         }
 
-        public Task<User?> GetByRefreshTokenAsync(RefreshToken token)
+        public ValueTask<User?> GetByRefreshTokenAsync(RefreshToken token)
         {
             return _userRepository.GetByIdAsync(token.UserId);
         }
 
-        public async Task<User?> RegisterAsync(UserRegistrationDTO userDTO)
+        public async Task<User> RegisterAsync(UserRegistrationDTO userDTO)
         {
-            if (await CheckIfExistAsync(userDTO))
-            {
-                return null;
-            }
-
-            var user = _userMapper.Map<UserRegistrationDTO, User>(userDTO);
+            var user = ConvertFromDTO(userDTO);
 
             return await _userRepository.CreateUserAsync(user);
-        }        
+        }
+
+        public Task<bool> CheckIfExistsAsync(UserRegistrationDTO userDTO)
+        {
+            return _userRepository.IsUniqueCredentialsAsync(
+                userDTO.Username, userDTO.Email
+            );
+        }
+
+        private User ConvertFromDTO(UserRegistrationDTO userDTO)
+        {
+            var user = _userMapper.Map<UserRegistrationDTO, User>(userDTO);
+
+            var salt = _passwordService.GenerateSalt();
+
+            user.HashedPassword = _passwordService.DigestPassword(
+                userDTO.Password, salt
+            );
+            user.Salt = salt;
+            user.Role = Role.User;
+
+            return user;
+        }
     }
 }

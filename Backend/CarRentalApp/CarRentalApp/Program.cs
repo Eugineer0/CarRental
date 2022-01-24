@@ -1,15 +1,17 @@
 using CarRentalApp.Configuration.JWT.Access;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using CarRentalApp.Services.Identity;
 using CarRentalApp.Services.Token;
 using CarRentalApp.Services.Authentication;
-using CarRentalApp.Services.Data;
 using CarRentalApp.Contexts;
 using Microsoft.EntityFrameworkCore;
 using CarRentalApp.Configuration.JWT.Refresh;
+using CarRentalApp.Services.Data.Tokens;
+using CarRentalApp.Services.Data.Users;
 using CarRentalApp.Services.Registration;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,8 +36,7 @@ builder.Services.AddScoped<AuthenticationService>();
 
 builder.Services.AddAutoMapper(typeof(UserMapperProfile));
 
-var configurationString = builder
-    .Configuration
+var configurationString = builder.Configuration
     .GetConnectionString("sqlserver");
 
 builder.Services.AddDbContext<CarRentalDbContext>(
@@ -50,11 +51,8 @@ accessJwtValidationParams.IssuerSigningKey = TokenService
     .GetKey(accessJwtConfig.GenerationParameters);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = accessJwtValidationParams;
-    }
-);
+    .AddJwtBearer(options => { options.TokenValidationParameters = accessJwtValidationParams; }
+    );
 
 builder.Services.AddCors(options =>
 {
