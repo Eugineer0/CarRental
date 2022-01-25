@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
-import {Admin} from '../admin';
+import {LoginDTO} from '../_models/loginDTO';
 
-import {AuthService} from '../services/auth.service';
+import {AuthService} from '../_services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -11,12 +11,12 @@ import {AuthService} from '../services/auth.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  public admin: Admin = {
+  public admin: LoginDTO = {
     username: '',
     password: ''
   };
 
-  authStarted = false;
+  authFailed = false;
   returnUrl: string = '/';
 
   constructor(
@@ -31,24 +31,21 @@ export class LoginComponent implements OnInit {
   }
 
   public isAuthFailed() {
-    return this.authStarted && this.authService.isLoggedOut();
+    return this.authFailed;
   }
 
   public resetAuthStatus() {
-    this.authStarted = false;
+    this.authFailed = false;
   }
 
   public onSubmit() {
-    this.authStarted = true;
-
     this.authService.login(this.admin)
       .subscribe(
-        result => {
-          console.log('result: ' + result);
+        _ => {
           this.router.navigateByUrl(this.returnUrl)
         },
-        error => {
-          console.log('error: ' + error);
+        _ => {
+          this.authFailed = true;
         }
       );
   }

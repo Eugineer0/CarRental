@@ -1,4 +1,4 @@
-export interface Admin {
+export interface LoginDTO {
   username: string,
   password: string
 }

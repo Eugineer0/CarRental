@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { AuthGuard } from './auth.guard';
+import { AuthGuard } from './_services/auth.guard';
 
 import { LoginComponent } from './login/login.component';
 import { WelcomeComponent } from './welcome/welcome.component';
@@ -11,7 +11,7 @@ const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'welcome'},
   { path: 'login', component: LoginComponent},
   { path: 'welcome', component: WelcomeComponent},
-  { path: 'secret', canActivate: [AuthGuard], component: SecretComponent}
+  { path: 'secret', canActivate: [AuthGuard], runGuardsAndResolvers: 'always', component: SecretComponent}
 ];
 
 @NgModule({

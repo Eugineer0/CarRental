@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthResponse } from "../_models/auth-responce";
+import { HttpClient } from "@angular/common/http";
 
 @Component({
   selector: 'app-secret',
@@ -7,8 +9,21 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SecretComponent implements OnInit {
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
+  }
+
+  public getData() {
+    this.http.get<AuthResponse>('/api/data')
+      .subscribe(
+        response => {
+          console.log(response);
+        },
+        error => {
+          console.error(error);
+        }
+      )
+    ;
   }
 }
