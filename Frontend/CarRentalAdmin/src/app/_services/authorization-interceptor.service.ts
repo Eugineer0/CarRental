@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
+
 import { TokenService } from "./token.service";
 
 @Injectable()
@@ -13,11 +14,11 @@ export class AuthorizationInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const modifiedRequest = this.TryAuthorize(request);
+    const modifiedRequest = this.Authorize(request);
     return next.handle(modifiedRequest);
   }
 
-  private TryAuthorize(request: HttpRequest<any>): HttpRequest<any> {
+  private Authorize(request: HttpRequest<any>): HttpRequest<any> {
     const accessToken = this.tokenService.getAccessToken();
 
     if (!accessToken) {

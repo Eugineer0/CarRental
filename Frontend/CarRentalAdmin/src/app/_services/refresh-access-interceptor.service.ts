@@ -1,11 +1,19 @@
 import { Injectable } from '@angular/core';
-import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from "@angular/common/http";
-import { TokenService } from "./token.service";
+import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { catchError } from "rxjs/operators";
+import {
+  HttpErrorResponse,
+  HttpEvent,
+  HttpHandler,
+  HttpInterceptor,
+  HttpRequest
+} from "@angular/common/http";
+
 import { AuthService } from "./auth.service";
+import { TokenService } from "./token.service";
+
 import { RefreshRequest } from "../_models/refresh-request";
-import { Router } from "@angular/router";
 
 @Injectable({
   providedIn: 'root'
@@ -26,14 +34,17 @@ export class RefreshAccessInterceptor implements HttpInterceptor {
     return next.handle(request)
       .pipe(
         catchError(
-          this.handleError(`${request.method} ${request.url}`)
+          this.handleError(request, next)
         )
       );
   }
 
-  private handleError(action: string) {
+  private handleError(
+    request: HttpRequest<any>,
+    handler: HttpHandler
+  ) {
     return (error: HttpErrorResponse) => {
-      console.error(`${action} failed: ${error.error}`);
+      console.error(`${ request.method } ${ request.url } failed: ${ error.error }`);
 
       if (error.status === 401) {
         const refreshToken = this.tokenService.getRefreshToken();
@@ -44,7 +55,12 @@ export class RefreshAccessInterceptor implements HttpInterceptor {
             token: refreshToken
           }
 
-          this.authService.refresh(token).subscribe();
+          this.authService.refresh(token)
+            .subscribe(
+              _ => {
+                handler.handle(request).subscribe();
+              }
+            );
         } else {
           this.router.navigate(
             ['login'],

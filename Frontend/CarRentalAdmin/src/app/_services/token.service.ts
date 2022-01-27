@@ -7,7 +7,8 @@ import { AuthResponse } from "../_models/auth-responce";
 })
 export class TokenService {
 
-  constructor() { }
+  constructor() {
+  }
 
   public getAccessToken(): string | null {
     return localStorage.getItem('access_token');

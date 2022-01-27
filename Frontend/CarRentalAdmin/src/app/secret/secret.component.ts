@@ -9,16 +9,17 @@ import { HttpClient } from "@angular/common/http";
 })
 export class SecretComponent implements OnInit {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+  }
 
   ngOnInit(): void {
   }
 
   public getData() {
-    this.http.get<AuthResponse>('/api/data')
+    this.http.get('/api/data')
       .subscribe(
-        response => {
-          console.log(response);
+        _ => {
+          console.log();
         },
         error => {
           console.error(error);

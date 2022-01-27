@@ -1,5 +1,11 @@
 import { Directive, Input } from '@angular/core';
-import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn } from '@angular/forms';
+import {
+  AbstractControl,
+  NG_VALIDATORS,
+  ValidationErrors,
+  Validator,
+  ValidatorFn
+} from '@angular/forms';
 
 @Directive({
   selector: '[appPasswordConstraint]',
@@ -15,7 +21,7 @@ export class PasswordConstraintDirective implements Validator {
   constructor() {
   }
 
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     const regex = new RegExp(this.regexString);
     return passwordConstraintValidator(regex)(control);
   }

@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { LoginDTO } from '../_models/loginDTO';
 import { AuthResponse } from '../_models/auth-responce';
-import { TokenService } from "./token.service";
 import { RefreshRequest } from "../_models/refresh-request";
+
+import { TokenService } from "./token.service";
 
 @Injectable()
 export class AuthService {
@@ -24,6 +25,17 @@ export class AuthService {
         tap(
           response => {
             this.setSession(response);
+          }
+        )
+      )
+  }
+
+  public logout(): Observable<any> {
+    return this.http.get('/api/logout')
+      .pipe(
+        tap(
+          _ => {
+            this.closeSession();
           }
         )
       )

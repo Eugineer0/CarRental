@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
 
 import { AuthService } from './_services/auth.service';
 
@@ -10,21 +9,18 @@ import { AuthService } from './_services/auth.service';
 })
 export class AppComponent {
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) { }
+  constructor(private authService: AuthService) {
+  }
 
-  public isLoggedIn():boolean {
+  public isLoggedIn(): boolean {
     return this.authService.isLoggedIn();
   }
 
-  public isLoggedOut():boolean {
+  public isLoggedOut(): boolean {
     return this.authService.isLoggedOut();
   }
 
   public logout() {
-    this.authService.closeSession();
-    this.router.navigateByUrl('');
+    this.authService.logout().subscribe();
   }
 }

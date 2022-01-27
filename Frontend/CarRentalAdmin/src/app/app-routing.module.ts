@@ -8,14 +8,15 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { SecretComponent } from './secret/secret.component';
 
 const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'welcome'},
-  { path: 'login', component: LoginComponent},
-  { path: 'welcome', component: WelcomeComponent},
-  { path: 'secret', canActivate: [AuthGuard], runGuardsAndResolvers: 'always', component: SecretComponent}
+  {path: '', pathMatch: 'full', redirectTo: 'welcome'},
+  {path: 'login', component: LoginComponent},
+  {path: 'welcome', component: WelcomeComponent},
+  {path: 'secret', canActivate: [AuthGuard], component: SecretComponent}
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {
+}
