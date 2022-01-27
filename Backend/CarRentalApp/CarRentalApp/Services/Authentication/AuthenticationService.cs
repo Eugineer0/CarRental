@@ -1,8 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using System.Threading.Tasks;
-using CarRentalApp.Models.DTOs.Requests;
-using CarRentalApp.Models.DTOs.Responces;
 using CarRentalApp.Models.Entities;
+using CarRentalApp.Models.Requests.DTOs;
+using CarRentalApp.Models.Responses.DTOs;
 using CarRentalApp.Services.Identity;
 using CarRentalApp.Services.Token;
 
@@ -19,7 +18,7 @@ namespace CarRentalApp.Services.Authentication
             _tokenService = tokenService;
         }
 
-        public async Task<AuthenticationResponse?> TryAuthenticateAsync(UserLoginDTO userDTO)
+        public async Task<AuthenticationResponse?> AuthenticateAsync(UserLoginDTO userDTO)
         {
             var user = await _userService.GetExistingUserAsync(userDTO);
             if (user == null || !_userService.ValidatePassword(user, userDTO))
@@ -30,12 +29,17 @@ namespace CarRentalApp.Services.Authentication
             return await GetAccess(user);
         }
 
-        public async Task<AuthenticationResponse?> TryAuthenticateAsync(RefreshTokenDTO tokenDTO)
+        public async Task<AuthenticationResponse?> ReAuthenticateAsync(RefreshTokenDTO tokenDTO)
         {
-            var token = await _tokenService.GetExistingTokenAsync(tokenDTO);
-            if (token == null || !_tokenService.Validate(token))
+            var token = await _tokenService.PopExistingTokenAsync(tokenDTO);
+            if (token == null)
             {
                 return null;
+            }
+
+            if (!_tokenService.Validate(token))
+            {
+                await _tokenService.InvalidateUserByIdAsync(token.UserId);
             }
 
             var user = await _userService.GetByRefreshTokenAsync(token);
@@ -45,6 +49,17 @@ namespace CarRentalApp.Services.Authentication
             }
 
             return await GetAccess(user);
+        }
+        
+        public Task<bool> DeAuthenticateAsync(string accessToken)
+        {
+            var userId = _tokenService.GetUserIdByToken(accessToken);
+            if (userId.HasValue)
+            {
+                return _tokenService.InvalidateUserByIdAsync(userId.Value);
+            }
+
+            return Task.FromResult(false);
         }
 
         public async Task<AuthenticationResponse> GetAccess(User user)

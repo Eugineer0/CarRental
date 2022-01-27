@@ -12,7 +12,7 @@ using CarRentalApp.Configuration.JWT;
 using Microsoft.Extensions.Options;
 using CarRentalApp.Services.Data;
 using CarRentalApp.Configuration.JWT.Refresh;
-using CarRentalApp.Models.DTOs.Requests;
+using CarRentalApp.Models.Requests.DTOs;
 using CarRentalApp.Services.Data.Tokens;
 
 namespace CarRentalApp.Services.Token
@@ -48,6 +48,7 @@ namespace CarRentalApp.Services.Token
 
             var jwtClaims = new List<Claim>()
             {
+                new Claim(JwtRegisteredClaimNames.Sid, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("role", user.Role.ToString())
@@ -78,12 +79,11 @@ namespace CarRentalApp.Services.Token
             );
         }
 
-        public async Task<RefreshToken?> GetExistingTokenAsync(RefreshTokenDTO tokenDTO)
+        public async Task<RefreshToken?> PopExistingTokenAsync(RefreshTokenDTO tokenDTO)
         {
-            var token = await _refreshTokenRepository.GetByTokenAsync(tokenDTO.Token);
+            var token = await _refreshTokenRepository.GetByTokenStringAsync(tokenDTO.Token);
             if (token == null)
             {
-                await InvalidateUserAsync(tokenDTO);
                 return null;
             }
 
@@ -116,7 +116,7 @@ namespace CarRentalApp.Services.Token
             return true;
         }
 
-        public async Task<RefreshToken> StoreRefreshTokenAsync(
+        public Task StoreRefreshTokenAsync(
             string refreshTokenString,
             User user
         )
@@ -127,23 +127,28 @@ namespace CarRentalApp.Services.Token
                 UserId = user.Id
             };
 
-            return await _refreshTokenRepository.CreateAsync(refreshToken);
+            return _refreshTokenRepository.InsertAsync(refreshToken);
+        }
+        
+        public Task<bool> InvalidateUserByIdAsync(Guid userId)
+        {
+            return _refreshTokenRepository.DeleteRelatedTokensAsync(userId);
         }
 
-        private Task InvalidateUserAsync(RefreshTokenDTO tokenDTO)
+        public Guid? GetUserIdByToken(string tokenString)
         {
             var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = handler.ReadJwtToken(tokenDTO.Token);
+            var jwtSecurityToken = handler.ReadJwtToken(tokenString);
 
             var userIdString = jwtSecurityToken.Claims
-                .FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sid)?.Value;
+                .FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sid)?
+                .Value;
 
-            if (Guid.TryParse(userIdString, out Guid userId))
-            {
-                return _refreshTokenRepository.DeleteRelatedTokensAsync(userId);
-            }
+            if (userIdString == null) return null;
 
-            return Task.CompletedTask;
+            if (!Guid.TryParse(userIdString, out var userId)) return null;
+
+            return userId;
         }
 
         private SigningCredentials GetCredentials(GenerationParameters jwtParams)

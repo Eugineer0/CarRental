@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using CarRentalApp.Contexts;
 using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -16,34 +13,41 @@ namespace CarRentalApp.Services.Data.Tokens
             _carRentalDbContext = carRentalDbContext;
         }
 
-        public async Task<RefreshToken> CreateAsync(RefreshToken refreshToken)
+        public Task InsertAsync(RefreshToken refreshToken)
         {
             _carRentalDbContext.RefreshTokens.Add(refreshToken);
-            await _carRentalDbContext.SaveChangesAsync();
-
-            return refreshToken;
+            return _carRentalDbContext.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(RefreshToken refreshToken)
+        public Task DeleteAsync(RefreshToken refreshToken)
         {
             _carRentalDbContext.RefreshTokens.Remove(refreshToken);
-            await _carRentalDbContext.SaveChangesAsync();
+            return _carRentalDbContext.SaveChangesAsync();
         }
 
-        public async Task DeleteRelatedTokensAsync(Guid userId)
+        public async Task<bool> DeleteRelatedTokensAsync(Guid userId)
         {
-            var tokens = await _carRentalDbContext
-                .RefreshTokens
+            var tokens = await _carRentalDbContext.RefreshTokens
                 .Where(t => t.UserId == userId)
                 .ToListAsync();
 
             _carRentalDbContext.RefreshTokens.RemoveRange(tokens);
-            await _carRentalDbContext.SaveChangesAsync();
+            
+            try
+            {
+                await _carRentalDbContext.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
+            return true;
         }
 
-        public async Task<RefreshToken?> GetByTokenAsync(string refreshTokenString)
+        public async Task<RefreshToken?> GetByTokenStringAsync(string refreshTokenString)
         {
             return await _carRentalDbContext.RefreshTokens.FirstOrDefaultAsync(t => t.Token == refreshTokenString);
-        }        
+        }
     }
 }

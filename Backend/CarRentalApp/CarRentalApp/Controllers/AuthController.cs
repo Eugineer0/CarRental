@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
-using CarRentalApp.Models.DTOs.Requests;
+using CarRentalApp.Models.Requests.DTOs;
 using CarRentalApp.Services.Authentication;
 using CarRentalApp.Services.Registration;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Net.Http.Headers;
 
 namespace CarRentalApp.Controllers
 {
     [ApiController]
-    [Route("[controller]/[action]")]
+    [Route("api/[action]")]
     public class AuthController : ControllerBase
     {
         private readonly AuthenticationService _authenticationService;
@@ -24,39 +26,84 @@ namespace CarRentalApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] UserLoginDTO model)
         {
-            var authResponse = await _authenticationService.TryAuthenticateAsync(model);
-            if (authResponse == null)
+            var authenticationResponse = await _authenticationService.AuthenticateAsync(model);
+            if (authenticationResponse == null)
             {
                 return Unauthorized("Incorrect username or password");
             }
 
-            return Ok(authResponse);
+            return Ok(authenticationResponse);
         }
 
         [HttpPost]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenDTO model)
         {
-            var authResponse = await _authenticationService.TryAuthenticateAsync(model);
-            if (authResponse == null)
+            var authenticationResponse = await _authenticationService.ReAuthenticateAsync(model);
+            if (authenticationResponse == null)
             {
                 return Unauthorized("Invalid refresh token");
             }
 
-            return Ok(authResponse);
+            return Ok(authenticationResponse);
+        }
+        
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            var authorizationToken = Request.Headers[HeaderNames.Authorization].ToString()[7..];
+
+            if (await _authenticationService.DeAuthenticateAsync(authorizationToken))
+            {
+                return Ok();
+            }
+
+            return BadRequest("Invalid token payload");
         }
 
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] UserRegistrationDTO model)
         {
-            var user = await _registrationService.TryRegisterAsync(model);
-            if (user == null)
+            var registrationResponse = await _registrationService.RegisterAsync(model);
+            if (registrationResponse == null)
             {
                 return Conflict("User already exists");
             }
 
-            var authResponse = await _authenticationService.GetAccess(user);
+            if (registrationResponse.User == null)
+            {
+                return Problem(
+                    statusCode: registrationResponse.StatusCode,
+                    detail: registrationResponse.Response
+                );
+            }
 
-            return Ok(authResponse);
+            var authenticationResponse = await _authenticationService.GetAccess(registrationResponse.User);
+
+            return Ok(authenticationResponse);
+        }
+
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpPost]
+        public async Task<IActionResult> RegisterAdmin([FromBody] UserRegistrationDTO model)
+        {
+            var registrationResponse = await _registrationService.RegisterAsync(model, true);
+            if (registrationResponse == null)
+            {
+                return Conflict("Admin already exists");
+            }
+
+            if (registrationResponse.User == null)
+            {
+                return Problem(
+                    statusCode: registrationResponse.StatusCode,
+                    detail: registrationResponse.Response
+                );
+            }
+
+            var authenticationResponse = await _authenticationService.GetAccess(registrationResponse.User);
+
+            return Ok(authenticationResponse);
         }
     }
 }

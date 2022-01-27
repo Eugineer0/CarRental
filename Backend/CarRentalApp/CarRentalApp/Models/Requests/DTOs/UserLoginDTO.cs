@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CarRentalApp.Models.DTOs.Requests
+namespace CarRentalApp.Models.Requests.DTOs
 {
     public class UserLoginDTO
     {

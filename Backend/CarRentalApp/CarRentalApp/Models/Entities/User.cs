@@ -22,6 +22,7 @@ namespace CarRentalApp.Models.Entities
     public enum Role
     {
         User,
-        Admin
+        Admin,
+        SuperAdmin
     }
 }

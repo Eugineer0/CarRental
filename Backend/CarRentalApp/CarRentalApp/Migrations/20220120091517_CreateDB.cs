@@ -32,11 +32,13 @@ namespace CarRentalApp.Migrations
                     HashedPassword = table.Column<byte[]>(type: "binary(32)", nullable: false),
                     Salt = table.Column<byte[]>(type: "binary(32)", nullable: false),
                     Birthday = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Role = table.Column<int>(type: "tinyint", nullable: false)
+                    Role = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.UniqueConstraint("UC_Email", x => x.Email);
+                    table.UniqueConstraint("UC_Username", x => x.Username);
                 });
         }
 

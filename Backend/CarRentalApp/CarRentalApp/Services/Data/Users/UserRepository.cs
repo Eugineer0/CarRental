@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using CarRentalApp.Contexts;
-using CarRentalApp.Models.DTOs.Requests;
+﻿using CarRentalApp.Contexts;
 using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,11 +13,19 @@ namespace CarRentalApp.Services.Data.Users
             _carRentalDbContext = carRentalDbContext;
         }
 
-        public async Task<User> CreateUserAsync(User user)
+        public async Task<User?> InsertUserAsync(User user)
         {
             _carRentalDbContext.Users.Add(user);
-            await _carRentalDbContext.SaveChangesAsync();
 
+            try
+            {
+                await _carRentalDbContext.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+            
             return user;
         }
 

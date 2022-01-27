@@ -44,13 +44,15 @@ var accessJwtConfig = new AccessJwtConfig();
 builder.Configuration.Bind(AccessJwtConfig.Section, accessJwtConfig);
 
 var accessJwtValidationParams = accessJwtConfig.ValidationParameters;
-accessJwtValidationParams.IssuerSigningKey = TokenService
-    .GetKey(accessJwtConfig.GenerationParameters);
+accessJwtValidationParams.IssuerSigningKey = TokenService.GetKey(accessJwtConfig.GenerationParameters);
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options => 
-        { options.TokenValidationParameters = accessJwtValidationParams; }
+    .AddJwtBearer(
+        options =>
+        {
+            options.TokenValidationParameters = accessJwtValidationParams;
+        }
     );
 
 builder.Services.AddCors(options =>
@@ -62,7 +64,8 @@ builder.Services.AddCors(options =>
                 .AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader();
-        });
+        }
+    );
 });
 
 var app = builder.Build();

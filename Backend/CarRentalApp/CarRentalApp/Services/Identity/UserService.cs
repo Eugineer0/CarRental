@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
 using AutoMapper;
-using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Models.Entities;
+using CarRentalApp.Models.Requests.DTOs;
 using CarRentalApp.Services.Authentication;
 using CarRentalApp.Services.Data.Users;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace CarRentalApp.Services.Identity
 {
@@ -44,11 +45,11 @@ namespace CarRentalApp.Services.Identity
             return _userRepository.GetByIdAsync(token.UserId);
         }
 
-        public async Task<User> RegisterAsync(UserRegistrationDTO userDTO)
+        public async Task<User?> RegisterAsync(UserRegistrationDTO userDTO, bool isAdmin)
         {
-            var user = ConvertFromDTO(userDTO);
+            var user = CreateFromDTO(userDTO, isAdmin);
 
-            return await _userRepository.CreateUserAsync(user);
+            return await _userRepository.InsertUserAsync(user);
         }
 
         public Task<bool> CheckIfExistsAsync(UserRegistrationDTO userDTO)
@@ -58,17 +59,10 @@ namespace CarRentalApp.Services.Identity
             );
         }
 
-        private User ConvertFromDTO(UserRegistrationDTO userDTO)
+        private User CreateFromDTO(UserRegistrationDTO userDTO, bool isAdmin)
         {
             var user = _userMapper.Map<UserRegistrationDTO, User>(userDTO);
-
-            var salt = _passwordService.GenerateSalt();
-
-            user.HashedPassword = _passwordService.DigestPassword(
-                userDTO.Password, salt
-            );
-            user.Salt = salt;
-            user.Role = Role.User;
+            var role = isAdmin ? Role.Admin : Role.User;
 
             return user;
         }
