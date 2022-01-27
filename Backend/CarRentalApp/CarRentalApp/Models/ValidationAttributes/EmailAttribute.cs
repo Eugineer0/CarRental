@@ -5,9 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace CarRentalApp.Models.ValidationAttributes
 {
-    [AttributeUsage(AttributeTargets.Property |
-                    AttributeTargets.Field, AllowMultiple = false
-    )]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class EmailAttribute : ValidationAttribute
     {
         public override bool IsValid(object? value)
@@ -17,9 +15,9 @@ namespace CarRentalApp.Models.ValidationAttributes
                 return false;
             }
 
-            string pattern = @"^(?!\.)(""([^""\r\\]|\\[""\r\\])*""|" +
-                             @"([-a-z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)" +
-                             @"@[a-z0-9][\w\.-]*[a-z0-9]\.[a-z][a-z\.]*[a-z]$.{3,254}";
+            var pattern = @"^(?!\.)(""([^""\r\\]|\\[""\r\\])*""|" +
+                          @"([-a-z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)" +
+                          @"@[a-z0-9][\w\.-]*[a-z0-9]\.[a-z][a-z\.]*[a-z]$.{3,254}";
 
             var regex = new Regex(pattern, RegexOptions.IgnoreCase);
 

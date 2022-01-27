@@ -9,41 +9,41 @@ namespace CarRentalApp.Services.Data.Tokens
 {
     public class RefreshTokenRepository
     {
-        private readonly CarRentalDbContext _authenticationDbContext;
+        private readonly CarRentalDbContext _carRentalDbContext;
 
-        public RefreshTokenRepository(CarRentalDbContext authenticationDbContext)
+        public RefreshTokenRepository(CarRentalDbContext carRentalDbContext)
         {
-            _authenticationDbContext = authenticationDbContext;
+            _carRentalDbContext = carRentalDbContext;
         }
 
         public async Task<RefreshToken> CreateAsync(RefreshToken refreshToken)
         {
-            _authenticationDbContext.RefreshTokens.Add(refreshToken);
-            await _authenticationDbContext.SaveChangesAsync();
+            _carRentalDbContext.RefreshTokens.Add(refreshToken);
+            await _carRentalDbContext.SaveChangesAsync();
 
             return refreshToken;
         }
 
         public async Task DeleteAsync(RefreshToken refreshToken)
         {
-            _authenticationDbContext.RefreshTokens.Remove(refreshToken);
-            await _authenticationDbContext.SaveChangesAsync();
+            _carRentalDbContext.RefreshTokens.Remove(refreshToken);
+            await _carRentalDbContext.SaveChangesAsync();
         }
 
         public async Task DeleteRelatedTokensAsync(Guid userId)
         {
-            var tokens = await _authenticationDbContext
+            var tokens = await _carRentalDbContext
                 .RefreshTokens
                 .Where(t => t.UserId == userId)
                 .ToListAsync();
 
-            _authenticationDbContext.RefreshTokens.RemoveRange(tokens);
-            await _authenticationDbContext.SaveChangesAsync();
+            _carRentalDbContext.RefreshTokens.RemoveRange(tokens);
+            await _carRentalDbContext.SaveChangesAsync();
         }
 
         public async Task<RefreshToken?> GetByTokenAsync(string refreshTokenString)
         {
-            return await _authenticationDbContext.RefreshTokens.FirstOrDefaultAsync(t => t.Token == refreshTokenString);
+            return await _carRentalDbContext.RefreshTokens.FirstOrDefaultAsync(t => t.Token == refreshTokenString);
         }        
     }
 }

@@ -9,9 +9,6 @@ using CarRentalApp.Configuration.JWT.Refresh;
 using CarRentalApp.Services.Data.Tokens;
 using CarRentalApp.Services.Data.Users;
 using CarRentalApp.Services.Registration;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,8 +47,10 @@ var accessJwtValidationParams = accessJwtConfig.ValidationParameters;
 accessJwtValidationParams.IssuerSigningKey = TokenService
     .GetKey(accessJwtConfig.GenerationParameters);
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options => { options.TokenValidationParameters = accessJwtValidationParams; }
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => 
+        { options.TokenValidationParameters = accessJwtValidationParams; }
     );
 
 builder.Services.AddCors(options =>

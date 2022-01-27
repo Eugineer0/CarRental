@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Services.Authentication;
@@ -23,7 +22,6 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
-        [Route("")]
         public async Task<IActionResult> Login([FromBody] UserLoginDTO model)
         {
             var authResponse = await _authenticationService.TryAuthenticateAsync(model);
@@ -36,7 +34,6 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
-        [Route("")]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenDTO model)
         {
             var authResponse = await _authenticationService.TryAuthenticateAsync(model);
@@ -49,7 +46,6 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
-        [Route("")]
         public async Task<IActionResult> Register([FromBody] UserRegistrationDTO model)
         {
             var user = await _registrationService.TryRegisterAsync(model);

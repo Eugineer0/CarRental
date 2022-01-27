@@ -11,9 +11,9 @@ namespace CarRentalApp.Services.Data.Users
     {
         private readonly CarRentalDbContext _carRentalDbContext;
 
-        public UserRepository(CarRentalDbContext authenticationDbContext)
+        public UserRepository(CarRentalDbContext carRentalDbContext)
         {
-            _carRentalDbContext = authenticationDbContext;
+            _carRentalDbContext = carRentalDbContext;
         }
 
         public async Task<User> CreateUserAsync(User user)
