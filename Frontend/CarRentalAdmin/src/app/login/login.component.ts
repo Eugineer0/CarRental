@@ -1,9 +1,9 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 
-import {LoginDTO} from '../_models/loginDTO';
+import { LoginDTO } from '../_models/loginDTO';
 
-import {AuthService} from '../_services/auth.service';
+import { AuthService } from '../_services/auth.service';
 
 @Component({
   selector: 'app-login',

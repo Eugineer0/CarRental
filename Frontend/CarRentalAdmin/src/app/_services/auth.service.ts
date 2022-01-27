@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 
 import { LoginDTO } from '../_models/loginDTO';
 import { AuthResponse } from '../_models/auth-responce';

@@ -9,7 +9,7 @@ import { AuthService } from './_services/auth.service';
 import { AuthorizationInterceptor } from "./_services/authorization-interceptor.service";
 import { RefreshAccessInterceptor } from "./_services/refresh-access-interceptor.service";
 
-import { ForbiddenNameDirective } from './forbidden-name.directive';
+import { PasswordConstraintDirective } from './password-constraint.directive';
 
 import { AppComponent } from './app.component';
 import { WelcomeComponent } from './welcome/welcome.component';
@@ -22,7 +22,7 @@ import { LoginComponent } from './login/login.component';
     LoginComponent,
     WelcomeComponent,
     SecretComponent,
-    ForbiddenNameDirective
+    PasswordConstraintDirective
   ],
   imports: [
     AppRoutingModule,
