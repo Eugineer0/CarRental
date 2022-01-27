@@ -11,7 +11,7 @@ import { TokenService } from "./token.service";
 
 @Injectable()
 export class AuthService {
-  private loggedIn = false
+  private loggedIn: boolean = false
 
   constructor(
     private http: HttpClient,
@@ -41,11 +41,6 @@ export class AuthService {
       )
   }
 
-  public closeSession() {
-    this.tokenService.removeTokens();
-    this.loggedIn = false;
-  }
-
   public refresh(refreshToken: RefreshRequest): Observable<any> {
     return this.http.post<AuthResponse>('/api/refresh', refreshToken)
       .pipe(
@@ -57,16 +52,21 @@ export class AuthService {
       )
   }
 
-  public isLoggedIn() {
+  public closeSession(): void {
+    this.tokenService.removeTokens();
+    this.loggedIn = false;
+  }
+
+  private setSession(authResult: AuthResponse): void {
+    this.tokenService.setTokens(authResult);
+    this.loggedIn = true;
+  }
+
+  public isLoggedIn(): boolean {
     return this.loggedIn;
   }
 
-  public isLoggedOut() {
+  public isLoggedOut(): boolean {
     return !this.loggedIn;
-  }
-
-  private setSession(authResult: AuthResponse) {
-    this.tokenService.setTokens(authResult);
-    this.loggedIn = true;
   }
 }

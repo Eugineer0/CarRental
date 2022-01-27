@@ -21,8 +21,6 @@
       <li class="nav-item">
         <a
           *ngIf="isLoggedIn()"
-          routerLink="/welcome"
-          routerLinkActive="active"
           class="nav-link"
           (click)="logout()"
         >Logout</a>

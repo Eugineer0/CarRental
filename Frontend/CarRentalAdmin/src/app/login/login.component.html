@@ -33,19 +33,29 @@
               </div>
             </div>
             <label class="mb-0 mt-2" for="password">Password</label>
-            <input
-              #passwordField="ngModel"
-              required
-              minlength="5"
-              maxlength="25"
-              type="password"
-              appPasswordConstraint="(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])"
-              name="password"
-              class="form-control"
-              id="password"
-              (ngModelChange)="resetAuthStatus()"
-              [(ngModel)]="admin.password"
-            >
+            <div class="input-group mb-3">
+              <input
+                #passwordField="ngModel"
+                required
+                minlength="5"
+                maxlength="25"
+                [type]="getPasswordType()"
+                appPasswordConstraint="(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])"
+                name="password"
+                class="form-control"
+                id="password"
+                aria-describedby="button-addon2"
+                (ngModelChange)="resetAuthStatus()"
+                [(ngModel)]="admin.password"
+              >
+              <button
+                type="button"
+                class="btn btn-light"
+                id="button-addon2"
+                (click)="changePasswordType()">
+                {{getButtonText()}}
+              </button>
+            </div>
             <div
               *ngIf="passwordField.invalid && (passwordField.dirty || passwordField.touched)"
               class="alert alert-danger"

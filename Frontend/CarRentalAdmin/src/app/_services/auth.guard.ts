@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
   ) {
   }
 
-  canActivate(
+  public canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): boolean {
@@ -31,6 +31,7 @@ export class AuthGuard implements CanActivate {
       ['login'],
       {queryParams: {returnUrl: state.url}}
     );
+
     return false;
   }
 }

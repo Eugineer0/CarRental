@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { AuthService } from "./auth.service";
 import { AuthResponse } from "../_models/auth-responce";
 
 @Injectable({
@@ -18,12 +17,12 @@ export class TokenService {
     return localStorage.getItem('refresh_token');
   }
 
-  public setTokens(tokenPair: AuthResponse) {
+  public setTokens(tokenPair: AuthResponse): void {
     localStorage.setItem('access_token', tokenPair.accessToken);
     localStorage.setItem('refresh_token', tokenPair.refreshToken);
   }
 
-  public removeTokens() {
+  public removeTokens(): void {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
   }

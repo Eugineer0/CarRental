@@ -16,8 +16,10 @@ export class LoginComponent implements OnInit {
     password: ''
   };
 
-  authFailed = false;
-  returnUrl: string = '/';
+  private authFailed: boolean = false;
+  private returnUrl: string = '/';
+
+  private isVisiblePassword: boolean = false
 
   constructor(
     private authService: AuthService,
@@ -30,15 +32,15 @@ export class LoginComponent implements OnInit {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '';
   }
 
-  public isAuthFailed() {
+  public isAuthFailed(): boolean {
     return this.authFailed;
   }
 
-  public resetAuthStatus() {
+  public resetAuthStatus(): void {
     this.authFailed = false;
   }
 
-  public onSubmit() {
+  public onSubmit(): void  {
     this.authService.login(this.admin)
       .subscribe(
         _ => {
@@ -48,5 +50,17 @@ export class LoginComponent implements OnInit {
           this.authFailed = true;
         }
       );
+  }
+
+  public changePasswordType(): void {
+    this.isVisiblePassword = !this.isVisiblePassword;
+  }
+
+  public getPasswordType(): string {
+    return this.isVisiblePassword ? 'text' : 'password';
+  }
+
+  getButtonText() {
+    return this.isVisiblePassword ? 'Hide' : 'Show';
   }
 }
