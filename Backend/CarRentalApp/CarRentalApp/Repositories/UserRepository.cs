@@ -2,7 +2,7 @@
 using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace CarRentalApp.Services.Data.Users
+namespace CarRentalApp.Repositories
 {
     public class UserRepository
     {
@@ -13,25 +13,23 @@ namespace CarRentalApp.Services.Data.Users
             _carRentalDbContext = carRentalDbContext;
         }
 
-        public async Task<User?> InsertUserAsync(User user)
+        public Task InsertUserAsync(User user)
         {
             _carRentalDbContext.Users.Add(user);
 
             try
             {
-                await _carRentalDbContext.SaveChangesAsync();
+                return _carRentalDbContext.SaveChangesAsync();
             }
-            catch (Exception e)
+            catch (NullReferenceException e)
             {
-                return null;
+                throw;
             }
-            
-            return user;
         }
 
-        public ValueTask<User?> GetByIdAsync(Guid id)
+        public Task<User?> GetByIdAsync(Guid id)
         {
-            return _carRentalDbContext.Users.FindAsync(id);
+            return _carRentalDbContext.Users.FindAsync(id).AsTask();
         }
 
         public Task<User?> GetByEmailAsync(string email)
@@ -46,7 +44,7 @@ namespace CarRentalApp.Services.Data.Users
                 .FirstOrDefaultAsync(u => u.Username.Equals(username));
         }
 
-        public Task<bool> IsUniqueCredentialsAsync(string username, string email)
+        public Task<bool> AreUniqueCredentialsAsync(string username, string email)
         {
              return _carRentalDbContext.Users
                 .AnyAsync(u => u.Username.Equals(username) || u.Email.Equals(email));

@@ -1,5 +1,6 @@
-﻿using CarRentalApp.Models.Entities;
-using CarRentalApp.Models.Requests.DTOs;
+﻿using CarRentalApp.Models.DTOs.Requests;
+using CarRentalApp.Models.DTOs.Responses;
+using CarRentalApp.Models.Entities;
 using CarRentalApp.Services.Identity;
 
 namespace CarRentalApp.Services.Registration

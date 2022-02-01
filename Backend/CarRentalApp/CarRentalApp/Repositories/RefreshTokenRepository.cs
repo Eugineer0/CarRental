@@ -2,7 +2,7 @@ using CarRentalApp.Contexts;
 using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace CarRentalApp.Services.Data.Tokens
+namespace CarRentalApp.Repositories
 {
     public class RefreshTokenRepository
     {
@@ -25,7 +25,7 @@ namespace CarRentalApp.Services.Data.Tokens
             return _carRentalDbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> DeleteRelatedTokensAsync(Guid userId)
+        public async Task<bool> DeleteRelatedTokensByUserIdAsync(Guid userId)
         {
             var tokens = await _carRentalDbContext.RefreshTokens
                 .Where(t => t.UserId == userId)

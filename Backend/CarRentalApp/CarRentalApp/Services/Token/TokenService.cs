@@ -1,24 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using CarRentalApp.Configuration.JWT.Access;
 using Microsoft.IdentityModel.Tokens;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Configuration.JWT;
 using Microsoft.Extensions.Options;
-using CarRentalApp.Services.Data;
 using CarRentalApp.Configuration.JWT.Refresh;
-using CarRentalApp.Models.Requests.DTOs;
-using CarRentalApp.Services.Data.Tokens;
+using CarRentalApp.Models.DTOs.Requests;
+using CarRentalApp.Repositories;
+using Microsoft.Net.Http.Headers;
 
 namespace CarRentalApp.Services.Token
 {
     public class TokenService
     {
+        const int TOKEN_START_INDEX = 7;
+
         private readonly RefreshTokenRepository _refreshTokenRepository;
 
         private readonly AccessJwtConfig _accessJwtConfig;
@@ -34,6 +33,11 @@ namespace CarRentalApp.Services.Token
             _accessJwtConfig = accessJwtConfig.Value;
             _refreshJwtConfig = refreshJwtConfig.Value;
         }
+        
+        public string GetTokenFromHeaders(IHeaderDictionary headers)
+        {
+            return headers[HeaderNames.Authorization].ToString()[TOKEN_START_INDEX..];
+        }
 
         public static SecurityKey GetKey(GenerationParameters jwtParams)
         {
@@ -48,7 +52,7 @@ namespace CarRentalApp.Services.Token
 
             var jwtClaims = new List<Claim>()
             {
-                new Claim(JwtRegisteredClaimNames.Sid, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("role", user.Role.ToString())
@@ -59,7 +63,7 @@ namespace CarRentalApp.Services.Token
                 audience: accessJwtGenerationParams.Audience,
                 claims: jwtClaims,
                 expires: DateTime.Now.AddSeconds(accessJwtGenerationParams.LifeTimeSeconds),
-                signingCredentials: GetCredentials(accessJwtGenerationParams)
+                signingCredentials: GetJWTCredentials(accessJwtGenerationParams)
             );
         }
 
@@ -69,13 +73,13 @@ namespace CarRentalApp.Services.Token
 
             var jwtClaims = new List<Claim>()
             {
-                new Claim(JwtRegisteredClaimNames.Sid, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             };
 
             return new JwtSecurityToken(
                 claims: jwtClaims,
                 expires: DateTime.Now.AddSeconds(refreshJwtGenerationParams.LifeTimeSeconds),
-                signingCredentials: GetCredentials(refreshJwtGenerationParams)
+                signingCredentials: GetJWTCredentials(refreshJwtGenerationParams)
             );
         }
 
@@ -132,7 +136,7 @@ namespace CarRentalApp.Services.Token
         
         public Task<bool> InvalidateUserByIdAsync(Guid userId)
         {
-            return _refreshTokenRepository.DeleteRelatedTokensAsync(userId);
+            return _refreshTokenRepository.DeleteRelatedTokensByUserIdAsync(userId);
         }
 
         public Guid? GetUserIdByToken(string tokenString)
@@ -141,17 +145,23 @@ namespace CarRentalApp.Services.Token
             var jwtSecurityToken = handler.ReadJwtToken(tokenString);
 
             var userIdString = jwtSecurityToken.Claims
-                .FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sid)?
+                .FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?
                 .Value;
 
-            if (userIdString == null) return null;
+            if (userIdString == null)
+            {
+                return null;
+            }
 
-            if (!Guid.TryParse(userIdString, out var userId)) return null;
+            if (!Guid.TryParse(userIdString, out var userId))
+            {
+                return null;
+            }
 
             return userId;
         }
 
-        private SigningCredentials GetCredentials(GenerationParameters jwtParams)
+        private SigningCredentials GetJWTCredentials(GenerationParameters jwtParams)
         {
             return new SigningCredentials(
                 GetKey(jwtParams),

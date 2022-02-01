@@ -1,7 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using CarRentalApp.Models.DTOs.Requests;
+using CarRentalApp.Models.DTOs.Responses;
 using CarRentalApp.Models.Entities;
-using CarRentalApp.Models.Requests.DTOs;
-using CarRentalApp.Models.Responses.DTOs;
 using CarRentalApp.Services.Identity;
 using CarRentalApp.Services.Token;
 
@@ -51,8 +51,10 @@ namespace CarRentalApp.Services.Authentication
             return await GetAccess(user);
         }
         
-        public Task<bool> DeAuthenticateAsync(string accessToken)
+        public Task<bool> DeAuthenticateAsync(HttpRequest request)
         {
+            var accessToken = _tokenService.GetTokenFromHeaders(request.Headers);
+            
             var userId = _tokenService.GetUserIdByToken(accessToken);
             if (userId.HasValue)
             {

@@ -1,9 +1,8 @@
+using CarRentalApp.Models.DTOs.Requests;
 using Microsoft.AspNetCore.Mvc;
-using CarRentalApp.Models.Requests.DTOs;
 using CarRentalApp.Services.Authentication;
 using CarRentalApp.Services.Registration;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Net.Http.Headers;
 
 namespace CarRentalApp.Controllers
 {
@@ -51,9 +50,7 @@ namespace CarRentalApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            var authorizationToken = Request.Headers[HeaderNames.Authorization].ToString()[7..];
-
-            if (await _authenticationService.DeAuthenticateAsync(authorizationToken))
+            if (await _authenticationService.DeAuthenticateAsync(Request))
             {
                 return Ok();
             }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CarRentalApp.Models.Requests.DTOs
+namespace CarRentalApp.Models.DTOs.Requests
 {
     public class RefreshTokenDTO
     {
