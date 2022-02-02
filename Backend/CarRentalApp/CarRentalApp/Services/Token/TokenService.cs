@@ -7,7 +7,7 @@ using CarRentalApp.Models.Entities;
 using CarRentalApp.Configuration.JWT;
 using Microsoft.Extensions.Options;
 using CarRentalApp.Configuration.JWT.Refresh;
-using CarRentalApp.Exceptions.BLL;
+using CarRentalApp.Exceptions;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Repositories;
 using Microsoft.Net.Http.Headers;
@@ -34,9 +34,23 @@ namespace CarRentalApp.Services.Token
             _refreshJwtConfig = refreshJwtConfig.Value;
         }
 
-        public string GetTokenStringFromHeaders(IHeaderDictionary headers)
+        /// <exception cref="GeneralException"><paramref name="headers"/> do not contain expected header .</exception>
+        public TokenDTO GetTokenFromHeaders(IHeaderDictionary headers)
         {
-            return headers[HeaderNames.Authorization].ToString()[TOKEN_START_INDEX..];
+            var tokenHeader = headers[HeaderNames.Authorization];
+            if (tokenHeader.Count == 0)
+            {
+                throw new GeneralException(
+                    GeneralException.ErrorTypes.NotFound,
+                    "Authorization header not found",
+                    null
+                );
+            }
+
+            return new TokenDTO()
+            {
+                Token = tokenHeader.ToString()[TOKEN_START_INDEX..]
+            };
         }
 
         public static SecurityKey GetKey(GenerationParameters jwtParams)
@@ -81,12 +95,18 @@ namespace CarRentalApp.Services.Token
             );
         }
 
-        public async Task<RefreshToken> PopExistingTokenAsync(RefreshTokenDTO tokenDTO)
+        /// <exception cref="GeneralException">Token not found by <paramref name="tokenDTO"/>.</exception>
+        public async Task<RefreshToken> PopTokenAsync(TokenDTO tokenDTO)
         {
             var token = await _refreshTokenRepository.GetByTokenStringAsync(tokenDTO.Token);
             if (token == null)
             {
-                throw new TokenNotFoundException();
+                await InvalidateRelatedRefreshTokensAsync(tokenDTO);
+                throw new GeneralException(
+                    GeneralException.ErrorTypes.NotFound,
+                    "Token not found",
+                    null
+                );
             }
 
             await _refreshTokenRepository.DeleteAsync(token);
@@ -94,18 +114,29 @@ namespace CarRentalApp.Services.Token
             return token;
         }
 
-        public bool IsValid(RefreshToken token)
+        public async Task<bool> CheckIfValidAsync(TokenDTO tokenDTO)
         {
-            var refreshJwtValidationParams = _refreshJwtConfig.ValidationParameters;
-            refreshJwtValidationParams.IssuerSigningKey = GetKey(_refreshJwtConfig.GenerationParameters);
+            var refreshJwtValidationParams = GetRefreshValidationParams();
 
             try
             {
                 new JwtSecurityTokenHandler().ValidateToken(
-                    token.Token,
+                    tokenDTO.Token,
                     refreshJwtValidationParams,
                     out var securityToken
                 );
+            }
+            catch (SecurityTokenExpiredException)
+            {
+                try
+                {
+                    await PopTokenAsync(tokenDTO);
+                }
+                catch (GeneralException)
+                {
+                }
+
+                return false;
             }
             catch (Exception)
             {
@@ -128,18 +159,23 @@ namespace CarRentalApp.Services.Token
             return refreshToken;
         }
 
-        public Task InvalidateRefreshTokenOwnerAsync(RefreshToken token)
+        public Task InvalidateRelatedRefreshTokensAsync(TokenDTO tokenDTO)
         {
-            return _refreshTokenRepository.DeleteRelatedTokensByUserIdAsync(token.UserId);
-        }
-
-        public Task InvalidateAccessTokenOwnerAsync(string tokenString)
-        {
-            var userId = GetTokenOwnerId(tokenString);
+            var userId = GetTokenOwnerId(tokenDTO.Token);
 
             return _refreshTokenRepository.DeleteRelatedTokensByUserIdAsync(userId);
         }
 
+        private TokenValidationParameters GetRefreshValidationParams()
+        {
+            var refreshJwtValidationParams = _refreshJwtConfig.ValidationParameters;
+            refreshJwtValidationParams.IssuerSigningKey = GetKey(_refreshJwtConfig.GenerationParameters);
+
+            return refreshJwtValidationParams;
+        }
+
+        /// <exception cref="GeneralException">Sub claim of <paramref name="tokenString"/> not found.</exception>
+        /// <exception cref="GeneralException">Sub claim value is invalid.</exception>
         private Guid GetTokenOwnerId(string tokenString)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -151,12 +187,20 @@ namespace CarRentalApp.Services.Token
 
             if (userIdString == null)
             {
-                throw new TokenClaimNotFoundException();
+                throw new GeneralException(
+                    GeneralException.ErrorTypes.NotFound,
+                    "Required claim not found",
+                    null
+                );
             }
 
             if (!Guid.TryParse(userIdString, out var userId))
             {
-                throw new InvalidTokenClaimException();
+                throw new GeneralException(
+                    GeneralException.ErrorTypes.Invalid,
+                    "Invalid claim value",
+                    null
+                );
             }
 
             return userId;

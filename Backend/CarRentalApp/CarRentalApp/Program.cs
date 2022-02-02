@@ -34,7 +34,7 @@ builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddAutoMapper(typeof(UserMapperProfile));
 
 var configurationString = builder.Configuration
-    .GetConnectionString("sqlserver");
+    .GetConnectionString("CarRentalDB");
 
 builder.Services.AddDbContext<CarRentalDbContext>(
     options => options.UseSqlServer(configurationString)
@@ -55,18 +55,20 @@ builder.Services
         }
     );
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(
-        configurePolicy =>
-        {
-            configurePolicy
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        }
-    );
-});
+builder.Services.AddCors(
+    options =>
+    {
+        options.AddDefaultPolicy(
+            configurePolicy =>
+            {
+                configurePolicy
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            }
+        );
+    }
+);
 
 var app = builder.Build();
 

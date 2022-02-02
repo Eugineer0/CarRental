@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using CarRentalApp.Exceptions.BLL;
+using CarRentalApp.Exceptions;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Repositories;
@@ -25,18 +25,23 @@ namespace CarRentalApp.Services.Identity
             _userMapper = userMapper;
         }
 
+        /// <exception cref="GeneralException">User not found by <paramref name="userDTO"/>.</exception>
         public async Task<User> GetExistingUserAsync(UserLoginDTO userDTO)
         {
             var user = await _userRepository.GetByUsernameAsync(userDTO.Username);
             if (user == null)
             {
-                throw new UserNotFoundException();
+                throw new GeneralException(
+                    GeneralException.ErrorTypes.NotFound,
+                    "User not found",
+                    null
+                );
             }
 
             return user;
         }
 
-        public bool IsValid(User existingUser, UserLoginDTO userDTO)
+        public bool CheckIfValid(User existingUser, UserLoginDTO userDTO)
         {
             return _passwordService.VerifyPassword(
                 existingUser.HashedPassword,
@@ -45,12 +50,17 @@ namespace CarRentalApp.Services.Identity
             );
         }
 
-        public async Task<User> GetByRefreshTokenAsync(RefreshToken token)
+        /// <exception cref="GeneralException"><paramref name="token"/> subject not found.</exception>
+        public async Task<User> GetUserByRefreshTokenAsync(RefreshToken token)
         {
             var user = await _userRepository.GetByIdAsync(token.UserId);
             if (user == null)
             {
-                throw new TokenOwnerNotFoundException();
+                throw new GeneralException(
+                    GeneralException.ErrorTypes.NotFound,
+                    "User not found",
+                    null
+                );
             }
 
             return user;
@@ -67,7 +77,7 @@ namespace CarRentalApp.Services.Identity
 
         public Task<bool> CheckIfExistsAsync(UserRegistrationDTO userDTO)
         {
-            return _userRepository.AreUniqueCredentialsAsync(userDTO.Username, userDTO.Email);
+            return _userRepository.CheckUniquenessAsync(userDTO.Username, userDTO.Email);
         }
 
         private User CreateFromDTO(UserRegistrationDTO userDTO, bool isAdmin)

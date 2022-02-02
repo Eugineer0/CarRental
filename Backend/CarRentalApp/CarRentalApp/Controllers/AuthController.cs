@@ -1,5 +1,5 @@
-using CarRentalApp.Exceptions.BLL;
-using CarRentalApp.Exceptions.DAL;
+using System.Web.Http;
+using CarRentalApp.Exceptions;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Models.DTOs.Responses;
 using CarRentalApp.Models.Entities;
@@ -35,44 +35,74 @@ namespace CarRentalApp.Controllers
             {
                 authenticationResponse = await _authenticationService.AuthenticateAsync(model);
             }
-            catch (InvalidRefreshTokenException)
+            catch (GeneralException exception)
             {
-                return Unauthorized("Invalid refresh token");
+                switch (exception.ErrorType)
+                {
+                    case GeneralException.ErrorTypes.Invalid:
+                        return Unauthorized(exception.Message);
+                    case GeneralException.ErrorTypes.NotFound:
+                        return Unauthorized(exception.Message);
+                    case GeneralException.ErrorTypes.Conflict:
+                        return Conflict(exception.Message);
+                    default:
+                        return new InternalServerErrorResult();
+                }
             }
-            
+
             return Ok(authenticationResponse);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Refresh([FromBody] RefreshTokenDTO model)
+        public async Task<IActionResult> Refresh([FromBody] TokenDTO model)
         {
             AuthenticationResponse authenticationResponse;
-            
+
             try
             {
                 authenticationResponse = await _authenticationService.ReAuthenticateAsync(model);
             }
-            catch (InvalidRefreshTokenException)
+            catch (GeneralException exception)
             {
-                return Unauthorized("Invalid refresh token");
+                switch (exception.ErrorType)
+                {
+                    case GeneralException.ErrorTypes.Invalid:
+                        return Unauthorized(exception.Message);
+                    case GeneralException.ErrorTypes.NotFound:
+                        return Unauthorized(exception.Message);
+                    case GeneralException.ErrorTypes.Conflict:
+                        return Conflict(exception.Message);
+                    default:
+                        return new InternalServerErrorResult();
+                }
             }
 
             return Ok(authenticationResponse);
         }
-        
+
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> LogoutAll()
         {
             try
             {
-                await _authenticationService.DeAuthenticateAsync(this.Request);
+                await _authenticationService.DeAuthenticateAllAsync(this.Request);
             }
-            catch (InvalidTokenPayloadException)
+            catch (GeneralException exception)
             {
-                return BadRequest("Invalid token payload");
+                switch (exception.ErrorType)
+                {
+                    case GeneralException.ErrorTypes.Invalid:
+                        return BadRequest(exception.Message);
+                    case GeneralException.ErrorTypes.NotFound:
+                        return BadRequest(exception.Message);
+                    case GeneralException.ErrorTypes.Conflict:
+                        return Conflict(exception.Message);
+                    default:
+                        return new InternalServerErrorResult();
+                }
             }
-            
+
             return Ok();
         }
 
@@ -80,14 +110,24 @@ namespace CarRentalApp.Controllers
         public async Task<IActionResult> Register([FromBody] UserRegistrationDTO model, bool isAdmin = false)
         {
             User user;
-            
+
             try
             {
                 user = await _registrationService.RegisterAsync(model, isAdmin);
             }
-            catch (UserAlreadyExistsException)
+            catch (GeneralException exception)
             {
-                return Conflict("User already exists");
+                switch (exception.ErrorType)
+                {
+                    case GeneralException.ErrorTypes.Invalid:
+                        return BadRequest(exception.Message);
+                    case GeneralException.ErrorTypes.NotFound:
+                        return BadRequest(exception.Message);
+                    case GeneralException.ErrorTypes.Conflict:
+                        return Conflict(exception.Message);
+                    default:
+                        return new InternalServerErrorResult();
+                }
             }
 
             var authenticationResponse = await _authenticationService.GetAccess(user);

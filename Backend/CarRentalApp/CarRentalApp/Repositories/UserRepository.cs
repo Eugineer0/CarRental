@@ -16,7 +16,6 @@ namespace CarRentalApp.Repositories
         public Task InsertUserAsync(User user)
         {
             _carRentalDbContext.Users.Add(user);
-
             return _carRentalDbContext.SaveChangesAsync();
         }
 
@@ -37,7 +36,7 @@ namespace CarRentalApp.Repositories
                 .FirstOrDefaultAsync(u => u.Username.Equals(username));
         }
 
-        public Task<bool> AreUniqueCredentialsAsync(string username, string email)
+        public Task<bool> CheckUniquenessAsync(string username, string email)
         {
             return _carRentalDbContext.Users
                 .AnyAsync(u => u.Username.Equals(username) || u.Email.Equals(email));
