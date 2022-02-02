@@ -25,29 +25,21 @@ namespace CarRentalApp.Repositories
             return _carRentalDbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> DeleteRelatedTokensByUserIdAsync(Guid userId)
+        public async Task DeleteRelatedTokensByUserIdAsync(Guid userId)
         {
             var tokens = await _carRentalDbContext.RefreshTokens
                 .Where(t => t.UserId == userId)
                 .ToListAsync();
 
             _carRentalDbContext.RefreshTokens.RemoveRange(tokens);
-            
-            try
-            {
-                await _carRentalDbContext.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
 
-            return true;
+            await _carRentalDbContext.SaveChangesAsync();
         }
 
         public async Task<RefreshToken?> GetByTokenStringAsync(string refreshTokenString)
         {
-            return await _carRentalDbContext.RefreshTokens.FirstOrDefaultAsync(t => t.Token == refreshTokenString);
+            return await _carRentalDbContext.RefreshTokens
+                .FirstOrDefaultAsync(t => t.Token == refreshTokenString);
         }
     }
 }

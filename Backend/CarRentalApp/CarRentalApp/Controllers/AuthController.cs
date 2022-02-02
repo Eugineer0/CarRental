@@ -1,4 +1,8 @@
+using CarRentalApp.Exceptions.BLL;
+using CarRentalApp.Exceptions.DAL;
 using CarRentalApp.Models.DTOs.Requests;
+using CarRentalApp.Models.DTOs.Responses;
+using CarRentalApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using CarRentalApp.Services.Authentication;
 using CarRentalApp.Services.Registration;
@@ -25,20 +29,30 @@ namespace CarRentalApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] UserLoginDTO model)
         {
-            var authenticationResponse = await _authenticationService.AuthenticateAsync(model);
-            if (authenticationResponse == null)
-            {
-                return Unauthorized("Incorrect username or password");
-            }
+            AuthenticationResponse authenticationResponse;
 
+            try
+            {
+                authenticationResponse = await _authenticationService.AuthenticateAsync(model);
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                return Unauthorized("Invalid refresh token");
+            }
+            
             return Ok(authenticationResponse);
         }
 
         [HttpPost]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenDTO model)
         {
-            var authenticationResponse = await _authenticationService.ReAuthenticateAsync(model);
-            if (authenticationResponse == null)
+            AuthenticationResponse authenticationResponse;
+            
+            try
+            {
+                authenticationResponse = await _authenticationService.ReAuthenticateAsync(model);
+            }
+            catch (InvalidRefreshTokenException)
             {
                 return Unauthorized("Invalid refresh token");
             }
@@ -50,57 +64,42 @@ namespace CarRentalApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            if (await _authenticationService.DeAuthenticateAsync(Request))
+            try
             {
-                return Ok();
+                await _authenticationService.DeAuthenticateAsync(this.Request);
             }
-
-            return BadRequest("Invalid token payload");
+            catch (InvalidTokenPayloadException)
+            {
+                return BadRequest("Invalid token payload");
+            }
+            
+            return Ok();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody] UserRegistrationDTO model)
+        public async Task<IActionResult> Register([FromBody] UserRegistrationDTO model, bool isAdmin = false)
         {
-            var registrationResponse = await _registrationService.RegisterAsync(model);
-            if (registrationResponse == null)
+            User user;
+            
+            try
+            {
+                user = await _registrationService.RegisterAsync(model, isAdmin);
+            }
+            catch (UserAlreadyExistsException)
             {
                 return Conflict("User already exists");
             }
 
-            if (registrationResponse.User == null)
-            {
-                return Problem(
-                    statusCode: registrationResponse.StatusCode,
-                    detail: registrationResponse.Response
-                );
-            }
-
-            var authenticationResponse = await _authenticationService.GetAccess(registrationResponse.User);
+            var authenticationResponse = await _authenticationService.GetAccess(user);
 
             return Ok(authenticationResponse);
         }
 
         [Authorize(Roles = "SuperAdmin")]
         [HttpPost]
-        public async Task<IActionResult> RegisterAdmin([FromBody] UserRegistrationDTO model)
+        public Task<IActionResult> RegisterAdmin([FromBody] UserRegistrationDTO model)
         {
-            var registrationResponse = await _registrationService.RegisterAsync(model, true);
-            if (registrationResponse == null)
-            {
-                return Conflict("Admin already exists");
-            }
-
-            if (registrationResponse.User == null)
-            {
-                return Problem(
-                    statusCode: registrationResponse.StatusCode,
-                    detail: registrationResponse.Response
-                );
-            }
-
-            var authenticationResponse = await _authenticationService.GetAccess(registrationResponse.User);
-
-            return Ok(authenticationResponse);
+            return Register(model, true);
         }
     }
 }

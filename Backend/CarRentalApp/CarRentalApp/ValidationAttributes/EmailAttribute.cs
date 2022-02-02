@@ -1,9 +1,8 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace CarRentalApp.Models.ValidationAttributes
+namespace CarRentalApp.ValidationAttributes
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class EmailAttribute : ValidationAttribute

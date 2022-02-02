@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CarRentalApp.Exceptions.BLL;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Repositories;
@@ -24,12 +25,18 @@ namespace CarRentalApp.Services.Identity
             _userMapper = userMapper;
         }
 
-        public Task<User?> GetExistingUserAsync(UserLoginDTO userDTO)
+        public async Task<User> GetExistingUserAsync(UserLoginDTO userDTO)
         {
-            return _userRepository.GetByUsernameAsync(userDTO.Username);
+            var user = await _userRepository.GetByUsernameAsync(userDTO.Username);
+            if (user == null)
+            {
+                throw new UserNotFoundException();
+            }
+
+            return user;
         }
 
-        public bool ValidatePassword(User existingUser, UserLoginDTO userDTO)
+        public bool IsValid(User existingUser, UserLoginDTO userDTO)
         {
             return _passwordService.VerifyPassword(
                 existingUser.HashedPassword,
@@ -38,12 +45,18 @@ namespace CarRentalApp.Services.Identity
             );
         }
 
-        public Task<User?> GetByRefreshTokenAsync(RefreshToken token)
+        public async Task<User> GetByRefreshTokenAsync(RefreshToken token)
         {
-            return _userRepository.GetByIdAsync(token.UserId);
+            var user = await _userRepository.GetByIdAsync(token.UserId);
+            if (user == null)
+            {
+                throw new TokenOwnerNotFoundException();
+            }
+
+            return user;
         }
 
-        public async Task<User?> RegisterAsync(UserRegistrationDTO userDTO, bool isAdmin)
+        public async Task<User> RegisterAsync(UserRegistrationDTO userDTO, bool isAdmin)
         {
             var user = CreateFromDTO(userDTO, isAdmin);
 
@@ -54,15 +67,13 @@ namespace CarRentalApp.Services.Identity
 
         public Task<bool> CheckIfExistsAsync(UserRegistrationDTO userDTO)
         {
-            return _userRepository.AreUniqueCredentialsAsync(
-                userDTO.Username, userDTO.Email
-            );
+            return _userRepository.AreUniqueCredentialsAsync(userDTO.Username, userDTO.Email);
         }
 
         private User CreateFromDTO(UserRegistrationDTO userDTO, bool isAdmin)
         {
             var user = _userMapper.Map<UserRegistrationDTO, User>(userDTO);
-            
+
             user.Salt = _passwordService.GenerateSalt();
             user.HashedPassword = _passwordService.DigestPassword(userDTO.Password, user.Salt);
             user.Role = isAdmin ? Role.Admin : Role.User;

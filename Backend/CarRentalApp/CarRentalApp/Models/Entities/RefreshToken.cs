@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CarRentalApp.Models.Entities
+﻿namespace CarRentalApp.Models.Entities
 {
     public class RefreshToken
     {

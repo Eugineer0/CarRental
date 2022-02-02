@@ -1,4 +1,5 @@
-﻿using CarRentalApp.Models.DTOs.Requests;
+﻿using CarRentalApp.Exceptions.DAL;
+using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Models.DTOs.Responses;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Services.Identity;
@@ -14,31 +15,16 @@ namespace CarRentalApp.Services.Registration
             _userService = userService;
         }
 
-        public async Task<RegistrationResponse?> RegisterAsync(UserRegistrationDTO userDTO, bool isAdmin = false)
+        public async Task<User> RegisterAsync(UserRegistrationDTO userDTO, bool isAdmin)
         {
             if (await _userService.CheckIfExistsAsync(userDTO))
             {
-                return null;
+                throw new UserAlreadyExistsException();
             }
 
             var user = await _userService.RegisterAsync(userDTO, isAdmin);
 
-            if (user == null)
-            {
-                return new RegistrationResponse()
-                {
-                    User = null,
-                    StatusCode = 500,
-                    Response = "Cannot insert into DB"
-                };
-            }
-
-            return new RegistrationResponse()
-            {
-                User = user,
-                StatusCode = 201,
-                Response = "User registered successfully"
-            };
+            return user;
         }
     }
 }

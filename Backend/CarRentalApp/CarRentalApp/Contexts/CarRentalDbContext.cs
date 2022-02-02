@@ -9,8 +9,7 @@ namespace CarRentalApp.Contexts
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
-        public CarRentalDbContext(DbContextOptions<CarRentalDbContext> options)
-            : base(options)
+        public CarRentalDbContext(DbContextOptions<CarRentalDbContext> options) : base(options)
         {
         }
     }

@@ -17,14 +17,7 @@ namespace CarRentalApp.Repositories
         {
             _carRentalDbContext.Users.Add(user);
 
-            try
-            {
-                return _carRentalDbContext.SaveChangesAsync();
-            }
-            catch (NullReferenceException e)
-            {
-                throw;
-            }
+            return _carRentalDbContext.SaveChangesAsync();
         }
 
         public Task<User?> GetByIdAsync(Guid id)
@@ -46,7 +39,7 @@ namespace CarRentalApp.Repositories
 
         public Task<bool> AreUniqueCredentialsAsync(string username, string email)
         {
-             return _carRentalDbContext.Users
+            return _carRentalDbContext.Users
                 .AnyAsync(u => u.Username.Equals(username) || u.Email.Equals(email));
         }
     }

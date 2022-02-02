@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using CarRentalApp.Models.ValidationAttributes;
+using CarRentalApp.ValidationAttributes;
 
 namespace CarRentalApp.Models.DTOs.Requests
 {
@@ -29,12 +29,12 @@ namespace CarRentalApp.Models.DTOs.Requests
         )]
         [RegularExpression(
             ".*(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).*",
-            ErrorMessage = "Incorrect format: The {0} value must contain at least "
-                + "one digit, one lowercase letter, one uppercase letter"
+            ErrorMessage = "Incorrect format: The {0} value must contain at least"
+                + " one digit, one lowercase letter and one uppercase letter"
         )]
         public string Password { get; set; }
 
-        [Required] 
+        [Required]
         public DateTime Birthday { get; set; }
     }
 }

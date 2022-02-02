@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using CarRentalApp.Exceptions.BLL;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Models.DTOs.Responses;
 using CarRentalApp.Models.Entities;
@@ -18,50 +19,34 @@ namespace CarRentalApp.Services.Authentication
             _tokenService = tokenService;
         }
 
-        public async Task<AuthenticationResponse?> AuthenticateAsync(UserLoginDTO userDTO)
+        public async Task<AuthenticationResponse> AuthenticateAsync(UserLoginDTO userDTO)
         {
             var user = await _userService.GetExistingUserAsync(userDTO);
-            if (user == null || !_userService.ValidatePassword(user, userDTO))
+            if (!_userService.IsValid(user, userDTO))
             {
-                return null;
+                throw new InvalidUserException();
             }
 
             return await GetAccess(user);
         }
 
-        public async Task<AuthenticationResponse?> ReAuthenticateAsync(RefreshTokenDTO tokenDTO)
+        public async Task<AuthenticationResponse> ReAuthenticateAsync(RefreshTokenDTO tokenDTO)
         {
             var token = await _tokenService.PopExistingTokenAsync(tokenDTO);
-            if (token == null)
+            if (!_tokenService.IsValid(token))
             {
-                return null;
-            }
-
-            if (!_tokenService.Validate(token))
-            {
-                await _tokenService.InvalidateUserByIdAsync(token.UserId);
+                await _tokenService.InvalidateRefreshTokenOwnerAsync(token);
+                throw new InvalidRefreshTokenException();
             }
 
             var user = await _userService.GetByRefreshTokenAsync(token);
-            if (user == null)
-            {
-                return null;
-            }
-
             return await GetAccess(user);
         }
-        
-        public Task<bool> DeAuthenticateAsync(HttpRequest request)
-        {
-            var accessToken = _tokenService.GetTokenFromHeaders(request.Headers);
-            
-            var userId = _tokenService.GetUserIdByToken(accessToken);
-            if (userId.HasValue)
-            {
-                return _tokenService.InvalidateUserByIdAsync(userId.Value);
-            }
 
-            return Task.FromResult(false);
+        public Task DeAuthenticateAsync(HttpRequest request)
+        {
+            var accessTokenString = _tokenService.GetTokenStringFromHeaders(request.Headers);
+            return _tokenService.InvalidateAccessTokenOwnerAsync(accessTokenString);
         }
 
         public async Task<AuthenticationResponse> GetAccess(User user)
@@ -77,7 +62,7 @@ namespace CarRentalApp.Services.Authentication
             return new AuthenticationResponse()
             {
                 AccessToken = accessTokenString,
-                RefreshToken = refreshTokenString
+                RefreshToken = refreshTokenString,
             };
         }
     }

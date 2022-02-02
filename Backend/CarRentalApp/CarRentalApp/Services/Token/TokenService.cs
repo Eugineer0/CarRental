@@ -1,5 +1,4 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using CarRentalApp.Configuration.JWT.Access;
@@ -8,6 +7,7 @@ using CarRentalApp.Models.Entities;
 using CarRentalApp.Configuration.JWT;
 using Microsoft.Extensions.Options;
 using CarRentalApp.Configuration.JWT.Refresh;
+using CarRentalApp.Exceptions.BLL;
 using CarRentalApp.Models.DTOs.Requests;
 using CarRentalApp.Repositories;
 using Microsoft.Net.Http.Headers;
@@ -33,17 +33,15 @@ namespace CarRentalApp.Services.Token
             _accessJwtConfig = accessJwtConfig.Value;
             _refreshJwtConfig = refreshJwtConfig.Value;
         }
-        
-        public string GetTokenFromHeaders(IHeaderDictionary headers)
+
+        public string GetTokenStringFromHeaders(IHeaderDictionary headers)
         {
             return headers[HeaderNames.Authorization].ToString()[TOKEN_START_INDEX..];
         }
 
         public static SecurityKey GetKey(GenerationParameters jwtParams)
         {
-            return new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtParams.Secret)
-            );
+            return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtParams.Secret));
         }
 
         public JwtSecurityToken GenerateAccessToken(User user)
@@ -62,7 +60,7 @@ namespace CarRentalApp.Services.Token
                 issuer: accessJwtGenerationParams.Issuer,
                 audience: accessJwtGenerationParams.Audience,
                 claims: jwtClaims,
-                expires: DateTime.Now.AddSeconds(accessJwtGenerationParams.LifeTimeSeconds),
+                expires: DateTimeOffset.Now.UtcDateTime.AddSeconds(accessJwtGenerationParams.LifeTimeSeconds),
                 signingCredentials: GetJWTCredentials(accessJwtGenerationParams)
             );
         }
@@ -78,17 +76,17 @@ namespace CarRentalApp.Services.Token
 
             return new JwtSecurityToken(
                 claims: jwtClaims,
-                expires: DateTime.Now.AddSeconds(refreshJwtGenerationParams.LifeTimeSeconds),
+                expires: DateTimeOffset.Now.UtcDateTime.AddSeconds(refreshJwtGenerationParams.LifeTimeSeconds),
                 signingCredentials: GetJWTCredentials(refreshJwtGenerationParams)
             );
         }
 
-        public async Task<RefreshToken?> PopExistingTokenAsync(RefreshTokenDTO tokenDTO)
+        public async Task<RefreshToken> PopExistingTokenAsync(RefreshTokenDTO tokenDTO)
         {
             var token = await _refreshTokenRepository.GetByTokenStringAsync(tokenDTO.Token);
             if (token == null)
             {
-                return null;
+                throw new TokenNotFoundException();
             }
 
             await _refreshTokenRepository.DeleteAsync(token);
@@ -96,21 +94,18 @@ namespace CarRentalApp.Services.Token
             return token;
         }
 
-        public bool Validate(RefreshToken token)
+        public bool IsValid(RefreshToken token)
         {
             var refreshJwtValidationParams = _refreshJwtConfig.ValidationParameters;
-
-            refreshJwtValidationParams.IssuerSigningKey
-                = GetKey(_refreshJwtConfig.GenerationParameters);
+            refreshJwtValidationParams.IssuerSigningKey = GetKey(_refreshJwtConfig.GenerationParameters);
 
             try
             {
-                new JwtSecurityTokenHandler()
-                    .ValidateToken(
-                        token.Token,
-                        refreshJwtValidationParams,
-                        out SecurityToken securityToken
-                    );
+                new JwtSecurityTokenHandler().ValidateToken(
+                    token.Token,
+                    refreshJwtValidationParams,
+                    out var securityToken
+                );
             }
             catch (Exception)
             {
@@ -120,10 +115,7 @@ namespace CarRentalApp.Services.Token
             return true;
         }
 
-        public Task StoreRefreshTokenAsync(
-            string refreshTokenString,
-            User user
-        )
+        public async Task<RefreshToken> StoreRefreshTokenAsync(string refreshTokenString, User user)
         {
             var refreshToken = new RefreshToken()
             {
@@ -131,15 +123,24 @@ namespace CarRentalApp.Services.Token
                 UserId = user.Id
             };
 
-            return _refreshTokenRepository.InsertAsync(refreshToken);
+            await _refreshTokenRepository.InsertAsync(refreshToken);
+
+            return refreshToken;
         }
-        
-        public Task<bool> InvalidateUserByIdAsync(Guid userId)
+
+        public Task InvalidateRefreshTokenOwnerAsync(RefreshToken token)
         {
+            return _refreshTokenRepository.DeleteRelatedTokensByUserIdAsync(token.UserId);
+        }
+
+        public Task InvalidateAccessTokenOwnerAsync(string tokenString)
+        {
+            var userId = GetTokenOwnerId(tokenString);
+
             return _refreshTokenRepository.DeleteRelatedTokensByUserIdAsync(userId);
         }
 
-        public Guid? GetUserIdByToken(string tokenString)
+        private Guid GetTokenOwnerId(string tokenString)
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtSecurityToken = handler.ReadJwtToken(tokenString);
@@ -150,12 +151,12 @@ namespace CarRentalApp.Services.Token
 
             if (userIdString == null)
             {
-                return null;
+                throw new TokenClaimNotFoundException();
             }
 
             if (!Guid.TryParse(userIdString, out var userId))
             {
-                return null;
+                throw new InvalidTokenClaimException();
             }
 
             return userId;
