@@ -7,6 +7,7 @@ using CarRentalApp.Contexts;
 using Microsoft.EntityFrameworkCore;
 using CarRentalApp.Configuration.JWT.Refresh;
 using CarRentalApp.Mappers;
+using CarRentalApp.Middleware;
 using CarRentalApp.Repositories;
 using CarRentalApp.Services.Registration;
 
@@ -71,6 +72,8 @@ builder.Services.AddCors(
 );
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseRouting();
 

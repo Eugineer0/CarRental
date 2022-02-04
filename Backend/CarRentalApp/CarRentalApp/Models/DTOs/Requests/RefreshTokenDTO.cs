@@ -2,7 +2,7 @@
 
 namespace CarRentalApp.Models.DTOs.Requests
 {
-    public class TokenDTO
+    public class RefreshTokenDTO
     {
         [Required]
         public string Token { get; set; }

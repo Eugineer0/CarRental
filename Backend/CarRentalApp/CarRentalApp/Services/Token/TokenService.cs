@@ -35,19 +35,19 @@ namespace CarRentalApp.Services.Token
         }
 
         /// <exception cref="GeneralException"><paramref name="headers"/> do not contain expected header .</exception>
-        public TokenDTO GetTokenFromHeaders(IHeaderDictionary headers)
+        public RefreshTokenDTO GetTokenFromHeaders(IHeaderDictionary headers)
         {
             var tokenHeader = headers[HeaderNames.Authorization];
             if (tokenHeader.Count == 0)
             {
                 throw new GeneralException(
-                    GeneralException.ErrorTypes.NotFound,
+                    ErrorTypes.NotFound,
                     "Authorization header not found",
                     null
                 );
             }
 
-            return new TokenDTO()
+            return new RefreshTokenDTO()
             {
                 Token = tokenHeader.ToString()[TOKEN_START_INDEX..]
             };
@@ -95,16 +95,16 @@ namespace CarRentalApp.Services.Token
             );
         }
 
-        /// <exception cref="GeneralException">Token not found by <paramref name="tokenDTO"/>.</exception>
-        public async Task<RefreshToken> PopTokenAsync(TokenDTO tokenDTO)
+        /// <exception cref="GeneralException">Token not found by <paramref name="refreshTokenDto"/>.</exception>
+        public async Task<RefreshToken> PopTokenAsync(RefreshTokenDTO refreshTokenDto)
         {
-            var token = await _refreshTokenRepository.GetByTokenStringAsync(tokenDTO.Token);
+            var token = await _refreshTokenRepository.GetByTokenStringAsync(refreshTokenDto.Token);
             if (token == null)
             {
-                await InvalidateRelatedRefreshTokensAsync(tokenDTO);
+                await InvalidateRelatedRefreshTokensAsync(refreshTokenDto);
                 throw new GeneralException(
-                    GeneralException.ErrorTypes.NotFound,
-                    "Token not found",
+                    ErrorTypes.NotFound,
+                    "Refresh token not found, all sessions will be closed",
                     null
                 );
             }
@@ -114,14 +114,14 @@ namespace CarRentalApp.Services.Token
             return token;
         }
 
-        public async Task<bool> CheckIfValidAsync(TokenDTO tokenDTO)
+        public async Task<bool> CheckIfValidAsync(RefreshTokenDTO refreshTokenDto)
         {
             var refreshJwtValidationParams = GetRefreshValidationParams();
 
             try
             {
                 new JwtSecurityTokenHandler().ValidateToken(
-                    tokenDTO.Token,
+                    refreshTokenDto.Token,
                     refreshJwtValidationParams,
                     out var securityToken
                 );
@@ -130,7 +130,7 @@ namespace CarRentalApp.Services.Token
             {
                 try
                 {
-                    await PopTokenAsync(tokenDTO);
+                    await PopTokenAsync(refreshTokenDto);
                 }
                 catch (GeneralException)
                 {
@@ -158,10 +158,26 @@ namespace CarRentalApp.Services.Token
 
             return refreshToken;
         }
-
-        public Task InvalidateRelatedRefreshTokensAsync(TokenDTO tokenDTO)
+        
+        public async Task InvalidateRefreshTokenAsync(RefreshTokenDTO refreshTokenDto)
         {
-            var userId = GetTokenOwnerId(tokenDTO.Token);
+            var refreshToken = await _refreshTokenRepository.GetByTokenStringAsync(refreshTokenDto.Token);
+            if (refreshToken == null)
+            {
+                await InvalidateRelatedRefreshTokensAsync(refreshTokenDto);
+                throw new GeneralException(
+                    ErrorTypes.NotFound,
+                    "Refresh token not found, all related sessions will be closed",
+                    null
+                );
+            }
+            
+            await _refreshTokenRepository.DeleteAsync(refreshToken);
+        }
+
+        public Task InvalidateRelatedRefreshTokensAsync(RefreshTokenDTO refreshTokenDto)
+        {
+            var userId = GetTokenOwnerId(refreshTokenDto.Token);
 
             return _refreshTokenRepository.DeleteRelatedTokensByUserIdAsync(userId);
         }
@@ -188,7 +204,7 @@ namespace CarRentalApp.Services.Token
             if (userIdString == null)
             {
                 throw new GeneralException(
-                    GeneralException.ErrorTypes.NotFound,
+                    ErrorTypes.NotFound,
                     "Required claim not found",
                     null
                 );
@@ -197,7 +213,7 @@ namespace CarRentalApp.Services.Token
             if (!Guid.TryParse(userIdString, out var userId))
             {
                 throw new GeneralException(
-                    GeneralException.ErrorTypes.Invalid,
+                    ErrorTypes.Invalid,
                     "Invalid claim value",
                     null
                 );

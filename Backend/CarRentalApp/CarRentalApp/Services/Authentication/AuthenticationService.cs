@@ -26,7 +26,7 @@ namespace CarRentalApp.Services.Authentication
             if (!_userService.CheckIfValid(user, userDTO))
             {
                 throw new GeneralException(
-                    GeneralException.ErrorTypes.Invalid,
+                    ErrorTypes.AuthFailed,
                     "Incorrect username or password",
                     null
                 );
@@ -35,28 +35,36 @@ namespace CarRentalApp.Services.Authentication
             return await GetAccess(user);
         }
 
-        /// <exception cref="GeneralException"><paramref name="tokenDTO"/> is invalid.</exception>
-        public async Task<AuthenticationResponse> ReAuthenticateAsync(TokenDTO tokenDTO)
+        /// <exception cref="GeneralException"><paramref name="refreshTokenDto"/> is invalid.</exception>
+        public async Task<AuthenticationResponse> ReAuthenticateAsync(RefreshTokenDTO refreshTokenDto)
         {
-            if (!await _tokenService.CheckIfValidAsync(tokenDTO))
+            if (!await _tokenService.CheckIfValidAsync(refreshTokenDto))
             {
                 throw new GeneralException(
-                    GeneralException.ErrorTypes.Invalid,
-                    "Invalid token",
+                    ErrorTypes.AuthFailed,
+                    "Invalid refresh token",
                     null
                 );
             }
 
-            var token = await _tokenService.PopTokenAsync(tokenDTO);
+            var token = await _tokenService.PopTokenAsync(refreshTokenDto);
 
             var user = await _userService.GetUserByRefreshTokenAsync(token);
             return await GetAccess(user);
         }
 
-        public Task DeAuthenticateAllAsync(HttpRequest request)
+        public async Task DeAuthenticateAsync(RefreshTokenDTO refreshTokenDto)
         {
-            var accessTokenString = _tokenService.GetTokenFromHeaders(request.Headers);
-            return _tokenService.InvalidateRelatedRefreshTokensAsync(accessTokenString);
+            if (!await _tokenService.CheckIfValidAsync(refreshTokenDto))
+            {
+                throw new GeneralException(
+                    ErrorTypes.AuthFailed,
+                    "Invalid refresh token",
+                    null
+                );
+            }
+            
+            await _tokenService.InvalidateRefreshTokenAsync(refreshTokenDto);
         }
 
         public async Task<AuthenticationResponse> GetAccess(User user)

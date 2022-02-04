@@ -32,7 +32,7 @@ namespace CarRentalApp.Services.Identity
             if (user == null)
             {
                 throw new GeneralException(
-                    GeneralException.ErrorTypes.NotFound,
+                    ErrorTypes.NotFound,
                     "User not found",
                     null
                 );
@@ -57,7 +57,7 @@ namespace CarRentalApp.Services.Identity
             if (user == null)
             {
                 throw new GeneralException(
-                    GeneralException.ErrorTypes.NotFound,
+                    ErrorTypes.NotFound,
                     "User not found",
                     null
                 );

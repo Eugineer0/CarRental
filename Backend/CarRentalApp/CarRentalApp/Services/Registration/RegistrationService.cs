@@ -20,7 +20,7 @@ namespace CarRentalApp.Services.Registration
             if (await _userService.CheckIfExistsAsync(userDTO))
             {
                 throw new GeneralException(
-                    GeneralException.ErrorTypes.Conflict,
+                    ErrorTypes.Conflict,
                     "User already exists",
                     null
                 );

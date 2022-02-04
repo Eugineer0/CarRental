@@ -1,17 +1,21 @@
-﻿namespace CarRentalApp.Exceptions;
-
-public class GeneralException : Exception
+﻿namespace CarRentalApp.Exceptions
 {
-    public ErrorTypes ErrorType { get; set; }
-
-    public GeneralException(ErrorTypes errorType, string? message, Exception? innerException)
-        : base(message, innerException)
+    public class GeneralException : Exception
     {
-        ErrorType = errorType;
+        public ErrorTypes ErrorType { get; set; }
+
+        public GeneralException(ErrorTypes errorType, string? message, Exception? innerException)
+            : base(message, innerException)
+        {
+            ErrorType = errorType;
+        }
+
+   
     }
 
     public enum ErrorTypes
     {
+        AuthFailed,
         Invalid,
         NotFound,
         Conflict
