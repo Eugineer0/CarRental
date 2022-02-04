@@ -5,13 +5,11 @@
         <h3>Login</h3>
       </div>
       <div class="card-body">
-        <div *ngIf="isAuthFailed()"
-             class="alert alert-danger">
-          Incorrect username or password
+        <div *ngIf="authFailed" class="alert alert-danger">
+          {{authFailedMessage}}
         </div>
         <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
           <div class="form-group">
-
             <label class="mb-0" for="username">Username</label>
             <input
               #usernameField="ngModel"
@@ -40,7 +38,7 @@
                 minlength="5"
                 maxlength="25"
                 [type]="getPasswordType()"
-                appPasswordConstraint="(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])"
+                appFieldConstraint="(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])"
                 name="password"
                 class="form-control"
                 id="password"
@@ -52,22 +50,23 @@
                 type="button"
                 class="btn btn-light"
                 id="button-addon2"
-                (click)="changePasswordType()">
+                (click)="changePasswordType()"
+              >
                 {{getButtonText()}}
               </button>
-            </div>
-            <div
-              *ngIf="passwordField.invalid && (passwordField.dirty || passwordField.touched)"
-              class="alert alert-danger"
-            >
-              <div *ngIf="passwordField.errors?.['required']">
-                Password is required.
-              </div>
-              <div *ngIf="passwordField.errors?.['minlength']">
-                Password must be at least 5 characters long.
-              </div>
-              <div *ngIf="passwordField.errors?.['passwordConstraint']">
-                Password must contain at least one digit, one lowercase and one uppercase.
+              <div
+                *ngIf="passwordField.invalid && (passwordField.dirty || passwordField.touched)"
+                class="alert alert-danger"
+              >
+                <div *ngIf="passwordField.errors?.['required']">
+                  Password is required.
+                </div>
+                <div *ngIf="passwordField.errors?.['minlength']">
+                  Password must be at least 5 characters long.
+                </div>
+                <div *ngIf="passwordField.errors?.['fieldConstraint']">
+                  Password must contain at least one digit, one lowercase and one uppercase.
+                </div>
               </div>
             </div>
           </div>

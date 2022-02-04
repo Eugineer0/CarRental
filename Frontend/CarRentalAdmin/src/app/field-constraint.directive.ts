@@ -8,28 +8,28 @@ import {
 } from '@angular/forms';
 
 @Directive({
-  selector: '[appPasswordConstraint]',
+  selector: '[appFieldConstraint]',
   providers: [{
     provide: NG_VALIDATORS,
-    useExisting: PasswordConstraintDirective,
+    useExisting: FieldConstraintDirective,
     multi: true
   }]
 })
-export class PasswordConstraintDirective implements Validator {
-  @Input('appPasswordConstraint') regexString: string = ".*";
+export class FieldConstraintDirective implements Validator {
+  @Input('appFieldConstraint') regexString: string = ".*";
 
   constructor() {
   }
 
   public validate(control: AbstractControl): ValidationErrors | null {
     const regex = new RegExp(this.regexString);
-    return passwordConstraintValidator(regex)(control);
+    return fieldConstraintValidator(regex)(control);
   }
 }
 
-export function passwordConstraintValidator(regex: RegExp): ValidatorFn {
+export function fieldConstraintValidator(regex: RegExp): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const isValid = regex.test(control.value);
-    return isValid ? null : {passwordConstraint: {value: control.value}};
+    return isValid ? null : {fieldConstraint: {value: control.value}};
   };
 }

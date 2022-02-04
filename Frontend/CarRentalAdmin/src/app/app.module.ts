@@ -9,12 +9,13 @@ import { AuthService } from './_services/auth.service';
 import { AuthorizationInterceptor } from "./_services/authorization-interceptor.service";
 import { RefreshAccessInterceptor } from "./_services/refresh-access-interceptor.service";
 
-import { PasswordConstraintDirective } from './password-constraint.directive';
+import { FieldConstraintDirective } from './field-constraint.directive';
 
 import { AppComponent } from './app.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { SecretComponent } from './secret/secret.component';
 import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { LoginComponent } from './login/login.component';
     LoginComponent,
     WelcomeComponent,
     SecretComponent,
-    PasswordConstraintDirective
+    FieldConstraintDirective,
+    RegisterComponent
   ],
   imports: [
     AppRoutingModule,

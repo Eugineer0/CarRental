@@ -5,7 +5,7 @@ import { tap } from 'rxjs/operators';
 
 import { LoginDTO } from '../_models/loginDTO';
 import { AuthResponse } from '../_models/auth-responce';
-import { RefreshRequest } from "../_models/refresh-request";
+import { RefreshTokenRequest } from "../_models/refresh-token-request";
 
 import { TokenService } from "./token.service";
 
@@ -19,6 +19,14 @@ export class AuthService {
   ) {
   }
 
+  public isLoggedIn(): boolean {
+    return this.loggedIn;
+  }
+
+  public isLoggedOut(): boolean {
+    return !this.loggedIn;
+  }
+
   public login(admin: LoginDTO): Observable<any> {
     return this.http.post<AuthResponse>('/api/login', admin)
       .pipe(
@@ -30,8 +38,8 @@ export class AuthService {
       )
   }
 
-  public logout(): Observable<any> {
-    return this.http.get('/api/logout')
+  public logout(refreshToken: RefreshTokenRequest): Observable<any> {
+    return this.http.post<RefreshTokenRequest>('/api/logout', refreshToken)
       .pipe(
         tap(
           _ => {
@@ -41,7 +49,7 @@ export class AuthService {
       )
   }
 
-  public refresh(refreshToken: RefreshRequest): Observable<any> {
+  public refresh(refreshToken: RefreshTokenRequest): Observable<any> {
     return this.http.post<AuthResponse>('/api/refresh', refreshToken)
       .pipe(
         tap(
@@ -60,13 +68,5 @@ export class AuthService {
   private setSession(authResult: AuthResponse): void {
     this.tokenService.setTokens(authResult);
     this.loggedIn = true;
-  }
-
-  public isLoggedIn(): boolean {
-    return this.loggedIn;
-  }
-
-  public isLoggedOut(): boolean {
-    return !this.loggedIn;
   }
 }

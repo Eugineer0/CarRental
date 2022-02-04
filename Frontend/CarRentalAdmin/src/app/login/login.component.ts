@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpErrorResponse } from "@angular/common/http";
 
 import { LoginDTO } from '../_models/loginDTO';
 
@@ -16,10 +17,11 @@ export class LoginComponent implements OnInit {
     password: ''
   };
 
-  private authFailed: boolean = false;
+  public authFailed: boolean = false;
+  public authFailedMessage: string = '';
+  private isVisiblePassword: boolean = false;
   private returnUrl: string = '/';
 
-  private isVisiblePassword: boolean = false
 
   constructor(
     private authService: AuthService,
@@ -32,24 +34,9 @@ export class LoginComponent implements OnInit {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '';
   }
 
-  public isAuthFailed(): boolean {
-    return this.authFailed;
-  }
-
   public resetAuthStatus(): void {
     this.authFailed = false;
-  }
-
-  public onSubmit(): void  {
-    this.authService.login(this.admin)
-      .subscribe(
-        _ => {
-          this.router.navigateByUrl(this.returnUrl)
-        },
-        _ => {
-          this.authFailed = true;
-        }
-      );
+    this.authFailedMessage = '';
   }
 
   public changePasswordType(): void {
@@ -60,7 +47,29 @@ export class LoginComponent implements OnInit {
     return this.isVisiblePassword ? 'text' : 'password';
   }
 
-  getButtonText() {
+  public getButtonText(): string {
     return this.isVisiblePassword ? 'Hide' : 'Show';
+  }
+
+  public onSubmit(): void {
+    this.authService.login(this.admin)
+      .subscribe(
+        _ => {
+          this.router.navigateByUrl(this.returnUrl);
+        },
+        error => {
+          this.handleError(error);
+        }
+      );
+  }
+
+  private handleError(error: HttpErrorResponse): void {
+    if (error.status > 499) {
+      this.authFailedMessage = 'Something went wrong';
+    } else {
+      this.authFailedMessage = error.error;
+    }
+
+    this.authFailed = true;
   }
 }

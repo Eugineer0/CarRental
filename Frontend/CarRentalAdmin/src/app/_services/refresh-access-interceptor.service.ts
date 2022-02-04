@@ -4,16 +4,16 @@ import { Observable } from "rxjs";
 import { catchError } from "rxjs/operators";
 import {
   HttpErrorResponse,
-  HttpEvent,
   HttpHandler,
+  HttpRequest,
   HttpInterceptor,
-  HttpRequest
+  HttpEvent
 } from "@angular/common/http";
 
 import { AuthService } from "./auth.service";
 import { TokenService } from "./token.service";
 
-import { RefreshRequest } from "../_models/refresh-request";
+import { RefreshTokenRequest } from "../_models/refresh-token-request";
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +42,7 @@ export class RefreshAccessInterceptor implements HttpInterceptor {
   private handleError(
     request: HttpRequest<any>,
     handler: HttpHandler
-  ) {
+  ): (error: HttpErrorResponse) => never {
     return (error: HttpErrorResponse) => {
       console.error(`${ request.method } ${ request.url } failed: ${ error.error }`);
 
@@ -51,11 +51,11 @@ export class RefreshAccessInterceptor implements HttpInterceptor {
         this.authService.closeSession();
 
         if (refreshToken) {
-          const token: RefreshRequest = {
+          const refreshTokenRequest: RefreshTokenRequest = {
             token: refreshToken
           }
 
-          this.authService.refresh(token)
+          this.authService.refresh(refreshTokenRequest)
             .subscribe(
               _ => {
                 handler.handle(request).subscribe();
