@@ -1,7 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using CarRentalApp.Exceptions;
-using CarRentalApp.Models.DTOs.Requests;
-using CarRentalApp.Models.DTOs.Responses;
+using CarRentalApp.Models.DTOs;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Services.Identity;
 using CarRentalApp.Services.Token;
@@ -19,52 +18,35 @@ namespace CarRentalApp.Services.Authentication
             _tokenService = tokenService;
         }
 
-        /// <exception cref="GeneralException">Incorrect username or password.</exception>
+        /// <exception cref="SharedException">Incorrect username or password.</exception>
         public async Task<AuthenticationResponse> AuthenticateAsync(UserLoginDTO userDTO)
         {
             var user = await _userService.GetExistingUserAsync(userDTO);
             if (!_userService.CheckIfValid(user, userDTO))
             {
-                throw new GeneralException(
+                throw new SharedException(
                     ErrorTypes.AuthFailed,
                     "Incorrect username or password",
-                    null
+                    "Incorrect password"
                 );
             }
 
             return await GetAccess(user);
         }
-
-        /// <exception cref="GeneralException"><paramref name="refreshTokenDto"/> is invalid.</exception>
-        public async Task<AuthenticationResponse> ReAuthenticateAsync(RefreshTokenDTO refreshTokenDto)
+        
+        public async Task<AuthenticationResponse> ReAuthenticateAsync(RefreshTokenDTO refreshTokenDTO)
         {
-            if (!await _tokenService.CheckIfValidAsync(refreshTokenDto))
-            {
-                throw new GeneralException(
-                    ErrorTypes.AuthFailed,
-                    "Invalid refresh token",
-                    null
-                );
-            }
-
-            var token = await _tokenService.PopTokenAsync(refreshTokenDto);
+            var token = await _tokenService.PopTokenAsync(refreshTokenDTO);
+            
+            _tokenService.ValidateTokenLifetime(refreshTokenDTO);
 
             var user = await _userService.GetUserByRefreshTokenAsync(token);
             return await GetAccess(user);
         }
 
-        public async Task DeAuthenticateAsync(RefreshTokenDTO refreshTokenDto)
+        public async Task DeAuthenticateAsync(RefreshTokenDTO refreshTokenDTO)
         {
-            if (!await _tokenService.CheckIfValidAsync(refreshTokenDto))
-            {
-                throw new GeneralException(
-                    ErrorTypes.AuthFailed,
-                    "Invalid refresh token",
-                    null
-                );
-            }
-            
-            await _tokenService.InvalidateRefreshTokenAsync(refreshTokenDto);
+            await _tokenService.PopTokenAsync(refreshTokenDTO);
         }
 
         public async Task<AuthenticationResponse> GetAccess(User user)

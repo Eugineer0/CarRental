@@ -19,13 +19,13 @@ namespace CarRentalApp.Middleware
             {
                 await _next(httpContext);
             }
-            catch (GeneralException exception)
+            catch (SharedException exception)
             {
                 await HandleGeneralExceptionAsync(httpContext, exception);
             }
         }
 
-        private async Task HandleGeneralExceptionAsync(HttpContext httpContext, GeneralException exception)
+        private async Task HandleGeneralExceptionAsync(HttpContext httpContext, SharedException exception)
         {
             var actionContext = new ActionContext()
             {

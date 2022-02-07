@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using CarRentalApp.ValidationAttributes;
 
-namespace CarRentalApp.Models.DTOs.Requests
+namespace CarRentalApp.Models.DTOs
 {
     public class UserRegistrationDTO
     {

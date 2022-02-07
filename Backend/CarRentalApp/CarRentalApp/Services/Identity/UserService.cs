@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using CarRentalApp.Exceptions;
-using CarRentalApp.Models.DTOs.Requests;
+using CarRentalApp.Models.DTOs;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Repositories;
 using CarRentalApp.Services.Authentication;
@@ -25,16 +25,31 @@ namespace CarRentalApp.Services.Identity
             _userMapper = userMapper;
         }
 
-        /// <exception cref="GeneralException">User not found by <paramref name="userDTO"/>.</exception>
+        /// <exception cref="SharedException">User not found by <paramref name="userDTO"/>.</exception>
         public async Task<User> GetExistingUserAsync(UserLoginDTO userDTO)
         {
             var user = await _userRepository.GetByUsernameAsync(userDTO.Username);
             if (user == null)
             {
-                throw new GeneralException(
+                throw new SharedException(
+                    ErrorTypes.AuthFailed,
+                    "Incorrect username or password",
+                    "User with such username not found"
+                );
+            }
+
+            return user;
+        }
+
+        /// <exception cref="SharedException">User not found by <paramref name="adminDTO"/>.</exception>
+        public async Task<User> GetExistingUserAsync(AdminAssignmentDTO adminDTO)
+        {
+            var user = await _userRepository.GetByUsernameAsync(adminDTO.Username);
+            if (user == null)
+            {
+                throw new SharedException(
                     ErrorTypes.NotFound,
-                    "User not found",
-                    null
+                    "User with such username not found"
                 );
             }
 
@@ -50,29 +65,66 @@ namespace CarRentalApp.Services.Identity
             );
         }
 
-        /// <exception cref="GeneralException"><paramref name="token"/> subject not found.</exception>
+        /// <exception cref="SharedException"><paramref name="token"/> subject not found.</exception>
         public async Task<User> GetUserByRefreshTokenAsync(RefreshToken token)
         {
             var user = await _userRepository.GetByIdAsync(token.UserId);
             if (user == null)
             {
-                throw new GeneralException(
+                throw new SharedException(
                     ErrorTypes.NotFound,
-                    "User not found",
-                    null
+                    "User not found"
                 );
             }
 
             return user;
         }
 
-        public async Task<User> RegisterAsync(UserRegistrationDTO userDTO, bool isAdmin)
+        public async Task<User> RegisterAsync(UserRegistrationDTO userDTO)
         {
-            var user = CreateFromDTO(userDTO, isAdmin);
+            var user = CreateFromDTO(userDTO);
 
             await _userRepository.InsertUserAsync(user);
 
             return user;
+        }
+
+        public async Task AssignAdminAsync(User user)
+        {
+            switch (user.Role)
+            {
+                case Role.None:
+                {
+                    break;
+                }
+                case Role.Client:
+                {
+                    throw new SharedException(
+                        ErrorTypes.Invalid,
+                        "Admin assignment failed",
+                        "Cannot assign client to admin"
+                    );
+                }
+                case Role.Admin:
+                {
+                    throw new SharedException(
+                        ErrorTypes.Invalid,
+                        "Admin assignment failed",
+                        "User already has admin role"
+                    );
+                }
+                case Role.SuperAdmin:
+                {
+                    throw new SharedException(
+                        ErrorTypes.Invalid,
+                        "Admin assignment failed",
+                        "Cannot downgrade super-admin"
+                    );
+                }
+            }
+
+            user.Role = Role.Admin;
+            await _userRepository.UpdateUserAsync(user);
         }
 
         public Task<bool> CheckIfExistsAsync(UserRegistrationDTO userDTO)
@@ -80,13 +132,13 @@ namespace CarRentalApp.Services.Identity
             return _userRepository.CheckUniquenessAsync(userDTO.Username, userDTO.Email);
         }
 
-        private User CreateFromDTO(UserRegistrationDTO userDTO, bool isAdmin)
+        private User CreateFromDTO(UserRegistrationDTO userDTO)
         {
             var user = _userMapper.Map<UserRegistrationDTO, User>(userDTO);
 
             user.Salt = _passwordService.GenerateSalt();
             user.HashedPassword = _passwordService.DigestPassword(userDTO.Password, user.Salt);
-            user.Role = isAdmin ? Role.Admin : Role.User;
+            user.Role = Role.None;
 
             return user;
         }

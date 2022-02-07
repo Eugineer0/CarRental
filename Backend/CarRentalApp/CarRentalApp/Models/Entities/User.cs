@@ -19,7 +19,8 @@
 
     public enum Role
     {
-        User,
+        None,
+        Client,
         Admin,
         SuperAdmin
     }

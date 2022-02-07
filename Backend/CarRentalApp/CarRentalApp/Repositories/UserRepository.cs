@@ -41,5 +41,11 @@ namespace CarRentalApp.Repositories
             return _carRentalDbContext.Users
                 .AnyAsync(u => u.Username.Equals(username) || u.Email.Equals(email));
         }
+
+        public Task UpdateUserAsync(User user)
+        {
+            _carRentalDbContext.Users.Update(user);
+            return _carRentalDbContext.SaveChangesAsync();
+        }
     }
 }

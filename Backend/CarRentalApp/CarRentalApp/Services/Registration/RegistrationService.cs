@@ -1,5 +1,5 @@
 ﻿using CarRentalApp.Exceptions;
-using CarRentalApp.Models.DTOs.Requests;
+using CarRentalApp.Models.DTOs;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Services.Identity;
 
@@ -14,19 +14,25 @@ namespace CarRentalApp.Services.Registration
             _userService = userService;
         }
 
-        /// <exception cref="GeneralException">User with such credentials already exists.</exception>
-        public async Task<User> RegisterAsync(UserRegistrationDTO userDTO, bool isAdmin)
+        /// <exception cref="SharedException">User with such credentials already exists.</exception>
+        public async Task<User> RegisterAsync(UserRegistrationDTO userDTO)
         {
             if (await _userService.CheckIfExistsAsync(userDTO))
             {
-                throw new GeneralException(
+                throw new SharedException(
                     ErrorTypes.Conflict,
-                    "User already exists",
-                    null
+                    "User already exists"
                 );
             }
 
-            return await _userService.RegisterAsync(userDTO, isAdmin);
+            return await _userService.RegisterAsync(userDTO);
+        }
+
+        public async Task AssignAdminAsync(AdminAssignmentDTO adminDTO)
+        {
+            var user = await _userService.GetExistingUserAsync(adminDTO);
+
+            await _userService.AssignAdminAsync(user);
         }
     }
 }

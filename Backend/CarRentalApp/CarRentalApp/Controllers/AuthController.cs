@@ -1,4 +1,4 @@
-using CarRentalApp.Models.DTOs.Requests;
+using CarRentalApp.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using CarRentalApp.Services.Authentication;
 using CarRentalApp.Services.Registration;
@@ -35,7 +35,6 @@ namespace CarRentalApp.Controllers
             var authenticationResponse = await _authenticationService.ReAuthenticateAsync(model);
             return Ok(authenticationResponse);
         }
-
         
         [HttpPost]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenDTO model)
@@ -45,18 +44,27 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody] UserRegistrationDTO model, bool isAdmin = false)
+        public async Task<IActionResult> Register([FromBody] UserRegistrationDTO model)
         {
-            var user = await _registrationService.RegisterAsync(model, isAdmin);
+            var user = await _registrationService.RegisterAsync(model);
             var authenticationResponse = await _authenticationService.GetAccess(user);
             return Ok(authenticationResponse);
         }
 
         [Authorize(Roles = "SuperAdmin")]
-        [HttpPost]
-        public Task<IActionResult> RegisterAdmin([FromBody] UserRegistrationDTO model)
+        [HttpPut]
+        public async Task<IActionResult> UpgradeRole([FromBody] AdminAssignmentDTO model)
         {
-            return Register(model, true);
+            await _registrationService.AssignAdminAsync(model);
+            return Ok();
+        }
+        
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpPut]
+        public async Task<IActionResult> DowngradeRole([FromBody] AdminAssignmentDTO model)
+        {
+            await _registrationService.AssignAdminAsync(model);
+            return Ok();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace CarRentalApp.Models.DTOs.Responses;
+﻿namespace CarRentalApp.Models.DTOs;
 
 public class AuthenticationResponse
 {

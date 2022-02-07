@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using CarRentalApp.Models.DTOs.Requests;
+using CarRentalApp.Models.DTOs;
 using CarRentalApp.Models.Entities;
 
 namespace CarRentalApp.Mappers
