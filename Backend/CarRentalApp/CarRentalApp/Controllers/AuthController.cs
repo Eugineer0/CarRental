@@ -12,14 +12,17 @@ namespace CarRentalApp.Controllers
     {
         private readonly AuthenticationService _authenticationService;
         private readonly RegistrationService _registrationService;
+        private readonly RoleService _roleService;
 
         public AuthController(
             AuthenticationService authenticationService,
-            RegistrationService registrationService
+            RegistrationService registrationService,
+            RoleService roleService
         )
         {
             _authenticationService = authenticationService;
             _registrationService = registrationService;
+            _roleService = roleService;
         }
 
         [HttpPost]
@@ -53,17 +56,17 @@ namespace CarRentalApp.Controllers
 
         [Authorize(Roles = "SuperAdmin")]
         [HttpPut]
-        public async Task<IActionResult> UpgradeRole([FromBody] AdminAssignmentDTO model)
+        public async Task<IActionResult> UpgradeRole([FromBody] UserDTO model)
         {
-            await _registrationService.AssignAdminAsync(model);
+            await _roleService.UpgradeRoleAsync(model);
             return Ok();
         }
         
         [Authorize(Roles = "SuperAdmin")]
         [HttpPut]
-        public async Task<IActionResult> DowngradeRole([FromBody] AdminAssignmentDTO model)
+        public async Task<IActionResult> DowngradeRole([FromBody] UserDTO model)
         {
-            await _registrationService.AssignAdminAsync(model);
+            await _roleService.DowngradeRoleAsync(model);
             return Ok();
         }
     }

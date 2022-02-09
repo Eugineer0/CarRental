@@ -1,6 +1,6 @@
 ﻿namespace CarRentalApp.Models.DTOs;
 
-public class AuthenticationResponse
+public class AuthenticationDTO
 {
     public string AccessToken { get; set; }
     

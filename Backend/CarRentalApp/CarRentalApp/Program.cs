@@ -1,3 +1,4 @@
+using CarRentalApp.Configuration;
 using CarRentalApp.Configuration.JWT.Access;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using CarRentalApp.Services.Identity;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using CarRentalApp.Configuration.JWT.Refresh;
 using CarRentalApp.Mappers;
 using CarRentalApp.Middleware;
-using CarRentalApp.Repositories;
+using CarRentalApp.Models.DAOs;
 using CarRentalApp.Services.Registration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,21 +22,24 @@ builder.Services.Configure<AccessJwtConfig>(
 builder.Services.Configure<RefreshJwtConfig>(
     builder.Configuration.GetSection(RefreshJwtConfig.Section)
 );
+builder.Services.Configure<ClientRequirements>(
+    builder.Configuration.GetSection(ClientRequirements.Section)
+);
 
-builder.Services.AddScoped<RefreshTokenRepository>();
+builder.Services.AddScoped<RefreshTokenDAO>();
 builder.Services.AddScoped<TokenService>();
 
-builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<PasswordService>();
+builder.Services.AddScoped<UserDAO>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<PasswordService>();
 
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<AuthenticationService>();
+builder.Services.AddScoped<RoleService>();
 
 builder.Services.AddAutoMapper(typeof(UserMapperProfile));
 
-var configurationString = builder.Configuration
-    .GetConnectionString("CarRentalDB");
+var configurationString = builder.Configuration.GetConnectionString("CarRentalDB");
 
 builder.Services.AddDbContext<CarRentalDbContext>(
     options => options.UseSqlServer(configurationString)

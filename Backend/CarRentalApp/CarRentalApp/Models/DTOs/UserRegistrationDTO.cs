@@ -30,11 +30,39 @@ namespace CarRentalApp.Models.DTOs
         [RegularExpression(
             ".*(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).*",
             ErrorMessage = "Incorrect format: The {0} value must contain at least"
-                + " one digit, one lowercase letter and one uppercase letter"
+                + " 1 digit, 1 lowercase letter and 1 uppercase letter"
         )]
         public string Password { get; set; }
 
         [Required]
-        public DateTime Birthday { get; set; }
+        [RegularExpression(
+            "[A-Z]{1}[a-z]{0,40}",
+            ErrorMessage = "Incorrect format: The {0} value must start from capital and contain only latin letters"
+        )]
+        public string Name { get; set; }
+
+        [Required]
+        [RegularExpression(
+            "[A-Z]{1}[a-z]{0,40}",
+            ErrorMessage = "Incorrect format: The {0} value must start from capital and contain only latin letters"
+        )]
+        public string Surname { get; set; }
+
+        [Required]
+        [RegularExpression(
+            "[A-Z]{2}[0-9]{7}",
+            ErrorMessage = "Incorrect format: The {0} value must consist of 2 capitals leading 7 digits"
+        )]
+        public string PassportNumber { get; set; }
+
+        [Required]
+        public DateTime DateOfBirth { get; set; }
+
+        [RegularExpression(
+            "[0-9]{1}[A-Z]{2}[0-9]{6}",
+            ErrorMessage = "Incorrect format: The {0} value must consist of"
+                + " 1 digit leading 2 capitals followed by 6 digits"
+        )]
+        public string? DriverLicenseSerialNumber { get; set; }
     }
 }

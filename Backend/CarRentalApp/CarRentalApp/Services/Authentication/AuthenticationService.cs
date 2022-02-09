@@ -19,10 +19,10 @@ namespace CarRentalApp.Services.Authentication
         }
 
         /// <exception cref="SharedException">Incorrect username or password.</exception>
-        public async Task<AuthenticationResponse> AuthenticateAsync(UserLoginDTO userDTO)
+        public async Task<AuthenticationDTO> AuthenticateAsync(UserLoginDTO userLoginDTO)
         {
-            var user = await _userService.GetExistingUserAsync(userDTO);
-            if (!_userService.CheckIfValid(user, userDTO))
+            var user = await _userService.GetExistingUserAsync(userLoginDTO);
+            if (!_userService.CheckIfPasswordValid(user, userLoginDTO))
             {
                 throw new SharedException(
                     ErrorTypes.AuthFailed,
@@ -33,11 +33,11 @@ namespace CarRentalApp.Services.Authentication
 
             return await GetAccess(user);
         }
-        
-        public async Task<AuthenticationResponse> ReAuthenticateAsync(RefreshTokenDTO refreshTokenDTO)
+
+        public async Task<AuthenticationDTO> ReAuthenticateAsync(RefreshTokenDTO refreshTokenDTO)
         {
             var token = await _tokenService.PopTokenAsync(refreshTokenDTO);
-            
+
             _tokenService.ValidateTokenLifetime(refreshTokenDTO);
 
             var user = await _userService.GetUserByRefreshTokenAsync(token);
@@ -49,7 +49,7 @@ namespace CarRentalApp.Services.Authentication
             await _tokenService.PopTokenAsync(refreshTokenDTO);
         }
 
-        public async Task<AuthenticationResponse> GetAccess(User user)
+        public async Task<AuthenticationDTO> GetAccess(User user)
         {
             var accessToken = _tokenService.GenerateAccessToken(user);
             var accessTokenString = new JwtSecurityTokenHandler().WriteToken(accessToken);
@@ -59,7 +59,7 @@ namespace CarRentalApp.Services.Authentication
 
             await _tokenService.StoreRefreshTokenAsync(refreshTokenString, user);
 
-            return new AuthenticationResponse()
+            return new AuthenticationDTO()
             {
                 AccessToken = accessTokenString,
                 RefreshToken = refreshTokenString,

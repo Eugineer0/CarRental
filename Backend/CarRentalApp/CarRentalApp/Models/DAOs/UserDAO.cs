@@ -1,14 +1,15 @@
-﻿using CarRentalApp.Contexts;
+﻿using System.Diagnostics;
+using CarRentalApp.Contexts;
 using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace CarRentalApp.Repositories
+namespace CarRentalApp.Models.DAOs
 {
-    public class UserRepository
+    public class UserDAO
     {
         private readonly CarRentalDbContext _carRentalDbContext;
 
-        public UserRepository(CarRentalDbContext carRentalDbContext)
+        public UserDAO(CarRentalDbContext carRentalDbContext)
         {
             _carRentalDbContext = carRentalDbContext;
         }
@@ -18,7 +19,7 @@ namespace CarRentalApp.Repositories
             _carRentalDbContext.Users.Add(user);
             return _carRentalDbContext.SaveChangesAsync();
         }
-
+        
         public Task<User?> GetByIdAsync(Guid id)
         {
             return _carRentalDbContext.Users.FindAsync(id).AsTask();

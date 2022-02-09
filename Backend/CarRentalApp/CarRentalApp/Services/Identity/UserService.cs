@@ -1,34 +1,39 @@
 ﻿using AutoMapper;
+using CarRentalApp.Configuration;
 using CarRentalApp.Exceptions;
+using CarRentalApp.Models.DAOs;
 using CarRentalApp.Models.DTOs;
 using CarRentalApp.Models.Entities;
-using CarRentalApp.Repositories;
 using CarRentalApp.Services.Authentication;
+using Microsoft.Extensions.Options;
 
 namespace CarRentalApp.Services.Identity
 {
     public class UserService
     {
-        private readonly UserRepository _userRepository;
+        private readonly UserDAO _userDAO;
         private readonly PasswordService _passwordService;
+        private readonly ClientRequirements _clientRequirements;
 
         private readonly IMapper _userMapper;
 
         public UserService(
-            UserRepository userRepository,
+            UserDAO userDAO,
             PasswordService passwordService,
-            IMapper userMapper
+            IMapper userMapper,
+            IOptions<ClientRequirements> clientRequirements
         )
         {
-            _userRepository = userRepository;
+            _userDAO = userDAO;
             _passwordService = passwordService;
             _userMapper = userMapper;
+            _clientRequirements = clientRequirements.Value;
         }
 
         /// <exception cref="SharedException">User not found by <paramref name="userDTO"/>.</exception>
-        public async Task<User> GetExistingUserAsync(UserLoginDTO userDTO)
+        public async Task<User> GetExistingUserAsync(UserLoginDTO userLoginDTO)
         {
-            var user = await _userRepository.GetByUsernameAsync(userDTO.Username);
+            var user = await _userDAO.GetByUsernameAsync(userLoginDTO.Username);
             if (user == null)
             {
                 throw new SharedException(
@@ -41,14 +46,15 @@ namespace CarRentalApp.Services.Identity
             return user;
         }
 
-        /// <exception cref="SharedException">User not found by <paramref name="adminDTO"/>.</exception>
-        public async Task<User> GetExistingUserAsync(AdminAssignmentDTO adminDTO)
+        /// <exception cref="SharedException">User not found by <paramref name="userDTO"/>.</exception>
+        public async Task<User> GetExistingUserAsync(UserDTO userDTO)
         {
-            var user = await _userRepository.GetByUsernameAsync(adminDTO.Username);
+            var user = await _userDAO.GetByUsernameAsync(userDTO.Username);
             if (user == null)
             {
                 throw new SharedException(
                     ErrorTypes.NotFound,
+                    "User not found",
                     "User with such username not found"
                 );
             }
@@ -56,89 +62,131 @@ namespace CarRentalApp.Services.Identity
             return user;
         }
 
-        public bool CheckIfValid(User existingUser, UserLoginDTO userDTO)
+        public bool CheckIfPasswordValid(User existingUser, UserLoginDTO userLoginDTO)
         {
             return _passwordService.VerifyPassword(
                 existingUser.HashedPassword,
                 existingUser.Salt,
-                userDTO.Password
+                userLoginDTO.Password
             );
         }
 
         /// <exception cref="SharedException"><paramref name="token"/> subject not found.</exception>
         public async Task<User> GetUserByRefreshTokenAsync(RefreshToken token)
         {
-            var user = await _userRepository.GetByIdAsync(token.UserId);
+            var user = await _userDAO.GetByIdAsync(token.UserId);
             if (user == null)
             {
                 throw new SharedException(
-                    ErrorTypes.NotFound,
-                    "User not found"
+                    ErrorTypes.AuthFailed,
+                    "Invalid token",
+                    "User not found by refresh token userId"
                 );
             }
 
             return user;
         }
 
-        public async Task<User> RegisterAsync(UserRegistrationDTO userDTO)
+        public async Task<User> RegisterAsync(UserRegistrationDTO userRegistrationDTO)
         {
-            var user = CreateFromDTO(userDTO);
+            var user = CreateFromDTO(userRegistrationDTO);
 
-            await _userRepository.InsertUserAsync(user);
+            await _userDAO.InsertUserAsync(user);
 
             return user;
         }
 
-        public async Task AssignAdminAsync(User user)
+        public Task UpgradeRoleAsync(User user)
         {
-            switch (user.Role)
+            switch (user.Roles)
             {
-                case Role.None:
+                case Roles.None:
                 {
+                    user.Roles = Roles.Admin;
                     break;
                 }
-                case Role.Client:
+                case Roles.Client:
                 {
-                    throw new SharedException(
-                        ErrorTypes.Invalid,
-                        "Admin assignment failed",
-                        "Cannot assign client to admin"
-                    );
+                    user.Roles = Roles.Admin;
+                    break;
                 }
-                case Role.Admin:
+                case Roles.Admin:
                 {
-                    throw new SharedException(
-                        ErrorTypes.Invalid,
-                        "Admin assignment failed",
-                        "User already has admin role"
-                    );
+                    user.Roles = Roles.SuperAdmin;
+                    break;
                 }
-                case Role.SuperAdmin:
+                case Roles.SuperAdmin:
                 {
                     throw new SharedException(
-                        ErrorTypes.Invalid,
-                        "Admin assignment failed",
-                        "Cannot downgrade super-admin"
+                        ErrorTypes.Conflict,
+                        "Role upgrading failed",
+                        "User already has highest role"
                     );
                 }
             }
 
-            user.Role = Role.Admin;
-            await _userRepository.UpdateUserAsync(user);
+            return _userDAO.UpdateUserAsync(user);
         }
 
-        public Task<bool> CheckIfExistsAsync(UserRegistrationDTO userDTO)
+        public Task DowngradeRoleAsync(User user)
         {
-            return _userRepository.CheckUniquenessAsync(userDTO.Username, userDTO.Email);
+            switch (user.Roles)
+            {
+                case Roles.Admin:
+                {
+                    user.Roles = user.DriverLicenseSerialNumber == null ? Roles.None : Roles.Client;
+                    break;
+                }
+                case Roles.SuperAdmin:
+                {
+                    user.Roles = Roles.Admin;
+                    break;
+                }
+                default:
+                {
+                    throw new SharedException(
+                        ErrorTypes.Conflict,
+                        "Role downgrading failed",
+                        "User already has lowest role"
+                    );
+                }
+            }
+
+            return _userDAO.UpdateUserAsync(user);
         }
 
-        private User CreateFromDTO(UserRegistrationDTO userDTO)
+        public Task<bool> CheckIfExistsAsync(UserRegistrationDTO userRegistrationDTO)
         {
-            var user = _userMapper.Map<UserRegistrationDTO, User>(userDTO);
+            return _userDAO.CheckUniquenessAsync(userRegistrationDTO.Username, userRegistrationDTO.Email);
+        }
+
+        private User CreateFromDTO(UserRegistrationDTO userRegistrationDTO)
+        {
+            var user = _userMapper.Map<UserRegistrationDTO, User>(userRegistrationDTO);
 
             user.Salt = _passwordService.GenerateSalt();
-            user.HashedPassword = _passwordService.DigestPassword(userDTO.Password, user.Salt);
-            user.Role = Role.None;
+            user.HashedPassword = _passwordService.DigestPassword(userRegistrationDTO.Password, user.Salt);
+
+            if (userRegistrationDTO.DriverLicenseSerialNumber != null)
+            {
+                var minimumAge = _clientRequirements.MinimumAge;
+                var criticalDate = DateTime.Now.AddYears(minimumAge);
+
+                if (criticalDate.CompareTo(userRegistrationDTO.DateOfBirth) > 0)
+                {
+                    throw new SharedException(
+                        ErrorTypes.Conflict,
+                        "Client`s data does not meet requirements",
+                        $"Client`s age must be greater than {minimumAge - 1}"
+                    );
+                }
+
+                user.Roles = Roles.Client;
+            }
+            else
+            {
+                user.Roles = Roles.None;
+            }
 
             return user;
         }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarRentalApp.Migrations
 {
     [DbContext(typeof(CarRentalDbContext))]
-    [Migration("20220120091517_CreateDB")]
-    partial class CreateDB
+    [Migration("20220209144607_CreateCarRentalDB")]
+    partial class CreateCarRentalDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -48,27 +48,42 @@ namespace CarRentalApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("Birthday")
+                    b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("DriverLicenseSerialNumber")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(254)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("HashedPassword")
                         .IsRequired()
-                        .HasColumnType("binary(32)");
+                        .HasColumnType("varbinary(max)");
 
-                    b.Property<int>("Role")
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PassportNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Roles")
                         .HasColumnType("int");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
-                        .HasColumnType("binary(32)");
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(25)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

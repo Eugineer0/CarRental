@@ -2,13 +2,13 @@ using CarRentalApp.Contexts;
 using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace CarRentalApp.Repositories
+namespace CarRentalApp.Models.DAOs
 {
-    public class RefreshTokenRepository
+    public class RefreshTokenDAO
     {
         private readonly CarRentalDbContext _carRentalDbContext;
 
-        public RefreshTokenRepository(CarRentalDbContext carRentalDbContext)
+        public RefreshTokenDAO(CarRentalDbContext carRentalDbContext)
         {
             _carRentalDbContext = carRentalDbContext;
         }

@@ -8,28 +8,25 @@ using CarRentalApp.Configuration.JWT;
 using Microsoft.Extensions.Options;
 using CarRentalApp.Configuration.JWT.Refresh;
 using CarRentalApp.Exceptions;
+using CarRentalApp.Models.DAOs;
 using CarRentalApp.Models.DTOs;
-using CarRentalApp.Repositories;
-using Microsoft.Net.Http.Headers;
 
 namespace CarRentalApp.Services.Token
 {
     public class TokenService
     {
-        const int TOKEN_START_INDEX = 7;
-
-        private readonly RefreshTokenRepository _refreshTokenRepository;
+        private readonly RefreshTokenDAO _refreshTokenDAO;
 
         private readonly AccessJwtConfig _accessJwtConfig;
         private readonly RefreshJwtConfig _refreshJwtConfig;
 
         public TokenService(
-            RefreshTokenRepository refreshTokenRepository,
+            RefreshTokenDAO refreshTokenDAO,
             IOptions<AccessJwtConfig> accessJwtConfig,
             IOptions<RefreshJwtConfig> refreshJwtConfig
         )
         {
-            _refreshTokenRepository = refreshTokenRepository;
+            _refreshTokenDAO = refreshTokenDAO;
             _accessJwtConfig = accessJwtConfig.Value;
             _refreshJwtConfig = refreshJwtConfig.Value;
         }
@@ -47,7 +44,7 @@ namespace CarRentalApp.Services.Token
             {
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("role", user.Role.ToString())
+                new Claim("role", user.Roles.ToString())
             };
 
             return new JwtSecurityToken(
@@ -78,7 +75,7 @@ namespace CarRentalApp.Services.Token
         /// <exception cref="SharedException">Token not found by <paramref name="refreshTokenDto"/>.</exception>
         public async Task<RefreshToken> PopTokenAsync(RefreshTokenDTO refreshTokenDTO)
         {
-            var token = await _refreshTokenRepository.GetByTokenStringAsync(refreshTokenDTO.Token);
+            var token = await _refreshTokenDAO.GetByTokenStringAsync(refreshTokenDTO.Token);
             if (token == null)
             {
                 SharedException? innerException = null;
@@ -100,7 +97,7 @@ namespace CarRentalApp.Services.Token
                 );
             }
 
-            await _refreshTokenRepository.DeleteAsync(token);
+            await _refreshTokenDAO.DeleteAsync(token);
 
             return token;
         }
@@ -110,7 +107,6 @@ namespace CarRentalApp.Services.Token
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtSecurityToken = handler.ReadJwtToken(refreshTokenDTO.Token);
-
             var expires = jwtSecurityToken.ValidTo;
 
             var refreshJwtValidationParams = GetRefreshValidationParams();
@@ -138,7 +134,7 @@ namespace CarRentalApp.Services.Token
                 UserId = user.Id
             };
 
-            await _refreshTokenRepository.InsertAsync(refreshToken);
+            await _refreshTokenDAO.InsertAsync(refreshToken);
 
             return refreshToken;
         }
@@ -147,7 +143,7 @@ namespace CarRentalApp.Services.Token
         {
             var userId = GetTokenOwnerId(refreshTokenDTO.Token);
 
-            return _refreshTokenRepository.DeleteRelatedTokensByUserIdAsync(userId);
+            return _refreshTokenDAO.DeleteRelatedTokensByUserIdAsync(userId);
         }
 
         private TokenValidationParameters GetRefreshValidationParams()
@@ -164,7 +160,6 @@ namespace CarRentalApp.Services.Token
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtSecurityToken = handler.ReadJwtToken(tokenString);
-
             var userIdString = jwtSecurityToken.Claims
                 .FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?
                 .Value;

@@ -15,9 +15,9 @@ namespace CarRentalApp.Services.Registration
         }
 
         /// <exception cref="SharedException">User with such credentials already exists.</exception>
-        public async Task<User> RegisterAsync(UserRegistrationDTO userDTO)
+        public async Task<User> RegisterAsync(UserRegistrationDTO userRegistrationDTO)
         {
-            if (await _userService.CheckIfExistsAsync(userDTO))
+            if (await _userService.CheckIfExistsAsync(userRegistrationDTO))
             {
                 throw new SharedException(
                     ErrorTypes.Conflict,
@@ -25,14 +25,7 @@ namespace CarRentalApp.Services.Registration
                 );
             }
 
-            return await _userService.RegisterAsync(userDTO);
-        }
-
-        public async Task AssignAdminAsync(AdminAssignmentDTO adminDTO)
-        {
-            var user = await _userService.GetExistingUserAsync(adminDTO);
-
-            await _userService.AssignAdminAsync(user);
+            return await _userService.RegisterAsync(userRegistrationDTO);
         }
     }
 }

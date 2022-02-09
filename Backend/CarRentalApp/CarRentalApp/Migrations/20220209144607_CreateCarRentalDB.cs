@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace CarRentalApp.Migrations
 {
-    public partial class CreateDB : Migration
+    public partial class CreateCarRentalDB : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -27,18 +27,20 @@ namespace CarRentalApp.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(254)", nullable: false),
-                    Username = table.Column<string>(type: "nvarchar(25)", nullable: false),
-                    HashedPassword = table.Column<byte[]>(type: "binary(32)", nullable: false),
-                    Salt = table.Column<byte[]>(type: "binary(32)", nullable: false),
-                    Birthday = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Role = table.Column<int>(type: "int", nullable: false)
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    HashedPassword = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    Salt = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Surname = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PassportNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Roles = table.Column<int>(type: "int", nullable: false),
+                    DriverLicenseSerialNumber = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
-                    table.UniqueConstraint("UC_Email", x => x.Email);
-                    table.UniqueConstraint("UC_Username", x => x.Username);
                 });
         }
 

@@ -1,4 +1,6 @@
-﻿namespace CarRentalApp.Models.Entities
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace CarRentalApp.Models.Entities
 {
     public class User
     {
@@ -12,12 +14,20 @@
 
         public byte[] Salt { get; set; }
 
-        public DateTime Birthday { get; set; }
+        public string Name { get; set; }
 
-        public Role Role { get; set; }
+        public string Surname { get; set; }
+
+        public string PassportNumber { get; set; }
+
+        public DateTime DateOfBirth { get; set; }
+
+        public Roles Roles { get; set; }
+
+        public string? DriverLicenseSerialNumber { get; set; }
     }
 
-    public enum Role
+    public enum Roles
     {
         None,
         Client,
