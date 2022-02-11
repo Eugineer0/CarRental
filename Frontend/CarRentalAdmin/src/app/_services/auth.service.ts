@@ -8,6 +8,7 @@ import { AuthResponse } from '../_models/auth-responce';
 import { RefreshTokenRequest } from "../_models/refresh-token-request";
 
 import { TokenService } from "./token.service";
+import { RegisterDTO } from "../_models/registerDTO";
 
 @Injectable()
 export class AuthService {
@@ -25,6 +26,17 @@ export class AuthService {
 
   public isLoggedOut(): boolean {
     return !this.loggedIn;
+  }
+
+  public register(admin: RegisterDTO): Observable<any> {
+    return this.http.post<AuthResponse>('/api/register', admin)
+      .pipe(
+        tap(
+          response => {
+            this.setSession(response);
+          }
+        )
+      )
   }
 
   public login(admin: LoginDTO): Observable<any> {

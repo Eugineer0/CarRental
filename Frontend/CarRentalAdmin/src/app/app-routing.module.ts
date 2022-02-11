@@ -6,9 +6,11 @@ import { AuthGuard } from './_services/auth.guard';
 import { LoginComponent } from './login/login.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { SecretComponent } from './secret/secret.component';
+import { RegisterComponent } from "./register/register.component";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: 'welcome'},
+  {path: 'register', component: RegisterComponent},
   {path: 'login', component: LoginComponent},
   {path: 'welcome', component: WelcomeComponent},
   {path: 'secret', canActivate: [AuthGuard], component: SecretComponent}

@@ -10,20 +10,33 @@
       </li>
     </ul>
     <ul class="navbar-nav">
-      <li class="nav-item">
+      <li
+        *ngIf="isLoggedIn()"
+        class="nav-item"
+      >
         <a
-          *ngIf="isLoggedOut()"
+          class="nav-link"
+          (click)="logout()"
+        >Login</a>
+      </li>
+      <li
+        *ngIf="isLoggedOut()"
+        class="nav-item">
+        <a
           routerLink="/login"
           routerLinkActive="active"
           class="nav-link"
         >Login</a>
       </li>
-      <li class="nav-item">
+      <li
+        *ngIf="isLoggedOut()"
+          class="nav-item"
+      >
         <a
-          *ngIf="isLoggedIn()"
+          routerLink="/register"
+          routerLinkActive="active"
           class="nav-link"
-          (click)="logout()"
-        >Logout</a>
+        >Register</a>
       </li>
     </ul>
   </div>
