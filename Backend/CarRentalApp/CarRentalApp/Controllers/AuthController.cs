@@ -33,6 +33,13 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> LoginAdmin([FromBody] UserLoginDTO model)
+        {
+            var authenticationResponse = await _authenticationService.AuthenticateAdminAsync(model);
+            return Ok(authenticationResponse);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenDTO model)
         {
             var authenticationResponse = await _authenticationService.ReAuthenticateAsync(model);
@@ -47,27 +54,27 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody] UserRegistrationDTO model)
+        public async Task<IActionResult> Register([FromBody] ClientRegistrationDTO model)
         {
             var user = await _registrationService.RegisterAsync(model);
             var authenticationResponse = await _authenticationService.GetAccess(user);
             return Ok(authenticationResponse);
         }
-
-        [Authorize(Roles = "SuperAdmin")]
-        [HttpPut]
-        public async Task<IActionResult> UpgradeRole([FromBody] UserDTO model)
+        
+        [HttpPost]
+        public async Task<IActionResult> RegisterAdmin([FromBody] UserRegistrationDTO model)
         {
-            await _roleService.UpgradeRoleAsync(model);
-            return Ok();
+            var user = await _registrationService.RegisterAsync(model);
+            var authenticationResponse = await _authenticationService.GetAccess(user);
+            return Ok(authenticationResponse);
         }
         
-        [Authorize(Roles = "SuperAdmin")]
-        [HttpPut]
-        public async Task<IActionResult> DowngradeRole([FromBody] UserDTO model)
+        [HttpPost]
+        public async Task<IActionResult> ProceedRegistration([FromBody] UserRegistrationDTO model)
         {
-            await _roleService.DowngradeRoleAsync(model);
-            return Ok();
+            var user = await _registrationService.RegisterAsync(model);
+            var authenticationResponse = await _authenticationService.GetAccess(user);
+            return Ok(authenticationResponse);
         }
     }
 }

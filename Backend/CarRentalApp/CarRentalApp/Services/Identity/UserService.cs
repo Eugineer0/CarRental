@@ -62,13 +62,34 @@ namespace CarRentalApp.Services.Identity
             return user;
         }
 
-        public bool CheckIfPasswordValid(User existingUser, UserLoginDTO userLoginDTO)
+        /// <exception cref="SharedException">Incorrect username or password.</exception>
+        public void ValidateClient(User user, UserLoginDTO userLoginDTO)
         {
-            return _passwordService.VerifyPassword(
-                existingUser.HashedPassword,
-                existingUser.Salt,
-                userLoginDTO.Password
-            );
+            if (!user.Roles.Intersect(User.ClientRoles).Any())
+            {
+                throw new SharedException(
+                    ErrorTypes.AccessDenied,
+                    "Wait for your account to be approved",
+                    "User does not have client role"
+                );
+            }
+
+            ValidatePassword(user, userLoginDTO);
+        }
+
+        /// <exception cref="SharedException">Incorrect username or password.</exception>
+        public void ValidateAdmin(User user, UserLoginDTO userLoginDTO)
+        {
+            if (!user.Roles.Intersect(User.AdminRoles).Any())
+            {
+                throw new SharedException(
+                    ErrorTypes.AccessDenied,
+                    "User does not have permission",
+                    "User does not have admin role"
+                );
+            }
+
+            ValidatePassword(user, userLoginDTO);
         }
 
         /// <exception cref="SharedException"><paramref name="token"/> subject not found.</exception>
@@ -96,58 +117,36 @@ namespace CarRentalApp.Services.Identity
             return user;
         }
 
-        public Task UpgradeRoleAsync(User user)
+        public Task UpdateRolesAsync(User user, UserDTO userDTO)
         {
-            switch (user.Roles)
+            if (userDTO.Roles.Count < 1)
             {
-                case Roles.None:
-                {
-                    user.Roles = Roles.Admin;
-                    break;
-                }
-                case Roles.Client:
-                {
-                    user.Roles = Roles.Admin;
-                    break;
-                }
-                case Roles.Admin:
-                {
-                    user.Roles = Roles.SuperAdmin;
-                    break;
-                }
-                case Roles.SuperAdmin:
-                {
-                    throw new SharedException(
-                        ErrorTypes.Conflict,
-                        "Role upgrading failed",
-                        "User already has highest role"
-                    );
-                }
+                throw new SharedException(
+                    ErrorTypes.Invalid,
+                    "Role changing failed",
+                    "User must have at least 1 role"
+                );
             }
 
-            return _userDAO.UpdateUserAsync(user);
-        }
-
-        public Task DowngradeRoleAsync(User user)
-        {
-            switch (user.Roles)
+            if (user.Roles.SequenceEqual(userDTO.Roles))
             {
-                case Roles.Admin:
-                {
-                    user.Roles = user.DriverLicenseSerialNumber == null ? Roles.None : Roles.Client;
-                    break;
-                }
-                case Roles.SuperAdmin:
-                {
-                    user.Roles = Roles.Admin;
-                    break;
-                }
-                default:
+                throw new SharedException(
+                    ErrorTypes.Conflict,
+                    "Role changing failed",
+                    "User already has specified roles"
+                );
+            }
+
+            if (user.Roles.Intersect(User.ClientRoles).Any())
+            {
+                ValidateAge(user.DateOfBirth);
+
+                if (user.DriverLicenseSerialNumber == null)
                 {
                     throw new SharedException(
                         ErrorTypes.Conflict,
-                        "Role downgrading failed",
-                        "User already has lowest role"
+                        "Role changing failed",
+                        "User cannot become a client without specifying DriverLicenseSerialNumber"
                     );
                 }
             }
@@ -167,28 +166,41 @@ namespace CarRentalApp.Services.Identity
             user.Salt = _passwordService.GenerateSalt();
             user.HashedPassword = _passwordService.DigestPassword(userRegistrationDTO.Password, user.Salt);
 
-            if (userRegistrationDTO.DriverLicenseSerialNumber != null)
-            {
-                var minimumAge = _clientRequirements.MinimumAge;
-                var criticalDate = DateTime.Now.AddYears(minimumAge);
-
-                if (criticalDate.CompareTo(userRegistrationDTO.DateOfBirth) > 0)
-                {
-                    throw new SharedException(
-                        ErrorTypes.Conflict,
-                        "Client`s data does not meet requirements",
-                        $"Client`s age must be greater than {minimumAge - 1}"
-                    );
-                }
-
-                user.Roles = Roles.Client;
-            }
-            else
-            {
-                user.Roles = Roles.None;
-            }
+            user.Roles = new List<Roles>() {Roles.None};
 
             return user;
+        }
+
+        private void ValidateAge(DateTime dateOfBirth)
+        {
+            var minimumAge = _clientRequirements.MinimumAge;
+            var criticalDate = DateTime.Now.AddYears(minimumAge);
+
+            if (criticalDate.CompareTo(dateOfBirth) > 0)
+            {
+                throw new SharedException(
+                    ErrorTypes.Conflict,
+                    "Client`s data does not meet requirements",
+                    $"Client`s age must be greater than {minimumAge - 1}"
+                );
+            }
+        }
+
+        /// <exception cref="SharedException">Incorrect username or password.</exception>
+        private void ValidatePassword(User existingUser, UserLoginDTO userLoginDTO)
+        {
+            if (!_passwordService.VerifyPassword(
+                    existingUser.HashedPassword,
+                    existingUser.Salt,
+                    userLoginDTO.Password
+                ))
+            {
+                throw new SharedException(
+                    ErrorTypes.AuthFailed,
+                    "Incorrect username or password",
+                    "Incorrect password"
+                );
+            }
         }
     }
 }

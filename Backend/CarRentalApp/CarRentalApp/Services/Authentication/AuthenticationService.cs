@@ -17,19 +17,19 @@ namespace CarRentalApp.Services.Authentication
             _userService = userService;
             _tokenService = tokenService;
         }
-
-        /// <exception cref="SharedException">Incorrect username or password.</exception>
+        
         public async Task<AuthenticationDTO> AuthenticateAsync(UserLoginDTO userLoginDTO)
         {
             var user = await _userService.GetExistingUserAsync(userLoginDTO);
-            if (!_userService.CheckIfPasswordValid(user, userLoginDTO))
-            {
-                throw new SharedException(
-                    ErrorTypes.AuthFailed,
-                    "Incorrect username or password",
-                    "Incorrect password"
-                );
-            }
+            _userService.ValidateClient(user, userLoginDTO);
+
+            return await GetAccess(user);
+        }
+
+        public async Task<AuthenticationDTO> AuthenticateAdminAsync(UserLoginDTO userLoginDTO)
+        {
+            var user = await _userService.GetExistingUserAsync(userLoginDTO);
+            _userService.ValidateAdmin(user, userLoginDTO);
 
             return await GetAccess(user);
         }

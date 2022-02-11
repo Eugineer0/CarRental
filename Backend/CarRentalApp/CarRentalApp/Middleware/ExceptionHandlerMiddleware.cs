@@ -40,6 +40,12 @@ namespace CarRentalApp.Middleware
                     await result.ExecuteResultAsync(actionContext);
                     break;
                 }
+                case ErrorTypes.AccessDenied:
+                {
+                    var result = new ForbidResult("Bearer");
+                    await result.ExecuteResultAsync(actionContext);
+                    break;
+                }
                 case ErrorTypes.Invalid:
                 {
                     var result = new BadRequestObjectResult(exception.Message);

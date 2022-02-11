@@ -12,17 +12,10 @@ public class RoleService
         _userService = userService;
     }
 
-    public async Task UpgradeRoleAsync(UserDTO userDTO)
+    public async Task UpdateRolesAsync(UserDTO userDTO)
     {
         var user = await _userService.GetExistingUserAsync(userDTO);
 
-        await _userService.UpgradeRoleAsync(user);
-    }
-
-    public async Task DowngradeRoleAsync(UserDTO userDTO)
-    {
-        var user = await _userService.GetExistingUserAsync(userDTO);
-
-        await _userService.DowngradeRoleAsync(user);
+        await _userService.UpdateRolesAsync(user, userDTO);
     }
 }

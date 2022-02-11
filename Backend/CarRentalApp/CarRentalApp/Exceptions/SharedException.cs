@@ -31,6 +31,7 @@
     public enum ErrorTypes
     {
         AuthFailed,
+        AccessDenied,
         Invalid,
         NotFound,
         Conflict
