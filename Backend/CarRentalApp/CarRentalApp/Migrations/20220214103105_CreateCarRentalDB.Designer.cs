@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarRentalApp.Migrations
 {
     [DbContext(typeof(CarRentalDbContext))]
-    [Migration("20220209144607_CreateCarRentalDB")]
+    [Migration("20220214103105_CreateCarRentalDB")]
     partial class CreateCarRentalDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,42 +52,74 @@ namespace CarRentalApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DriverLicenseSerialNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nchar(9)");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(254)");
 
                     b.Property<byte[]>("HashedPassword")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("binary(32)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(25)");
 
                     b.Property<string>("PassportNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Roles")
-                        .HasColumnType("int");
+                        .HasColumnType("nchar(9)");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("binary(32)");
 
                     b.Property<string>("Surname")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(25)");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(25)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("CarRentalApp.Models.Entities.UserRole", b =>
+                {
+                    b.Property<int>("EntryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EntryId"), 1L, 1);
+
+                    b.Property<byte>("Role")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("EntryId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("CarRentalApp.Models.Entities.UserRole", b =>
+                {
+                    b.HasOne("CarRentalApp.Models.Entities.User", null)
+                        .WithMany("Roles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CarRentalApp.Models.Entities.User", b =>
+                {
+                    b.Navigation("Roles");
                 });
 #pragma warning restore 612, 618
         }

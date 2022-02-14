@@ -22,18 +22,15 @@ namespace CarRentalApp.Models.DAOs
         
         public Task<User?> GetByIdAsync(Guid id)
         {
-            return _carRentalDbContext.Users.FindAsync(id).AsTask();
-        }
-
-        public Task<User?> GetByEmailAsync(string email)
-        {
             return _carRentalDbContext.Users
-                .FirstOrDefaultAsync(u => u.Email.Equals(email));
+                .Include(u => u.Roles)
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public Task<User?> GetByUsernameAsync(string username)
         {
             return _carRentalDbContext.Users
+                .Include(u => u.Roles)
                 .FirstOrDefaultAsync(u => u.Username.Equals(username));
         }
 
@@ -46,6 +43,22 @@ namespace CarRentalApp.Models.DAOs
         public Task UpdateUserAsync(User user)
         {
             _carRentalDbContext.Users.Update(user);
+            return _carRentalDbContext.SaveChangesAsync();
+        }
+        
+        public Task AssignRoleAsync(UserRole role)
+        {
+            _carRentalDbContext.UserRoles.Add(role);
+            return _carRentalDbContext.SaveChangesAsync();
+        }
+        
+        public Task AssignMultipleRolesAsync(List<UserRole> roles)
+        {
+            foreach (var role in roles)
+            {
+                _carRentalDbContext.UserRoles.Add(role);
+            }
+            
             return _carRentalDbContext.SaveChangesAsync();
         }
     }

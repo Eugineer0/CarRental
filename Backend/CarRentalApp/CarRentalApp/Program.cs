@@ -35,7 +35,6 @@ builder.Services.AddScoped<PasswordService>();
 
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<AuthenticationService>();
-builder.Services.AddScoped<RoleService>();
 
 builder.Services.AddAutoMapper(typeof(UserMapperProfile));
 

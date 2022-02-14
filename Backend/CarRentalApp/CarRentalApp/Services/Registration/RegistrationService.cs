@@ -27,5 +27,13 @@ namespace CarRentalApp.Services.Registration
 
             return await _userService.RegisterAsync(userRegistrationDTO);
         }
+
+        /// <exception cref="SharedException">User with such credentials already exists.</exception>
+        public async Task<User> FinishRegistrationAsync(UserDTO userDTO)
+        {
+            var user = await _userService.GetExistingUserAsync(userDTO);
+            await _userService.AssignClientAsync(user);
+            return user;
+        }
     }
 }

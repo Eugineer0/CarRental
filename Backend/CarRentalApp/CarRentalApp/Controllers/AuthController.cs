@@ -1,4 +1,6 @@
+using System.Linq;
 using CarRentalApp.Models.DTOs;
+using CarRentalApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using CarRentalApp.Services.Authentication;
 using CarRentalApp.Services.Registration;
@@ -12,17 +14,14 @@ namespace CarRentalApp.Controllers
     {
         private readonly AuthenticationService _authenticationService;
         private readonly RegistrationService _registrationService;
-        private readonly RoleService _roleService;
 
         public AuthController(
             AuthenticationService authenticationService,
-            RegistrationService registrationService,
-            RoleService roleService
+            RegistrationService registrationService
         )
         {
             _authenticationService = authenticationService;
             _registrationService = registrationService;
-            _roleService = roleService;
         }
 
         [HttpPost]
@@ -46,6 +45,7 @@ namespace CarRentalApp.Controllers
             return Ok(authenticationResponse);
         }
         
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenDTO model)
         {
@@ -54,25 +54,24 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody] ClientRegistrationDTO model)
+        public Task<IActionResult> RegisterClient([FromBody] ClientRegistrationDTO model)
+        {
+            return Register(model);
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> Register([FromBody] UserRegistrationDTO model)
         {
             var user = await _registrationService.RegisterAsync(model);
             var authenticationResponse = await _authenticationService.GetAccess(user);
             return Ok(authenticationResponse);
         }
-        
+
+        [Authorize(Roles = UserRole.AdminRolesString)]
         [HttpPost]
-        public async Task<IActionResult> RegisterAdmin([FromBody] UserRegistrationDTO model)
+        public async Task<IActionResult> FinishRegistration([FromBody] UserDTO model)
         {
-            var user = await _registrationService.RegisterAsync(model);
-            var authenticationResponse = await _authenticationService.GetAccess(user);
-            return Ok(authenticationResponse);
-        }
-        
-        [HttpPost]
-        public async Task<IActionResult> ProceedRegistration([FromBody] UserRegistrationDTO model)
-        {
-            var user = await _registrationService.RegisterAsync(model);
+            var user = await _registrationService.FinishRegistrationAsync(model);
             var authenticationResponse = await _authenticationService.GetAccess(user);
             return Ok(authenticationResponse);
         }

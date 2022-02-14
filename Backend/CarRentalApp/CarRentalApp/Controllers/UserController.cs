@@ -1,5 +1,6 @@
 ﻿using CarRentalApp.Models.DTOs;
 using CarRentalApp.Services.Authentication;
+using CarRentalApp.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,18 +10,18 @@ namespace CarRentalApp.Controllers;
 [Route("api/[action]")]
 public class UserController: ControllerBase
 {
-    private readonly RoleService _roleService;
+    private readonly UserService _userService;
 
-    public UserController(RoleService roleService)
+    public UserController(UserService userService)
     {
-        _roleService = roleService;
+        _userService = userService;
     }
 
-    [Authorize(Roles = "SuperAdmin")]
+    //[Authorize(Roles = "SuperAdmin")]
     [HttpPut]
     public async Task<IActionResult> ChangeRoles([FromBody] UserDTO model)
     {
-        await _roleService.UpdateRolesAsync(model);
+        await _userService.ChangeRolesAsync(model);
         return Ok();
     }
 }

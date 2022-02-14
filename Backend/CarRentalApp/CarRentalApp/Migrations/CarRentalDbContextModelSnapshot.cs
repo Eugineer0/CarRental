@@ -68,9 +68,6 @@ namespace CarRentalApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Roles")
-                        .HasColumnType("int");
-
                     b.Property<byte[]>("Salt")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
@@ -86,6 +83,41 @@ namespace CarRentalApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("CarRentalApp.Models.Entities.UserRole", b =>
+                {
+                    b.Property<int>("EntryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EntryId"), 1L, 1);
+
+                    b.Property<byte>("Role")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("EntryId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("CarRentalApp.Models.Entities.UserRole", b =>
+                {
+                    b.HasOne("CarRentalApp.Models.Entities.User", null)
+                        .WithMany("Roles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CarRentalApp.Models.Entities.User", b =>
+                {
+                    b.Navigation("Roles");
                 });
 #pragma warning restore 612, 618
         }

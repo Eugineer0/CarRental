@@ -7,7 +7,7 @@ namespace CarRentalApp.Contexts
     {
         public DbSet<User> Users { get; set; }
         
-        public DbSet<Roles> UserRoles { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 

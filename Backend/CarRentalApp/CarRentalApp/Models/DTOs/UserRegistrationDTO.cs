@@ -57,5 +57,7 @@ namespace CarRentalApp.Models.DTOs
 
         [Required]
         public DateTime DateOfBirth { get; set; }
+        
+        public virtual string? DriverLicenseSerialNumber { get; set; }
     }
 }

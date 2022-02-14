@@ -31,46 +31,49 @@ namespace CarRentalApp.Middleware
             {
                 HttpContext = httpContext
             };
-                
+
+            ActionResult result;
+            
             switch (exception.ErrorType)
             {
+                case ErrorTypes.NotEnoughData:
+                {
+                    result = new RedirectResult(exception.DeveloperInfo, false);
+                    break;
+                }
                 case ErrorTypes.AuthFailed:
                 {
-                    var result = new UnauthorizedObjectResult(exception.Message);
-                    await result.ExecuteResultAsync(actionContext);
+                    result = new UnauthorizedObjectResult(exception.Message);
                     break;
                 }
                 case ErrorTypes.AccessDenied:
                 {
-                    var result = new ForbidResult("Bearer");
-                    await result.ExecuteResultAsync(actionContext);
+                    result = new ObjectResult(exception.Message) {StatusCode = StatusCodes.Status403Forbidden};
                     break;
                 }
                 case ErrorTypes.Invalid:
                 {
-                    var result = new BadRequestObjectResult(exception.Message);
-                    await result.ExecuteResultAsync(actionContext);
+                    result = new BadRequestObjectResult(exception.Message);
                     break;
                 }
                 case ErrorTypes.NotFound:
                 {
-                    var result = new NotFoundObjectResult(exception.Message);
-                    await result.ExecuteResultAsync(actionContext);
+                    result = new NotFoundObjectResult(exception.Message);
                     break;
                 }
                 case ErrorTypes.Conflict:
                 {
-                    var result = new ConflictObjectResult(exception.Message);
-                    await result.ExecuteResultAsync(actionContext);
+                    result = new ConflictObjectResult(exception.Message);
                     break;
                 }
                 default:
                 {
-                    var result = new InternalServerErrorResult();
-                    await result.ExecuteResultAsync(actionContext);
+                    result = new InternalServerErrorResult();
                     break;
                 }
             }
+
+            await result.ExecuteResultAsync(actionContext);
         }
     }
 }

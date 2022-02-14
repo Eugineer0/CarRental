@@ -29,6 +29,11 @@ namespace CarRentalApp.Services.Identity
             _userMapper = userMapper;
             _clientRequirements = clientRequirements.Value;
         }
+        
+        public Task<bool> CheckIfExistsAsync(UserRegistrationDTO userRegistrationDTO)
+        {
+            return _userDAO.CheckUniquenessAsync(userRegistrationDTO.Username, userRegistrationDTO.Email);
+        }
 
         /// <exception cref="SharedException">User not found by <paramref name="userDTO"/>.</exception>
         public async Task<User> GetExistingUserAsync(UserLoginDTO userLoginDTO)
@@ -62,34 +67,43 @@ namespace CarRentalApp.Services.Identity
             return user;
         }
 
-        /// <exception cref="SharedException">Incorrect username or password.</exception>
+        /// <exception cref="SharedException">Inconsistent user role.</exception>
         public void ValidateClient(User user, UserLoginDTO userLoginDTO)
         {
-            if (!user.Roles.Intersect(User.ClientRoles).Any())
+            ValidatePassword(user, userLoginDTO);
+            
+            if (!user.Roles.Select(role => role.Role).Intersect(UserRole.ClientRoles).Any())
             {
+                if (!user.Roles.Select(role => role.Role).Intersect(UserRole.AdminRoles).Any())
+                {
+                    throw new SharedException(
+                        ErrorTypes.AccessDenied,
+                        "Wait for your account to be approved",
+                        "User does not have client role"
+                    );
+                }
+
                 throw new SharedException(
                     ErrorTypes.AccessDenied,
-                    "Wait for your account to be approved",
-                    "User does not have client role"
+                    "Additional info required",
+                    "!!!SPECIFY REDIRECT URL!!!"
                 );
             }
-
-            ValidatePassword(user, userLoginDTO);
         }
 
-        /// <exception cref="SharedException">Incorrect username or password.</exception>
+        /// <exception cref="SharedException">Inconsistent user role.</exception>
         public void ValidateAdmin(User user, UserLoginDTO userLoginDTO)
         {
-            if (!user.Roles.Intersect(User.AdminRoles).Any())
+            ValidatePassword(user, userLoginDTO);
+            
+            if (!user.Roles.Select(role => role.Role).Intersect(UserRole.AdminRoles).Any())
             {
                 throw new SharedException(
                     ErrorTypes.AccessDenied,
-                    "User does not have permission",
+                    "You do not have permission",
                     "User does not have admin role"
                 );
             }
-
-            ValidatePassword(user, userLoginDTO);
         }
 
         /// <exception cref="SharedException"><paramref name="token"/> subject not found.</exception>
@@ -108,16 +122,30 @@ namespace CarRentalApp.Services.Identity
             return user;
         }
 
-        public async Task<User> RegisterAsync(UserRegistrationDTO userRegistrationDTO)
+        public async Task<User> RegisterAsync(UserRegistrationDTO clientRegistrationDTO)
         {
-            var user = CreateFromDTO(userRegistrationDTO);
+            var user = CreateFromDTO(clientRegistrationDTO);
 
             await _userDAO.InsertUserAsync(user);
 
             return user;
         }
 
-        public Task UpdateRolesAsync(User user, UserDTO userDTO)
+        public async Task ChangeRolesAsync(UserDTO userDTO)
+        {
+            var user = await GetExistingUserAsync(userDTO);
+
+            await UpdateRolesAsync(user, userDTO);
+        }
+
+        public Task AssignClientAsync(User user)
+        {
+            user.Roles.Add(new UserRole(){Role = Roles.Client});
+            
+            return _userDAO.UpdateUserAsync(user);
+        }
+
+        private Task UpdateRolesAsync(User user, UserDTO userDTO)
         {
             if (userDTO.Roles.Count < 1)
             {
@@ -128,7 +156,7 @@ namespace CarRentalApp.Services.Identity
                 );
             }
 
-            if (user.Roles.SequenceEqual(userDTO.Roles))
+            if (user.Roles.Select(role => role.Role).SequenceEqual(userDTO.Roles))
             {
                 throw new SharedException(
                     ErrorTypes.Conflict,
@@ -137,7 +165,7 @@ namespace CarRentalApp.Services.Identity
                 );
             }
 
-            if (user.Roles.Intersect(User.ClientRoles).Any())
+            if (userDTO.Roles.Intersect(UserRole.ClientRoles).Any())
             {
                 ValidateAge(user.DateOfBirth);
 
@@ -151,12 +179,9 @@ namespace CarRentalApp.Services.Identity
                 }
             }
 
-            return _userDAO.UpdateUserAsync(user);
-        }
+            user.Roles = userDTO.Roles.Select(role => new UserRole() {Role = role}).ToList();
 
-        public Task<bool> CheckIfExistsAsync(UserRegistrationDTO userRegistrationDTO)
-        {
-            return _userDAO.CheckUniquenessAsync(userRegistrationDTO.Username, userRegistrationDTO.Email);
+            return _userDAO.UpdateUserAsync(user);
         }
 
         private User CreateFromDTO(UserRegistrationDTO userRegistrationDTO)
@@ -166,7 +191,7 @@ namespace CarRentalApp.Services.Identity
             user.Salt = _passwordService.GenerateSalt();
             user.HashedPassword = _passwordService.DigestPassword(userRegistrationDTO.Password, user.Salt);
 
-            user.Roles = new List<Roles>() {Roles.None};
+            user.Roles = new List<UserRole>() {new UserRole() {Role = Roles.None}};
 
             return user;
         }

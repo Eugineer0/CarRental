@@ -10,5 +10,5 @@ public class ClientRegistrationDTO: UserRegistrationDTO
         ErrorMessage = "Incorrect format: The {0} value must consist of"
                        + " 1 digit leading 2 capitals followed by 6 digits"
     )]
-    public string? DriverLicenseSerialNumber { get; set; }
+    public override string DriverLicenseSerialNumber { get; set; }
 }
