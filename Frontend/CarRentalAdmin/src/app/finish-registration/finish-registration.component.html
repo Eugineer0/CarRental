@@ -1,0 +1,39 @@
+<div class="row">
+  <div class="col-md-5  mx-auto">
+    <div class=" card rounded-1">
+      <div class="card-header">
+        <h3>Finish registration by entering you driver license serial number</h3>
+      </div>
+      <div class="card-body">
+        <div *ngIf="authFailed" class="alert alert-danger">
+          {{authFailedMessage}}
+        </div>
+        <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+          <div class="form-group">
+            <label class="mb-0" for="serialNumber">Driver License</label>
+            <input
+              #serialNumberField="ngModel"
+              required
+              maxlength="25"
+              type="text"
+              name="serialNumber"
+              class="form-control"
+              id="serialNumber"
+              (ngModelChange)="resetAuthStatus()"
+              [(ngModel)]="admin.username"
+            >
+            <div
+              *ngIf="usernameField.invalid && (usernameField.dirty || usernameField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="usernameField.errors?.['required']">
+                Username is required.
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success" [disabled]="!loginForm.form.valid">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

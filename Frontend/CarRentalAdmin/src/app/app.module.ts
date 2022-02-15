@@ -16,6 +16,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { SecretComponent } from './secret/secret.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
+import { FinishRegistrationComponent } from './finish-registration/finish-registration.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { RegisterComponent } from './register/register.component';
     WelcomeComponent,
     SecretComponent,
     FieldConstraintDirective,
-    RegisterComponent
+    RegisterComponent,
+    FinishRegistrationComponent
   ],
   imports: [
     AppRoutingModule,

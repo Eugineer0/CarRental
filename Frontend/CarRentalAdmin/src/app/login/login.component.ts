@@ -5,6 +5,7 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { LoginDTO } from '../_models/loginDTO';
 
 import { AuthService } from '../_services/auth.service';
+import { query } from "@angular/animations";
 
 @Component({
   selector: 'app-login',
@@ -64,7 +65,9 @@ export class LoginComponent implements OnInit {
   }
 
   private handleError(error: HttpErrorResponse): void {
-    if (error.status > 499) {
+    if (error.status === 308) {
+      this.router.navigate(['welcome'], {queryParams: {token: error.error}});
+    } else if (error.status > 499) {
       this.authFailedMessage = 'Something went wrong';
     } else {
       this.authFailedMessage = error.error;

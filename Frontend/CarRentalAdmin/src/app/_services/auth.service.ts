@@ -12,7 +12,6 @@ import { RegisterDTO } from "../_models/registerDTO";
 
 @Injectable()
 export class AuthService {
-  private loggedIn: boolean = false
 
   constructor(
     private http: HttpClient,
@@ -21,11 +20,11 @@ export class AuthService {
   }
 
   public isLoggedIn(): boolean {
-    return this.loggedIn;
+    return localStorage.hasOwnProperty('access_token') && localStorage.hasOwnProperty('refresh_token');
   }
 
   public isLoggedOut(): boolean {
-    return !this.loggedIn;
+    return !this.isLoggedIn();
   }
 
   public register(admin: RegisterDTO): Observable<any> {
@@ -74,11 +73,9 @@ export class AuthService {
 
   public closeSession(): void {
     this.tokenService.removeTokens();
-    this.loggedIn = false;
   }
 
   private setSession(authResult: AuthResponse): void {
     this.tokenService.setTokens(authResult);
-    this.loggedIn = true;
   }
 }

@@ -1,0 +1,110 @@
+<div class="row">
+  <div class="col-md-5  mx-auto">
+    <div class=" card rounded-1">
+      <div class="card-header">
+        <h3>Register</h3>
+      </div>
+      <div class="card-body">
+        <div *ngIf="registerFailed" class="alert alert-danger">
+          {{registerFailedMessage}}
+        </div>
+        <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+          <div class="form-group">
+                <label class="mb-0 mt-2" for="emailId">Email</label>
+                <input
+                  #emailField="ngModel"
+                  required
+                  minlength="3"
+                  maxlength="256"
+                  type="text"
+                  name="email"
+                  class="form-control"
+                  id="emailId"
+                  (ngModelChange)="resetRegisterStatus()"
+                  [(ngModel)]="admin.email"
+                >
+                <div
+                  *ngIf="emailField.invalid && (emailField.dirty || emailField.touched)"
+                  class="alert alert-danger"
+                >
+                  <div *ngIf="emailField.errors?.['required']">
+                    Email is required.
+                  </div>
+                  <div *ngIf="emailField.errors?.['minlength']">
+                    Email must be at least 3 characters long.
+                  </div>
+                  <div *ngIf="emailField.errors?.['maxlength']">
+                    Email must be maximum 256 characters long.
+                  </div>
+                  <div *ngIf="passwordField.errors?.['fieldConstraint']">
+                    Incorrect email format
+                  </div>
+                </div>
+            <label class="mb-0 mt-2" for="usernameId">Username</label>
+            <input
+              #usernameField="ngModel"
+              required
+              maxlength="25"
+              type="text"
+              name="username"
+              class="form-control"
+              id="usernameId"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="admin.username"
+            >
+            <div
+              *ngIf="usernameField.invalid && (usernameField.dirty || usernameField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="usernameField.errors?.['required']">
+                Username is required.
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="passwordId">Password</label>
+            <div class="input-group mb-3">
+              <input
+                #passwordField="ngModel"
+                required
+                minlength="5"
+                maxlength="25"
+                [type]="getPasswordType()"
+                appFieldConstraint="(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])"
+                name="password"
+                class="form-control"
+                id="passwordId"
+                aria-describedby="button-addon2"
+                (ngModelChange)="resetRegisterStatus()"
+                [(ngModel)]="admin.password"
+              >
+              <button
+                type="button"
+                class="btn btn-light"
+                id="button-addon2"
+                (click)="changePasswordType()">
+                {{getButtonText()}}
+              </button>
+              <div
+                *ngIf="passwordField.invalid && (passwordField.dirty || passwordField.touched)"
+                class="alert alert-danger"
+              >
+                <div *ngIf="passwordField.errors?.['required']">
+                  Password is required.
+                </div>
+                <div *ngIf="passwordField.errors?.['minlength']">
+                  Password must be at least 5 characters long.
+                </div>
+                <div *ngIf="passwordField.errors?.['fieldConstraint']">
+                  Password must contain at least one digit, one lowercase and one uppercase.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success" [disabled]="!registerForm.form.valid">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
