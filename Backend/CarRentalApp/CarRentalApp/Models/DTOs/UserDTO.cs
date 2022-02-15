@@ -5,20 +5,20 @@ namespace CarRentalApp.Models.DTOs;
 
 public class UserDTO
 {
-    public string Email { get; set; }
+    public string? Email { get; set; }
 
     [Required]  
     public string Username { get; set; }
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
-    public string Surname { get; set; }
+    public string? Surname { get; set; }
 
     public DateTime DateOfBirth { get; set; }
     
-    public string PassportNumber { get; set; }
+    public string? PassportNumber { get; set; }
     
-    [Required]  
+    [Required]
     public ICollection<Roles> Roles { get; set; }
     
     public string? DriverLicenseSerialNumber { get; set; }

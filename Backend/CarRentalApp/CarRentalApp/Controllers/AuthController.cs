@@ -1,4 +1,3 @@
-using System.Linq;
 using CarRentalApp.Models.DTOs;
 using CarRentalApp.Models.Entities;
 using Microsoft.AspNetCore.Mvc;

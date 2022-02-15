@@ -5,28 +5,32 @@ using CarRentalApp.Models.DAOs;
 using CarRentalApp.Models.DTOs;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Services.Authentication;
+using CarRentalApp.Services.Token;
 using Microsoft.Extensions.Options;
 
 namespace CarRentalApp.Services.Identity
 {
     public class UserService
     {
-        private readonly UserDAO _userDAO;
         private readonly PasswordService _passwordService;
-        private readonly ClientRequirements _clientRequirements;
+        private readonly TokenService _tokenService;
 
         private readonly IMapper _userMapper;
+        
+        private readonly UserDAO _userDAO;
+
+        private readonly ClientRequirements _clientRequirements;
 
         public UserService(
             UserDAO userDAO,
             PasswordService passwordService,
             IMapper userMapper,
-            IOptions<ClientRequirements> clientRequirements
-        )
+            IOptions<ClientRequirements> clientRequirements, TokenService tokenService)
         {
             _userDAO = userDAO;
             _passwordService = passwordService;
             _userMapper = userMapper;
+            _tokenService = tokenService;
             _clientRequirements = clientRequirements.Value;
         }
         
@@ -83,10 +87,12 @@ namespace CarRentalApp.Services.Identity
                     );
                 }
 
+                var token = _tokenService.GenerateAccessToken(user);
+
                 throw new SharedException(
-                    ErrorTypes.AccessDenied,
+                    ErrorTypes.NotEnoughData,
                     "Additional info required",
-                    "!!!SPECIFY REDIRECT URL!!!"
+                    token
                 );
             }
         }

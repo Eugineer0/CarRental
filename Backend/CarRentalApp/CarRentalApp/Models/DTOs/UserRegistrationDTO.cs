@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
 using CarRentalApp.ValidationAttributes;
 
 namespace CarRentalApp.Models.DTOs
@@ -57,7 +59,8 @@ namespace CarRentalApp.Models.DTOs
 
         [Required]
         public DateTime DateOfBirth { get; set; }
-        
+
+        [ForbidFillIn(ErrorMessage = "Invalid input: The {0} must not be specified")]
         public virtual string? DriverLicenseSerialNumber { get; set; }
     }
 }

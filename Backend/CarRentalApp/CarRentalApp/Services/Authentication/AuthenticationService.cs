@@ -1,6 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using CarRentalApp.Exceptions;
-using CarRentalApp.Models.DTOs;
+﻿using CarRentalApp.Models.DTOs;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Services.Identity;
 using CarRentalApp.Services.Token;
@@ -52,17 +50,15 @@ namespace CarRentalApp.Services.Authentication
         public async Task<AuthenticationDTO> GetAccess(User user)
         {
             var accessToken = _tokenService.GenerateAccessToken(user);
-            var accessTokenString = new JwtSecurityTokenHandler().WriteToken(accessToken);
 
             var refreshToken = _tokenService.GenerateRefreshToken(user);
-            var refreshTokenString = new JwtSecurityTokenHandler().WriteToken(refreshToken);
 
-            await _tokenService.StoreRefreshTokenAsync(refreshTokenString, user);
+            await _tokenService.StoreRefreshTokenAsync(refreshToken, user);
 
             return new AuthenticationDTO()
             {
-                AccessToken = accessTokenString,
-                RefreshToken = refreshTokenString,
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
             };
         }
     }

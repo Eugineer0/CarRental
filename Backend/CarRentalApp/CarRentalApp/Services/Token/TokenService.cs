@@ -36,7 +36,7 @@ namespace CarRentalApp.Services.Token
             return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtParams.Secret));
         }
 
-        public JwtSecurityToken GenerateAccessToken(User user)
+        public string GenerateAccessToken(User user)
         {
             var accessJwtGenerationParams = _accessJwtConfig.GenerationParameters;
 
@@ -47,16 +47,18 @@ namespace CarRentalApp.Services.Token
                 new Claim("role", user.Roles.ToString())
             };
 
-            return new JwtSecurityToken(
+            var accessToken = new JwtSecurityToken(
                 issuer: accessJwtGenerationParams.Issuer,
                 audience: accessJwtGenerationParams.Audience,
                 claims: jwtClaims,
                 expires: DateTimeOffset.Now.UtcDateTime.AddSeconds(accessJwtGenerationParams.LifeTimeSeconds),
                 signingCredentials: GetJWTCredentials(accessJwtGenerationParams)
             );
+            
+            return new JwtSecurityTokenHandler().WriteToken(accessToken);
         }
 
-        public JwtSecurityToken GenerateRefreshToken(User user)
+        public string GenerateRefreshToken(User user)
         {
             var refreshJwtGenerationParams = _refreshJwtConfig.GenerationParameters;
 
@@ -65,11 +67,13 @@ namespace CarRentalApp.Services.Token
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             };
 
-            return new JwtSecurityToken(
+            var refreshToken =  new JwtSecurityToken(
                 claims: jwtClaims,
                 expires: DateTimeOffset.Now.UtcDateTime.AddSeconds(refreshJwtGenerationParams.LifeTimeSeconds),
                 signingCredentials: GetJWTCredentials(refreshJwtGenerationParams)
             );
+            
+            return new JwtSecurityTokenHandler().WriteToken(refreshToken);
         }
 
         /// <exception cref="SharedException">Token not found by <paramref name="refreshTokenDto"/>.</exception>

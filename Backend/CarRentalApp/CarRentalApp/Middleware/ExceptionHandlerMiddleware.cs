@@ -21,11 +21,11 @@ namespace CarRentalApp.Middleware
             }
             catch (SharedException exception)
             {
-                await HandleGeneralExceptionAsync(httpContext, exception);
+                await HandleSharedExceptionAsync(httpContext, exception);
             }
         }
 
-        private async Task HandleGeneralExceptionAsync(HttpContext httpContext, SharedException exception)
+        private async Task HandleSharedExceptionAsync(HttpContext httpContext, SharedException exception)
         {
             var actionContext = new ActionContext()
             {
@@ -38,7 +38,10 @@ namespace CarRentalApp.Middleware
             {
                 case ErrorTypes.NotEnoughData:
                 {
-                    result = new RedirectResult(exception.DeveloperInfo, false);
+                    result = new ObjectResult(exception.DeveloperInfo)
+                    {
+                        StatusCode = StatusCodes.Status308PermanentRedirect,
+                    };
                     break;
                 }
                 case ErrorTypes.AuthFailed:
@@ -72,7 +75,7 @@ namespace CarRentalApp.Middleware
                     break;
                 }
             }
-
+            
             await result.ExecuteResultAsync(actionContext);
         }
     }

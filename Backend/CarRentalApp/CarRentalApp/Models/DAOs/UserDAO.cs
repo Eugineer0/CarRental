@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using CarRentalApp.Contexts;
+﻿using CarRentalApp.Contexts;
 using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
