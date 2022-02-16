@@ -8,7 +8,7 @@
         <div *ngIf="authFailed" class="alert alert-danger">
           {{authFailedMessage}}
         </div>
-        <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+        <form (ngSubmit)="onSubmit(); loginForm.form.markAsPristine()" #loginForm="ngForm">
           <div class="form-group">
             <label class="mb-0" for="username">Username</label>
             <input
@@ -31,14 +31,11 @@
               </div>
             </div>
             <label class="mb-0 mt-2" for="password">Password</label>
-            <div class="input-group mb-3">
+            <div class="input-group">
               <input
                 #passwordField="ngModel"
                 required
-                minlength="5"
-                maxlength="25"
                 [type]="getPasswordType()"
-                appFieldConstraint="(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])"
                 name="password"
                 class="form-control"
                 id="password"
@@ -48,30 +45,27 @@
               >
               <button
                 type="button"
-                class="btn btn-light"
+                class="btn btn-light col-2"
                 id="button-addon2"
                 (click)="changePasswordType()"
               >
                 {{getButtonText()}}
               </button>
-              <div
-                *ngIf="passwordField.invalid && (passwordField.dirty || passwordField.touched)"
-                class="alert alert-danger"
-              >
-                <div *ngIf="passwordField.errors?.['required']">
-                  Password is required.
-                </div>
-                <div *ngIf="passwordField.errors?.['minlength']">
-                  Password must be at least 5 characters long.
-                </div>
-                <div *ngIf="passwordField.errors?.['fieldConstraint']">
-                  Password must contain at least one digit, one lowercase and one uppercase.
-                </div>
+            </div>
+            <div
+              *ngIf="passwordField.invalid && (passwordField.dirty || passwordField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="passwordField.errors?.['required']">
+                Password is required.
               </div>
             </div>
           </div>
-
-          <button type="submit" class="btn btn-success" [disabled]="!loginForm.form.valid">Login</button>
+          <button
+            type="submit"
+            class="btn btn-success"
+            [disabled]="loginForm.form.invalid || loginForm.form.pristine"
+          >Login</button>
         </form>
       </div>
     </div>

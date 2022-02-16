@@ -2,10 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from "@angular/common/http";
 
-import { LoginDTO } from '../_models/loginDTO';
+import { LoginDTO } from '../_models/login';
 
 import { AuthService } from '../_services/auth.service';
-import { query } from "@angular/animations";
 
 @Component({
   selector: 'app-login',
@@ -21,7 +20,6 @@ export class LoginComponent implements OnInit {
   public authFailed: boolean = false;
   public authFailedMessage: string = '';
   private isVisiblePassword: boolean = false;
-  private returnUrl: string = '/';
 
 
   constructor(
@@ -32,7 +30,6 @@ export class LoginComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '';
   }
 
   public resetAuthStatus(): void {
@@ -53,10 +50,12 @@ export class LoginComponent implements OnInit {
   }
 
   public onSubmit(): void {
+    const returnUrl: string = this.route.snapshot.queryParams['returnUrl'];
+
     this.authService.login(this.admin)
       .subscribe(
         _ => {
-          this.router.navigateByUrl(this.returnUrl);
+          this.router.navigateByUrl(returnUrl);
         },
         error => {
           this.handleError(error);
@@ -66,11 +65,11 @@ export class LoginComponent implements OnInit {
 
   private handleError(error: HttpErrorResponse): void {
     if (error.status === 308) {
-      this.router.navigate(['welcome'], {queryParams: {token: error.error}});
+      this.router.navigate(['completeRegistration'], {queryParams: {token: error.error}});
     } else if (error.status > 499) {
       this.authFailedMessage = 'Something went wrong';
     } else {
-      this.authFailedMessage = error.error;
+      this.authFailedMessage = error.error || error.message;
     }
 
     this.authFailed = true;

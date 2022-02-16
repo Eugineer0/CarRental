@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from "@angular/common/http";
+import { Router } from "@angular/router";
 
 import { AuthService } from "../_services/auth.service";
 
-import { RegisterDTO } from "../_models/registerDTO";
+import { RegisterDTO } from "../_models/register";
 
 @Component({
   selector: 'app-register',
@@ -22,18 +23,22 @@ export class RegisterComponent implements OnInit {
   };
 
   public registerFailed: boolean = false;
-  public registerFailedMessage: string = 'something went wrong';
+  public registerFailedMessage: string = '';
   private isVisiblePassword: boolean = false;
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {
   }
 
   ngOnInit(): void {
   }
 
   public resetRegisterStatus(): void {
+
+    this.registerFailedMessage = '';
     this.registerFailed = false;
-    this.registerFailedMessage = 'something went wrong';
   }
 
   public changePasswordType(): void {
@@ -51,6 +56,9 @@ export class RegisterComponent implements OnInit {
   public onSubmit(): void {
     this.authService.register(this.admin)
       .subscribe(
+        _ => {
+          this.router.navigateByUrl('secret')
+        },
         error => {
           this.handleError(error)
         }
@@ -58,21 +66,12 @@ export class RegisterComponent implements OnInit {
   }
 
   private handleError(error: HttpErrorResponse): void {
-    switch (error.status) {
-      case 401: {
-        this.registerFailedMessage = 'Incorrect username or password';
-        break;
-      }
-      case 504: {
-        this.registerFailedMessage = 'Cannot connect to the server';
-        break;
-      }
-      default: {
-        break;
-      }
+    if (error.status > 499) {
+      this.registerFailedMessage = 'Something went wrong';
+    } else {
+      this.registerFailedMessage = error.error;
     }
 
     this.registerFailed = true;
   }
-
 }

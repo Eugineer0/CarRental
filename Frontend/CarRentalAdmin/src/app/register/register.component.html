@@ -8,47 +8,49 @@
         <div *ngIf="registerFailed" class="alert alert-danger">
           {{registerFailedMessage}}
         </div>
-        <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+        <form (ngSubmit)="onSubmit(); registerForm.form.markAsPristine()" #registerForm="ngForm">
           <div class="form-group">
-                <label class="mb-0 mt-2" for="emailId">Email</label>
-                <input
-                  #emailField="ngModel"
-                  required
-                  minlength="3"
-                  maxlength="256"
-                  type="text"
-                  name="email"
-                  class="form-control"
-                  id="emailId"
-                  (ngModelChange)="resetRegisterStatus()"
-                  [(ngModel)]="admin.email"
-                >
-                <div
-                  *ngIf="emailField.invalid && (emailField.dirty || emailField.touched)"
-                  class="alert alert-danger"
-                >
-                  <div *ngIf="emailField.errors?.['required']">
-                    Email is required.
-                  </div>
-                  <div *ngIf="emailField.errors?.['minlength']">
-                    Email must be at least 3 characters long.
-                  </div>
-                  <div *ngIf="emailField.errors?.['maxlength']">
-                    Email must be maximum 256 characters long.
-                  </div>
-                  <div *ngIf="passwordField.errors?.['fieldConstraint']">
-                    Incorrect email format
-                  </div>
-                </div>
-            <label class="mb-0 mt-2" for="usernameId">Username</label>
+            <label class="mb-0 mt-2" for="email">Email</label>
+            <input
+              #emailField="ngModel"
+              required
+              minlength="3"
+              maxlength="254"
+              appFieldConstraint=".*@.+"
+              type="text"
+              name="email"
+              class="form-control"
+              id="email"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="admin.email"
+            >
+            <div
+              *ngIf="emailField.invalid && (emailField.dirty || emailField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="emailField.errors?.['required']">
+                Email is required.
+              </div>
+              <div *ngIf="emailField.errors?.['minlength']">
+                Email must be at least 3 characters long.
+              </div>
+              <div *ngIf="emailField.errors?.['maxlength']">
+                Email must be maximum 256 characters long.
+              </div>
+              <div *ngIf="passwordField.errors?.['fieldConstraint']">
+                Incorrect email format
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="username">Username</label>
             <input
               #usernameField="ngModel"
               required
               maxlength="25"
               type="text"
+              appFieldConstraint="^\w*$"
               name="username"
               class="form-control"
-              id="usernameId"
+              id="username"
               (ngModelChange)="resetRegisterStatus()"
               [(ngModel)]="admin.username"
             >
@@ -59,9 +61,84 @@
               <div *ngIf="usernameField.errors?.['required']">
                 Username is required.
               </div>
+              <div *ngIf="usernameField.errors?.['fieldConstraint']">
+                Please, choose latin letters, digits and underscore for username.
+              </div>
             </div>
-            <label class="mb-0 mt-2" for="passwordId">Password</label>
-            <div class="input-group mb-3">
+            <label class="mb-0 mt-2" for="name">Name</label>
+            <input
+              #nameField="ngModel"
+              required
+              maxlength="64"
+              type="text"
+              appFieldConstraint="^[A-Z]{1}[a-z]*(-[A-Z])?[a-z]*$"
+              name="name"
+              class="form-control"
+              id="name"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="admin.name"
+            >
+            <div
+              *ngIf="nameField.invalid && (nameField.dirty || nameField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="nameField.errors?.['required']">
+                Name is required.
+              </div>
+              <div *ngIf="nameField.errors?.['fieldConstraint']">
+                Name must start from capital and contain only latin letters or hyphen in composite variant.
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="surname">Surname</label>
+            <input
+              #surnameField="ngModel"
+              required
+              maxlength="64"
+              type="text"
+              appFieldConstraint="^[A-Z]{1}[a-z]*((-[A-Z])?[a-z]*)*$"
+              name="surname"
+              class="form-control"
+              id="surname"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="admin.surname"
+            >
+            <div
+              *ngIf="surnameField.invalid && (surnameField.dirty || surnameField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="surnameField.errors?.['required']">
+                Surname is required.
+              </div>
+              <div *ngIf="surnameField.errors?.['fieldConstraint']">
+                Surname must start from capital and contain only latin letters or hyphen in composite variant.
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="passportNumber">Passport number</label>
+            <input
+              #passportNumberField="ngModel"
+              required
+              maxlength="9"
+              type="text"
+              appFieldConstraint="^[A-Z]{2}[0-9]{7}$"
+              name="passportNumber"
+              class="form-control"
+              id="passportNumber"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="admin.passportNumber"
+            >
+            <div
+              *ngIf="passportNumberField.invalid && (passportNumberField.dirty || passportNumberField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="passportNumberField.errors?.['required']">
+                Passport number is required.
+              </div>
+              <div *ngIf="passportNumberField.errors?.['fieldConstraint']">
+                Passport number must consist of 2 capitals leading 7 digits.
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="password">Password</label>
+            <div class="input-group">
               <input
                 #passwordField="ngModel"
                 required
@@ -71,36 +148,40 @@
                 appFieldConstraint="(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])"
                 name="password"
                 class="form-control"
-                id="passwordId"
+                id="password"
                 aria-describedby="button-addon2"
                 (ngModelChange)="resetRegisterStatus()"
                 [(ngModel)]="admin.password"
               >
               <button
                 type="button"
-                class="btn btn-light"
+                class="btn btn-light col-2"
                 id="button-addon2"
-                (click)="changePasswordType()">
+                (click)="changePasswordType()"
+              >
                 {{getButtonText()}}
               </button>
-              <div
-                *ngIf="passwordField.invalid && (passwordField.dirty || passwordField.touched)"
-                class="alert alert-danger"
-              >
-                <div *ngIf="passwordField.errors?.['required']">
-                  Password is required.
-                </div>
-                <div *ngIf="passwordField.errors?.['minlength']">
-                  Password must be at least 5 characters long.
-                </div>
-                <div *ngIf="passwordField.errors?.['fieldConstraint']">
-                  Password must contain at least one digit, one lowercase and one uppercase.
-                </div>
+            </div>
+            <div
+              *ngIf="passwordField.invalid && (passwordField.dirty || passwordField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="passwordField.errors?.['required']">
+                Password is required.
+              </div>
+              <div *ngIf="passwordField.errors?.['minlength']">
+                Password must be at least 5 characters long.
+              </div>
+              <div *ngIf="passwordField.errors?.['fieldConstraint']">
+                Password must contain at least 1 digit, 1 lowercase and 1 uppercase.
               </div>
             </div>
           </div>
-
-          <button type="submit" class="btn btn-success" [disabled]="!registerForm.form.valid">Login</button>
+          <button
+            type="submit"
+            class="btn btn-success"
+            [disabled]="registerForm.form.invalid || registerForm.form.pristine"
+          >Register</button>
         </form>
       </div>
     </div>

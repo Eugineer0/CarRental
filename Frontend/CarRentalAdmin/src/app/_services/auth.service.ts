@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { LoginDTO } from '../_models/loginDTO';
+import { LoginDTO } from '../_models/login';
+import { RegisterDTO } from "../_models/register";
+import { CompleteRegistrationDTO } from "../_models/complete-registration";
 import { AuthResponse } from '../_models/auth-responce';
 import { RefreshTokenRequest } from "../_models/refresh-token-request";
 
 import { TokenService } from "./token.service";
-import { RegisterDTO } from "../_models/registerDTO";
 
 @Injectable()
 export class AuthService {
@@ -28,7 +29,18 @@ export class AuthService {
   }
 
   public register(admin: RegisterDTO): Observable<any> {
-    return this.http.post<AuthResponse>('/api/register', admin)
+    return this.http.post<AuthResponse>('/api/auth/register', admin)
+      .pipe(
+        tap(
+          response => {
+            this.setSession(response);
+          }
+        )
+      )
+  }
+
+  public completeRegistration(admin: CompleteRegistrationDTO): Observable<any> {
+    return this.http.post<AuthResponse>('/api/auth/completeRegistration', admin)
       .pipe(
         tap(
           response => {
@@ -39,7 +51,7 @@ export class AuthService {
   }
 
   public login(admin: LoginDTO): Observable<any> {
-    return this.http.post<AuthResponse>('/api/login', admin)
+    return this.http.post<AuthResponse>('/api/auth/login', admin)
       .pipe(
         tap(
           response => {
@@ -50,7 +62,7 @@ export class AuthService {
   }
 
   public logout(refreshToken: RefreshTokenRequest): Observable<any> {
-    return this.http.post<RefreshTokenRequest>('/api/logout', refreshToken)
+    return this.http.post<RefreshTokenRequest>('/api/auth/logout', refreshToken)
       .pipe(
         tap(
           _ => {
@@ -61,7 +73,7 @@ export class AuthService {
   }
 
   public refresh(refreshToken: RefreshTokenRequest): Observable<any> {
-    return this.http.post<AuthResponse>('/api/refresh', refreshToken)
+    return this.http.post<AuthResponse>('/api/auth/refresh', refreshToken)
       .pipe(
         tap(
           response => {
