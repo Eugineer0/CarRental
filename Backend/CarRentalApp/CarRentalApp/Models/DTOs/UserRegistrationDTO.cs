@@ -16,8 +16,13 @@ namespace CarRentalApp.Models.DTOs
 
         [Required]
         [StringLength(
-            25,
-            ErrorMessage = "Incorrect format: The {0} value cannot exceed {1} characters"
+            maximumLength: 25,
+            MinimumLength = 1,
+            ErrorMessage = "Incorrect format: The {0} value must have length between {2} and {1} characters"
+        )]
+        [RegularExpression(
+            "\\w*",
+            ErrorMessage = "Incorrect format: The {0} value must contain only latin letters, digits and underscore"
         )]
         public string Username { get; set; }
 
@@ -35,16 +40,28 @@ namespace CarRentalApp.Models.DTOs
         public string Password { get; set; }
 
         [Required]
+        [StringLength(
+            maximumLength: 64,
+            MinimumLength = 1,
+            ErrorMessage = "Incorrect format: The {0} value must have length between {2} and {1} characters"
+        )]
         [RegularExpression(
-            "[A-Z]{1}[a-z]{0,63}",
-            ErrorMessage = "Incorrect format: The {0} value must start from capital and contain only latin letters"
+            "[A-Z]{1}[a-z]*((-[A-Z])?[a-z]*)*",
+            ErrorMessage = "Incorrect format: The {0} value must start from capital"
+                + " and contain only latin letters or hyphen, followed by capital"
         )]
         public string Name { get; set; }
 
         [Required]
+        [StringLength(
+            maximumLength: 64,
+            MinimumLength = 1,
+            ErrorMessage = "Incorrect format: The {0} value must have length between {2} and {1} characters"
+        )]
         [RegularExpression(
-            "[A-Z]{1}[a-z]{0,63}",
-            ErrorMessage = "Incorrect format: The {0} value must start from capital and contain only latin letters"
+            "[A-Z]{1}[a-z]*((-[A-Z])?[a-z]*)*",
+            ErrorMessage = "Incorrect format: The {0} value must start from capital"
+                + " and contain only latin letters or hyphen, followed by capital"
         )]
         public string Surname { get; set; }
 

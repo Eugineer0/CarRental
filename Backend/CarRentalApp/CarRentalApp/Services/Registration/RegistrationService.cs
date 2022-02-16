@@ -24,7 +24,7 @@ namespace CarRentalApp.Services.Registration
             {
                 throw new SharedException(
                     ErrorTypes.Conflict,
-                    "User already exists"
+                    "User with such email or username already exists"
                 );
             }
 
