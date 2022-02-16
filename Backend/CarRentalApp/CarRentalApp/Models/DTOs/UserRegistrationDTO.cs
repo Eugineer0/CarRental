@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
 using CarRentalApp.ValidationAttributes;
 
 namespace CarRentalApp.Models.DTOs
 {
-    public class UserRegistrationDTO
+    public class UserRegistrationDTO: IContainUniqueUsername
     {
         [Required]
         [StringLength(
@@ -38,14 +36,14 @@ namespace CarRentalApp.Models.DTOs
 
         [Required]
         [RegularExpression(
-            "[A-Z]{1}[a-z]{0,40}",
+            "[A-Z]{1}[a-z]{0,63}",
             ErrorMessage = "Incorrect format: The {0} value must start from capital and contain only latin letters"
         )]
         public string Name { get; set; }
 
         [Required]
         [RegularExpression(
-            "[A-Z]{1}[a-z]{0,40}",
+            "[A-Z]{1}[a-z]{0,63}",
             ErrorMessage = "Incorrect format: The {0} value must start from capital and contain only latin letters"
         )]
         public string Surname { get; set; }

@@ -2,7 +2,7 @@
 
 namespace CarRentalApp.Models.DTOs
 {
-    public class UserLoginDTO
+    public class UserLoginDTO: IContainUniqueUsername
     {
         [Required]
         public string Username { get; set; }

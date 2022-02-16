@@ -31,8 +31,8 @@ namespace CarRentalApp.Migrations
                     Username = table.Column<string>(type: "nvarchar(25)", nullable: false),
                     HashedPassword = table.Column<byte[]>(type: "binary(32)", nullable: false),
                     Salt = table.Column<byte[]>(type: "binary(32)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(25)", nullable: false),
-                    Surname = table.Column<string>(type: "nvarchar(25)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(64)", nullable: false),
+                    Surname = table.Column<string>(type: "nvarchar(64)", nullable: false),
                     PassportNumber = table.Column<string>(type: "nchar(9)", nullable: false),
                     DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DriverLicenseSerialNumber = table.Column<string>(type: "nchar(9)", nullable: true)

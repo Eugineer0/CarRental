@@ -64,7 +64,7 @@ namespace CarRentalApp.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(25)");
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("PassportNumber")
                         .IsRequired()
@@ -76,7 +76,7 @@ namespace CarRentalApp.Migrations
 
                     b.Property<string>("Surname")
                         .IsRequired()
-                        .HasColumnType("nvarchar(25)");
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("Username")
                         .IsRequired()

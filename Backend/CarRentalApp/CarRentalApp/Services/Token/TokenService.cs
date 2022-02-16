@@ -54,7 +54,7 @@ namespace CarRentalApp.Services.Token
                 expires: DateTimeOffset.Now.UtcDateTime.AddSeconds(accessJwtGenerationParams.LifeTimeSeconds),
                 signingCredentials: GetJWTCredentials(accessJwtGenerationParams)
             );
-            
+
             return new JwtSecurityTokenHandler().WriteToken(accessToken);
         }
 
@@ -64,15 +64,15 @@ namespace CarRentalApp.Services.Token
 
             var jwtClaims = new List<Claim>()
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString())
             };
 
-            var refreshToken =  new JwtSecurityToken(
+            var refreshToken = new JwtSecurityToken(
                 claims: jwtClaims,
                 expires: DateTimeOffset.Now.UtcDateTime.AddSeconds(refreshJwtGenerationParams.LifeTimeSeconds),
                 signingCredentials: GetJWTCredentials(refreshJwtGenerationParams)
             );
-            
+
             return new JwtSecurityTokenHandler().WriteToken(refreshToken);
         }
 
@@ -143,24 +143,9 @@ namespace CarRentalApp.Services.Token
             return refreshToken;
         }
 
-        private Task InvalidateRelatedRefreshTokensAsync(RefreshTokenDTO refreshTokenDTO)
-        {
-            var userId = GetTokenOwnerId(refreshTokenDTO.Token);
-
-            return _refreshTokenDAO.DeleteRelatedTokensByUserIdAsync(userId);
-        }
-
-        private TokenValidationParameters GetRefreshValidationParams()
-        {
-            var refreshJwtValidationParams = _refreshJwtConfig.ValidationParameters;
-            refreshJwtValidationParams.IssuerSigningKey = GetKey(_refreshJwtConfig.GenerationParameters);
-
-            return refreshJwtValidationParams;
-        }
-
         /// <exception cref="SharedException">Claim 'sub' of <paramref name="tokenString"/> not found.</exception>
         /// <exception cref="SharedException">Claim 'sub' value is invalid.</exception>
-        private Guid GetTokenOwnerId(string tokenString)
+        public Guid GetUserId(string tokenString)
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtSecurityToken = handler.ReadJwtToken(tokenString);
@@ -172,6 +157,7 @@ namespace CarRentalApp.Services.Token
             {
                 throw new SharedException(
                     ErrorTypes.NotFound,
+                    "Invalid token",
                     "Claim 'sub' not found"
                 );
             }
@@ -180,11 +166,27 @@ namespace CarRentalApp.Services.Token
             {
                 throw new SharedException(
                     ErrorTypes.Invalid,
+                    "Invalid token",
                     "Invalid 'sub' claim value"
                 );
             }
 
             return userId;
+        }
+
+        private Task InvalidateRelatedRefreshTokensAsync(RefreshTokenDTO refreshTokenDTO)
+        {
+            var userId = GetUserId(refreshTokenDTO.Token);
+
+            return _refreshTokenDAO.DeleteRelatedTokensByUserIdAsync(userId);
+        }
+
+        private TokenValidationParameters GetRefreshValidationParams()
+        {
+            var refreshJwtValidationParams = _refreshJwtConfig.ValidationParameters;
+            refreshJwtValidationParams.IssuerSigningKey = GetKey(_refreshJwtConfig.GenerationParameters);
+
+            return refreshJwtValidationParams;
         }
 
         private SigningCredentials GetJWTCredentials(GenerationParameters jwtParams)

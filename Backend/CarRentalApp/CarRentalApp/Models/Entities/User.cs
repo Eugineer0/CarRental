@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CarRentalApp.Models.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalApp.Models.Entities
 {
-    public class User
+    public class User: IContainUniqueUsername
     {
         public Guid Id { get; set; }
 

@@ -66,11 +66,10 @@ namespace CarRentalApp.Controllers
             return Ok(authenticationResponse);
         }
 
-        [Authorize(Roles = UserRole.AdminRolesString)]
         [HttpPost]
-        public async Task<IActionResult> FinishRegistration([FromBody] UserDTO model)
+        public async Task<IActionResult> CompleteRegistration([FromBody] CompleteRegistrationDTO model)
         {
-            var user = await _registrationService.FinishRegistrationAsync(model);
+            var user = await _registrationService.CompleteRegistrationAsync(model);
             var authenticationResponse = await _authenticationService.GetAccess(user);
             return Ok(authenticationResponse);
         }

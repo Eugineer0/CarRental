@@ -3,7 +3,7 @@ using CarRentalApp.Models.Entities;
 
 namespace CarRentalApp.Models.DTOs;
 
-public class UserDTO
+public class UserDTO: IContainUniqueUsername
 {
     public string? Email { get; set; }
 

@@ -50,35 +50,35 @@ namespace CarRentalApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DriverLicenseSerialNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nchar(9)");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(254)");
 
                     b.Property<byte[]>("HashedPassword")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("binary(32)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("PassportNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nchar(7)");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("binary(32)");
 
                     b.Property<string>("Surname")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(25)");
 
                     b.HasKey("Id");
 
