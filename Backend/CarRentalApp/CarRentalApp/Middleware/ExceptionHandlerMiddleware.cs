@@ -1,5 +1,4 @@
-﻿using System.Web.Http;
-using CarRentalApp.Exceptions;
+﻿using CarRentalApp.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarRentalApp.Middleware
@@ -36,9 +35,9 @@ namespace CarRentalApp.Middleware
             
             switch (exception.ErrorType)
             {
-                case ErrorTypes.NotEnoughData:
+                case ErrorTypes.AdditionalDataRequired:
                 {
-                    result = new ObjectResult(exception.DeveloperInfo)
+                    result = new ObjectResult(exception.Message)
                     {
                         StatusCode = StatusCodes.Status308PermanentRedirect,
                     };
@@ -71,7 +70,10 @@ namespace CarRentalApp.Middleware
                 }
                 default:
                 {
-                    result = new InternalServerErrorResult();
+                    result = new ObjectResult(exception.Message)
+                    {
+                        StatusCode = StatusCodes.Status500InternalServerError,
+                    };
                     break;
                 }
             }

@@ -30,7 +30,7 @@
 
     public enum ErrorTypes
     {
-        NotEnoughData,
+        AdditionalDataRequired,
         AuthFailed,
         AccessDenied,
         Invalid,

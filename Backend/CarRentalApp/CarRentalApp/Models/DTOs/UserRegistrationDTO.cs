@@ -34,8 +34,7 @@ namespace CarRentalApp.Models.DTOs
         )]
         [RegularExpression(
             ".*(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).*",
-            ErrorMessage = "Incorrect format: The {0} value must contain at least"
-                + " 1 digit, 1 lowercase letter and 1 uppercase letter"
+            ErrorMessage = "Incorrect format: The {0} value must contain at least 1 digit, 1 lowercase letter and 1 uppercase letter"
         )]
         public string Password { get; set; }
 
@@ -47,8 +46,7 @@ namespace CarRentalApp.Models.DTOs
         )]
         [RegularExpression(
             "[A-Z]{1}[a-z]*((-[A-Z])?[a-z]*)*",
-            ErrorMessage = "Incorrect format: The {0} value must start from capital"
-                + " and contain only latin letters or hyphen, followed by capital"
+            ErrorMessage = "Incorrect format: The {0} value must start from capital and contain only latin letters or hyphen, followed by capital"
         )]
         public string Name { get; set; }
 
@@ -60,8 +58,7 @@ namespace CarRentalApp.Models.DTOs
         )]
         [RegularExpression(
             "[A-Z]{1}[a-z]*((-[A-Z])?[a-z]*)*",
-            ErrorMessage = "Incorrect format: The {0} value must start from capital"
-                + " and contain only latin letters or hyphen, followed by capital"
+            ErrorMessage = "Incorrect format: The {0} value must start from capital and contain only latin letters or hyphen, followed by capital"
         )]
         public string Surname { get; set; }
 

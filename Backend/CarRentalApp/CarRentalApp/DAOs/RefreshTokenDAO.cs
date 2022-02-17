@@ -2,7 +2,7 @@ using CarRentalApp.Contexts;
 using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace CarRentalApp.Models.DAOs
+namespace CarRentalApp.DAOs
 {
     public class RefreshTokenDAO
     {
@@ -31,7 +31,7 @@ namespace CarRentalApp.Models.DAOs
             return _carRentalDbContext.SaveChangesAsync();
         }
 
-        public async Task DeleteRelatedTokensByUserIdAsync(Guid userId)
+        public async Task DeleteTokensByUserIdAsync(Guid userId)
         {
             var tokens = await _carRentalDbContext.RefreshTokens
                 .Where(t => t.UserId == userId)

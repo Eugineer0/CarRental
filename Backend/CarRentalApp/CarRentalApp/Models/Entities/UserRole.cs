@@ -15,7 +15,8 @@ namespace CarRentalApp.Models.Entities
             .Split(',')
             .Select(role => (Roles) Enum.Parse(typeof(Roles), role));
 
-        [Key] public int EntryId { get; set; }
+        [Key] 
+        public int EntryId { get; set; }
 
         public Roles Role { get; set; }
 
@@ -24,9 +25,9 @@ namespace CarRentalApp.Models.Entities
 
     public enum Roles : byte
     {
-        None = 0,
-        Client = 1,
-        Admin = 10,
-        SuperAdmin = 20
+        None,
+        Client,
+        Admin,
+        SuperAdmin
     }
 }

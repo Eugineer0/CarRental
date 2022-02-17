@@ -2,7 +2,7 @@
 using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace CarRentalApp.Models.DAOs
+namespace CarRentalApp.DAOs
 {
     public class UserDAO
     {

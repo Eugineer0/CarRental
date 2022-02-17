@@ -1,4 +1,5 @@
-﻿using CarRentalApp.Models.DTOs;
+﻿using CarRentalApp.Exceptions;
+using CarRentalApp.Models.DTOs;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Services.Identity;
 using CarRentalApp.Services.Token;
@@ -19,9 +20,17 @@ namespace CarRentalApp.Services.Authentication
         public async Task<AuthenticationDTO> AuthenticateAsync(UserLoginDTO userLoginDTO)
         {
             var user = await _userService.GetExistingUserAsync(userLoginDTO);
-            _userService.ValidateClient(user, userLoginDTO);
-
-            return await GetAccess(user);
+            if (_userService.ValidateClient(user, userLoginDTO))
+            {
+                return await GetAccess(user);
+            }
+            
+            var token = _tokenService.GenerateRefreshToken(user);
+            throw new SharedException(
+                ErrorTypes.AdditionalDataRequired,
+                token,
+                "DriverLicenseSerialNumber field required"
+            );
         }
 
         public async Task<AuthenticationDTO> AuthenticateAdminAsync(UserLoginDTO userLoginDTO)

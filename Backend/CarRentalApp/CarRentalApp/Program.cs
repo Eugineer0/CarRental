@@ -7,9 +7,9 @@ using CarRentalApp.Services.Authentication;
 using CarRentalApp.Contexts;
 using Microsoft.EntityFrameworkCore;
 using CarRentalApp.Configuration.JWT.Refresh;
+using CarRentalApp.DAOs;
 using CarRentalApp.Mappers;
 using CarRentalApp.Middleware;
-using CarRentalApp.Models.DAOs;
 using CarRentalApp.Services.Registration;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -7,8 +7,8 @@ using CarRentalApp.Models.Entities;
 using CarRentalApp.Configuration.JWT;
 using Microsoft.Extensions.Options;
 using CarRentalApp.Configuration.JWT.Refresh;
+using CarRentalApp.DAOs;
 using CarRentalApp.Exceptions;
-using CarRentalApp.Models.DAOs;
 using CarRentalApp.Models.DTOs;
 
 namespace CarRentalApp.Services.Token
@@ -43,9 +43,13 @@ namespace CarRentalApp.Services.Token
             var jwtClaims = new List<Claim>()
             {
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("role", user.Roles.ToString())
+                new Claim(JwtRegisteredClaimNames.Email, user.Email)
             };
+
+            foreach (var role in user.Roles.Select(r => r.Role))
+            {
+                jwtClaims.Add(new Claim("role", role.ToString()));
+            }
 
             var accessToken = new JwtSecurityToken(
                 issuer: accessJwtGenerationParams.Issuer,
@@ -178,7 +182,7 @@ namespace CarRentalApp.Services.Token
         {
             var userId = GetUserId(refreshTokenDTO.Token);
 
-            return _refreshTokenDAO.DeleteRelatedTokensByUserIdAsync(userId);
+            return _refreshTokenDAO.DeleteTokensByUserIdAsync(userId);
         }
 
         private TokenValidationParameters GetRefreshValidationParams()

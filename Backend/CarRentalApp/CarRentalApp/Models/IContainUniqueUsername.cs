@@ -1,4 +1,4 @@
-﻿namespace CarRentalApp.Models.DTOs;
+﻿namespace CarRentalApp.Models;
 
 public interface IContainUniqueUsername
 {

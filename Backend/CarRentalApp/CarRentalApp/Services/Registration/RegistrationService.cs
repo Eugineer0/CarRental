@@ -2,19 +2,16 @@
 using CarRentalApp.Models.DTOs;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Services.Identity;
-using CarRentalApp.Services.Token;
 
 namespace CarRentalApp.Services.Registration
 {
     public class RegistrationService
     {
         private readonly UserService _userService;
-        private readonly TokenService _tokenService;
 
-        public RegistrationService(UserService userService, TokenService tokenService)
+        public RegistrationService(UserService userService)
         {
             _userService = userService;
-            _tokenService = tokenService;
         }
 
         /// <exception cref="SharedException">User with such credentials already exists.</exception>

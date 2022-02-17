@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 namespace CarRentalApp.Controllers
 {
     [ApiController]
-    [Route("api/[action]")]
-    public class AuthController : ControllerBase
+    [Route("api/[controller]/[action]")]
+    public class AuthController: ControllerBase
     {
         private readonly AuthenticationService _authenticationService;
         private readonly RegistrationService _registrationService;
@@ -24,42 +24,42 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody] UserLoginDTO model)
+        public async Task<IActionResult> Login(UserLoginDTO model)
         {
             var authenticationResponse = await _authenticationService.AuthenticateAsync(model);
             return Ok(authenticationResponse);
         }
 
         [HttpPost]
-        public async Task<IActionResult> LoginAdmin([FromBody] UserLoginDTO model)
+        public async Task<IActionResult> LoginAdmin(UserLoginDTO model)
         {
             var authenticationResponse = await _authenticationService.AuthenticateAdminAsync(model);
             return Ok(authenticationResponse);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Refresh([FromBody] RefreshTokenDTO model)
+        public async Task<IActionResult> Refresh(RefreshTokenDTO model)
         {
             var authenticationResponse = await _authenticationService.ReAuthenticateAsync(model);
             return Ok(authenticationResponse);
         }
-        
+
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Logout([FromBody] RefreshTokenDTO model)
+        public async Task<IActionResult> Logout(RefreshTokenDTO model)
         {
             await _authenticationService.DeAuthenticateAsync(model);
             return Ok();
         }
 
         [HttpPost]
-        public Task<IActionResult> RegisterClient([FromBody] ClientRegistrationDTO model)
+        public Task<IActionResult> RegisterClient(ClientRegistrationDTO model)
         {
             return Register(model);
         }
-        
+
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody] UserRegistrationDTO model)
+        public async Task<IActionResult> Register(UserRegistrationDTO model)
         {
             var user = await _registrationService.RegisterAsync(model);
             var authenticationResponse = await _authenticationService.GetAccess(user);
@@ -67,7 +67,7 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CompleteRegistration([FromBody] CompleteRegistrationDTO model)
+        public async Task<IActionResult> CompleteRegistration(CompleteRegistrationDTO model)
         {
             var user = await _registrationService.CompleteRegistrationAsync(model);
             var authenticationResponse = await _authenticationService.GetAccess(user);
