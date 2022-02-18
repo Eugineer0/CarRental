@@ -1,6 +1,6 @@
 ﻿namespace CarRentalApp.Models.Entities
 {
-    public class User: IContainUniqueUsername
+    public class User
     {
         public Guid Id { get; set; }
 

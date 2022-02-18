@@ -7,26 +7,24 @@ using CarRentalApp.Models.Entities;
 using CarRentalApp.Configuration.JWT;
 using Microsoft.Extensions.Options;
 using CarRentalApp.Configuration.JWT.Refresh;
-using CarRentalApp.DAOs;
+using CarRentalApp.Contexts;
 using CarRentalApp.Exceptions;
 using CarRentalApp.Models.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalApp.Services.Token
 {
     public class TokenService
     {
-        private readonly RefreshTokenDAO _refreshTokenDAO;
-
         private readonly AccessJwtConfig _accessJwtConfig;
         private readonly RefreshJwtConfig _refreshJwtConfig;
+        private readonly CarRentalDbContext _carRentalDbContext;
 
         public TokenService(
-            RefreshTokenDAO refreshTokenDAO,
             IOptions<AccessJwtConfig> accessJwtConfig,
-            IOptions<RefreshJwtConfig> refreshJwtConfig
-        )
+            IOptions<RefreshJwtConfig> refreshJwtConfig, CarRentalDbContext carRentalDbContext)
         {
-            _refreshTokenDAO = refreshTokenDAO;
+            _carRentalDbContext = carRentalDbContext;
             _accessJwtConfig = accessJwtConfig.Value;
             _refreshJwtConfig = refreshJwtConfig.Value;
         }
@@ -36,7 +34,108 @@ namespace CarRentalApp.Services.Token
             return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtParams.Secret));
         }
 
-        public string GenerateAccessToken(User user)
+        /// <exception cref="SharedException">Token not found by <paramref name="refreshTokenDto"/>.</exception>
+        public async Task<RefreshToken> PopTokenAsync(RefreshTokenDTO refreshTokenDTO)
+        {
+            var token = await _carRentalDbContext.RefreshTokens
+                .FirstOrDefaultAsync(t => t.Token.Equals(refreshTokenDTO.Token));
+            if (token == null)
+            {
+                SharedException? innerException = null;
+
+                try
+                {
+                    await InvalidateRelatedRefreshTokensAsync(refreshTokenDTO);
+                }
+                catch (SharedException exception)
+                {
+                    innerException = exception;
+                }
+
+                throw new SharedException(
+                    ErrorTypes.AuthFailed,
+                    "Invalid refresh token",
+                    "Refresh token not found, all related sessions will be closed",
+                    innerException
+                );
+            }
+
+            _carRentalDbContext.RefreshTokens.Remove(token);
+            await _carRentalDbContext.SaveChangesAsync();
+
+            return token;
+        }
+
+        /// <exception cref="SharedException"><paramref name="refreshTokenDto"/> is expired.</exception>
+        public void ValidateTokenLifetime(RefreshTokenDTO refreshTokenDTO)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = handler.ReadJwtToken(refreshTokenDTO.Token);
+            var expires = jwtSecurityToken.ValidTo;
+
+            var refreshJwtValidationParams = GetRefreshValidationParams();
+
+            try
+            {
+                Validators.ValidateLifetime(null, expires, jwtSecurityToken, refreshJwtValidationParams);
+            }
+            catch (SecurityTokenExpiredException exception)
+            {
+                throw new SharedException(
+                    ErrorTypes.AuthFailed,
+                    "Invalid refresh token",
+                    "Refresh token expired",
+                    exception
+                );
+            }
+        }
+
+        public async Task<AuthenticationDTO> GetAccess(User user)
+        {
+            var accessToken = GenerateAccessToken(user);
+            var refreshToken = GenerateRefreshToken(user);
+
+            await StoreRefreshTokenAsync(refreshToken, user);
+
+            return new AuthenticationDTO()
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+            };
+        }
+        
+        /// <exception cref="SharedException">Claim 'sub' of <paramref name="tokenString"/> not found.</exception>
+        /// <exception cref="SharedException">Claim 'sub' value is invalid.</exception>
+        public Guid GetUserId(string tokenString)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = handler.ReadJwtToken(tokenString);
+            var userIdString = jwtSecurityToken.Claims
+                .FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?
+                .Value;
+
+            if (userIdString == null)
+            {
+                throw new SharedException(
+                    ErrorTypes.NotFound,
+                    "Invalid token",
+                    "Claim 'sub' not found"
+                );
+            }
+
+            if (!Guid.TryParse(userIdString, out var userId))
+            {
+                throw new SharedException(
+                    ErrorTypes.Invalid,
+                    "Invalid token",
+                    "Invalid 'sub' claim value"
+                );
+            }
+
+            return userId;
+        }
+        
+        private string GenerateAccessToken(User user)
         {
             var accessJwtGenerationParams = _accessJwtConfig.GenerationParameters;
 
@@ -80,61 +179,7 @@ namespace CarRentalApp.Services.Token
             return new JwtSecurityTokenHandler().WriteToken(refreshToken);
         }
 
-        /// <exception cref="SharedException">Token not found by <paramref name="refreshTokenDto"/>.</exception>
-        public async Task<RefreshToken> PopTokenAsync(RefreshTokenDTO refreshTokenDTO)
-        {
-            var token = await _refreshTokenDAO.GetByTokenStringAsync(refreshTokenDTO.Token);
-            if (token == null)
-            {
-                SharedException? innerException = null;
-
-                try
-                {
-                    await InvalidateRelatedRefreshTokensAsync(refreshTokenDTO);
-                }
-                catch (SharedException exception)
-                {
-                    innerException = exception;
-                }
-
-                throw new SharedException(
-                    ErrorTypes.AuthFailed,
-                    "Invalid refresh token",
-                    "Refresh token not found, all related sessions will be closed",
-                    innerException
-                );
-            }
-
-            await _refreshTokenDAO.DeleteAsync(token);
-
-            return token;
-        }
-
-        /// <exception cref="SharedException"><paramref name="refreshTokenDto"/> is expired.</exception>
-        public void ValidateTokenLifetime(RefreshTokenDTO refreshTokenDTO)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = handler.ReadJwtToken(refreshTokenDTO.Token);
-            var expires = jwtSecurityToken.ValidTo;
-
-            var refreshJwtValidationParams = GetRefreshValidationParams();
-
-            try
-            {
-                Validators.ValidateLifetime(null, expires, jwtSecurityToken, refreshJwtValidationParams);
-            }
-            catch (SecurityTokenExpiredException exception)
-            {
-                throw new SharedException(
-                    ErrorTypes.AuthFailed,
-                    "Invalid refresh token",
-                    "Refresh token expired",
-                    exception
-                );
-            }
-        }
-
-        public async Task<RefreshToken> StoreRefreshTokenAsync(string refreshTokenString, User user)
+        private Task StoreRefreshTokenAsync(string refreshTokenString, User user)
         {
             var refreshToken = new RefreshToken()
             {
@@ -142,47 +187,22 @@ namespace CarRentalApp.Services.Token
                 UserId = user.Id
             };
 
-            await _refreshTokenDAO.InsertAsync(refreshToken);
+            _carRentalDbContext.RefreshTokens.Add(refreshToken);
 
-            return refreshToken;
+            return _carRentalDbContext.SaveChangesAsync();
         }
 
-        /// <exception cref="SharedException">Claim 'sub' of <paramref name="tokenString"/> not found.</exception>
-        /// <exception cref="SharedException">Claim 'sub' value is invalid.</exception>
-        public Guid GetUserId(string tokenString)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = handler.ReadJwtToken(tokenString);
-            var userIdString = jwtSecurityToken.Claims
-                .FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?
-                .Value;
-
-            if (userIdString == null)
-            {
-                throw new SharedException(
-                    ErrorTypes.NotFound,
-                    "Invalid token",
-                    "Claim 'sub' not found"
-                );
-            }
-
-            if (!Guid.TryParse(userIdString, out var userId))
-            {
-                throw new SharedException(
-                    ErrorTypes.Invalid,
-                    "Invalid token",
-                    "Invalid 'sub' claim value"
-                );
-            }
-
-            return userId;
-        }
-
-        private Task InvalidateRelatedRefreshTokensAsync(RefreshTokenDTO refreshTokenDTO)
+        private async Task InvalidateRelatedRefreshTokensAsync(RefreshTokenDTO refreshTokenDTO)
         {
             var userId = GetUserId(refreshTokenDTO.Token);
+            
+            var tokens = await _carRentalDbContext.RefreshTokens
+                .Where(t => t.UserId == userId)
+                .ToListAsync();
 
-            return _refreshTokenDAO.DeleteTokensByUserIdAsync(userId);
+            _carRentalDbContext.RefreshTokens.RemoveRange(tokens);
+
+            await _carRentalDbContext.SaveChangesAsync();
         }
 
         private TokenValidationParameters GetRefreshValidationParams()

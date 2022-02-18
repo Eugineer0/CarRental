@@ -7,10 +7,8 @@ using CarRentalApp.Services.Authentication;
 using CarRentalApp.Contexts;
 using Microsoft.EntityFrameworkCore;
 using CarRentalApp.Configuration.JWT.Refresh;
-using CarRentalApp.DAOs;
 using CarRentalApp.Mappers;
 using CarRentalApp.Middleware;
-using CarRentalApp.Services.Registration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,23 +24,18 @@ builder.Services.Configure<ClientRequirements>(
     builder.Configuration.GetSection(ClientRequirements.Section)
 );
 
-builder.Services.AddScoped<RefreshTokenDAO>();
-builder.Services.AddScoped<TokenService>();
-
-builder.Services.AddScoped<UserDAO>();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<PasswordService>();
-
-builder.Services.AddScoped<RegistrationService>();
-builder.Services.AddScoped<AuthenticationService>();
-
-builder.Services.AddAutoMapper(typeof(UserMapperProfile));
-
 var configurationString = builder.Configuration.GetConnectionString("CarRentalDB");
 
 builder.Services.AddDbContext<CarRentalDbContext>(
     options => options.UseSqlServer(configurationString)
 );
+
+builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<UserService>();
+
+builder.Services.AddScoped<PasswordService>();
+
+builder.Services.AddAutoMapper(typeof(UserMapperProfile));
 
 var accessJwtConfig = new AccessJwtConfig();
 builder.Configuration.Bind(AccessJwtConfig.Section, accessJwtConfig);

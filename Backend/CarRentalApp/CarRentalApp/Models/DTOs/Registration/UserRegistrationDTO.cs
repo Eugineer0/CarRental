@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using CarRentalApp.ValidationAttributes;
 
-namespace CarRentalApp.Models.DTOs
+namespace CarRentalApp.Models.DTOs.Registration
 {
-    public class UserRegistrationDTO: IContainUniqueUsername
+    public class UserRegistrationDTO
     {
         [Required]
         [StringLength(
@@ -70,9 +70,13 @@ namespace CarRentalApp.Models.DTOs
         public string PassportNumber { get; set; }
 
         [Required]
-        public DateTime DateOfBirth { get; set; }
+        [MinimumAge(minimumAge: 14, ErrorMessage = "Incorrect input: Admin have to reach {1} years")]
+        public virtual DateTime? DateOfBirth { get; set; }
 
-        [ForbidFillIn(ErrorMessage = "Invalid input: The {0} must not be specified")]
+        [RegularExpression(
+            "[0-9]{1}[A-Z]{2}[0-9]{6}",
+            ErrorMessage = "Incorrect format: The {0} value must consist of 1 digit leading 2 capitals, followed by 6 digits"
+        )]
         public virtual string? DriverLicenseSerialNumber { get; set; }
     }
 }
