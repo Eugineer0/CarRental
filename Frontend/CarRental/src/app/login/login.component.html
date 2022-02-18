@@ -1,0 +1,73 @@
+<div class="row">
+  <div class="col-md-5  mx-auto">
+    <div class=" card rounded-1">
+      <div class="card-header">
+        <h3>Login</h3>
+      </div>
+      <div class="card-body">
+        <div *ngIf="authFailed" class="alert alert-danger">
+          {{authFailedMessage}}
+        </div>
+        <form (ngSubmit)="onSubmit(); loginForm.form.markAsPristine()" #loginForm="ngForm">
+          <div class="form-group">
+            <label class="mb-0" for="username">Username</label>
+            <input
+              #usernameField="ngModel"
+              required
+              maxlength="25"
+              type="text"
+              name="username"
+              class="form-control"
+              id="username"
+              (ngModelChange)="resetAuthStatus()"
+              [(ngModel)]="client.username"
+            >
+            <div
+              *ngIf="usernameField.invalid && (usernameField.dirty || usernameField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="usernameField.errors?.['required']">
+                Username is required.
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="password">Password</label>
+            <div class="input-group">
+              <input
+                #passwordField="ngModel"
+                required
+                [type]="getPasswordType()"
+                name="password"
+                class="form-control"
+                id="password"
+                aria-describedby="button-addon2"
+                (ngModelChange)="resetAuthStatus()"
+                [(ngModel)]="client.password"
+              >
+              <button
+                type="button"
+                class="btn btn-light col-2"
+                id="button-addon2"
+                (click)="changePasswordType()"
+              >
+                {{getButtonText()}}
+              </button>
+            </div>
+            <div
+              *ngIf="passwordField.invalid && (passwordField.dirty || passwordField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="passwordField.errors?.['required']">
+                Password is required.
+              </div>
+            </div>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-success"
+            [disabled]="loginForm.form.invalid || loginForm.form.pristine"
+          >Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

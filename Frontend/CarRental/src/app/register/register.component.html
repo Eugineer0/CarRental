@@ -1,0 +1,239 @@
+<div class="row">
+  <div class="col-md-5  mx-auto">
+    <div class=" card rounded-1">
+      <div class="card-header">
+        <h3>Register</h3>
+      </div>
+      <div class="card-body">
+        <div *ngIf="registerFailed" class="alert alert-danger">
+          {{registerFailedMessage}}
+        </div>
+        <form (ngSubmit)="onSubmit(); registerForm.form.markAsPristine();" #registerForm="ngForm">
+          <div class="form-group">
+            <label class="mb-0 mt-2" for="email">Email</label>
+            <input
+              #emailField="ngModel"
+              required
+              minlength="3"
+              maxlength="254"
+              appFieldConstraint=".*@.+"
+              type="email"
+              name="email"
+              class="form-control"
+              id="email"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="client.email"
+            >
+            <div
+              *ngIf="emailField.invalid && (emailField.dirty || emailField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="emailField.errors?.['required']">
+                Email is required.
+              </div>
+              <div *ngIf="emailField.errors?.['minlength']">
+                Email must be at least 3 characters long.
+              </div>
+              <div *ngIf="emailField.errors?.['maxlength']">
+                Email must be maximum 256 characters long.
+              </div>
+              <div *ngIf="emailField.errors?.['fieldConstraint']">
+                Incorrect email format
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="username">Username</label>
+            <input
+              #usernameField="ngModel"
+              required
+              maxlength="25"
+              appFieldConstraint="^\w*$"
+              type="text"
+              name="username"
+              class="form-control"
+              id="username"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="client.username"
+            >
+            <div
+              *ngIf="usernameField.invalid && (usernameField.dirty || usernameField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="usernameField.errors?.['required']">
+                Username is required.
+              </div>
+              <div *ngIf="usernameField.errors?.['fieldConstraint']">
+                Please, choose latin letters, digits and underscore for username.
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="name">Name</label>
+            <input
+              #nameField="ngModel"
+              required
+              maxlength="64"
+              appFieldConstraint="^[A-Z]{1}[a-z]*(-[A-Z])?[a-z]*$"
+              type="text"
+              name="name"
+              class="form-control"
+              id="name"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="client.name"
+            >
+            <div
+              *ngIf="nameField.invalid && (nameField.dirty || nameField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="nameField.errors?.['required']">
+                Name is required.
+              </div>
+              <div *ngIf="nameField.errors?.['fieldConstraint']">
+                Name must start from capital and contain only latin letters or hyphen in composite variant.
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="surname">Surname</label>
+            <input
+              #surnameField="ngModel"
+              required
+              maxlength="64"
+              appFieldConstraint="^[A-Z]{1}[a-z]*((-[A-Z])?[a-z]*)*$"
+              type="text"
+              name="surname"
+              class="form-control"
+              id="surname"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="client.surname"
+            >
+            <div
+              *ngIf="surnameField.invalid && (surnameField.dirty || surnameField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="surnameField.errors?.['required']">
+                Surname is required.
+              </div>
+              <div *ngIf="surnameField.errors?.['fieldConstraint']">
+                Surname must start from capital and contain only latin letters or hyphen in composite variant.
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="dateOfBirth">Date of birth</label>
+            <input
+              #dateOfBirthField="ngModel"
+              required
+              appFieldConstraint="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+              type="date"
+              name="dateOfBirth"
+              class="form-control"
+              id="dateOfBirth"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="client.dateOfBirth"
+            >
+            <div
+              *ngIf="dateOfBirthField.invalid && (dateOfBirthField.dirty || dateOfBirthField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="dateOfBirthField.errors?.['required']">
+                Date of birth is required.
+              </div>
+              <div *ngIf="passwordField.errors?.['fieldConstraint']">
+                Incorrect date of birth format
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="passportNumber">Passport number</label>
+            <input
+              #passportNumberField="ngModel"
+              required
+              maxlength="9"
+              appFieldConstraint="^[A-Z]{2}[0-9]{7}$"
+              type="text"
+              name="passportNumber"
+              class="form-control"
+              id="passportNumber"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="client.passportNumber"
+            >
+            <div
+              *ngIf="passportNumberField.invalid && (passportNumberField.dirty || passportNumberField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="passportNumberField.errors?.['required']">
+                Passport number is required.
+              </div>
+              <div *ngIf="passportNumberField.errors?.['fieldConstraint']">
+                Passport number must consist of 2 capitals leading 7 digits.
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="driverLicense">Driver license</label>
+            <input
+              #driverLicenseField="ngModel"
+              required
+              maxlength="9"
+              appFieldConstraint="^[0-9]{1}[A-Z]{2}[0-9]{6}$"
+              type="text"
+              name="driverLicense"
+              class="form-control"
+              id="driverLicense"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="client.driverLicenseSerialNumber"
+            >
+            <div
+              *ngIf="driverLicenseField.invalid && (driverLicenseField.dirty || driverLicenseField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="driverLicenseField.errors?.['required']">
+                Driver license number is required.
+              </div>
+              <div *ngIf="driverLicenseField.errors?.['fieldConstraint']">
+                Driver license number must consist of 1 digit leading 2 capitals, followed by 6 digits.
+              </div>
+            </div>
+            <label class="mb-0 mt-2" for="password">Password</label>
+            <div class="input-group">
+              <input
+                #passwordField="ngModel"
+                required
+                minlength="5"
+                maxlength="25"
+                appFieldConstraint="(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])"
+                [type]="getPasswordType()"
+                name="password"
+                class="form-control"
+                id="password"
+                aria-describedby="button-addon2"
+                (ngModelChange)="resetRegisterStatus()"
+                [(ngModel)]="client.password"
+              >
+              <button
+                type="button"
+                class="btn btn-light col-2"
+                id="button-addon2"
+                (click)="changePasswordType()"
+              >
+                {{getButtonText()}}
+              </button>
+            </div>
+            <div
+              *ngIf="passwordField.invalid && (passwordField.dirty || passwordField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="passwordField.errors?.['required']">
+                Password is required.
+              </div>
+              <div *ngIf="passwordField.errors?.['minlength']">
+                Password must be at least 5 characters long.
+              </div>
+              <div *ngIf="passwordField.errors?.['fieldConstraint']">
+                Password must contain at least 1 digit, 1 lowercase and 1 uppercase.
+              </div>
+            </div>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-success"
+            [disabled]="registerForm.form.invalid || registerForm.form.pristine"
+          >Register
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+

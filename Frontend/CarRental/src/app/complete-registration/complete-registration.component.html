@@ -1,0 +1,47 @@
+<div class="row">
+  <div class="col-md-5  mx-auto">
+    <div class=" card rounded-1">
+      <div class="card-header">
+        <h3>Complete registration by entering you driver license serial number</h3>
+      </div>
+      <div class="card-body">
+        <div *ngIf="completionFailed" class="alert alert-danger">
+          {{completionFailedMessage}}
+        </div>
+        <form (ngSubmit)="onSubmit()" #completeRegistrationForm="ngForm">
+          <div class="form-group">
+            <label class="mb-0" for="serialNumber">Driver license</label>
+            <input
+              #serialNumberField="ngModel"
+              required
+              type="text"
+              maxlength="9"
+              appFieldConstraint="[0-9]{1}[A-Z]{2}[0-9]{6}"
+              name="serialNumber"
+              class="form-control"
+              id="serialNumber"
+              (ngModelChange)="resetCompletionStatus()"
+              [(ngModel)]="userInfo.driverLicenseSerialNumber"
+            >
+            <div
+              *ngIf="serialNumberField.invalid && (serialNumberField.dirty || serialNumberField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="serialNumberField.errors?.['required']">
+                Driver License is required.
+              </div>
+              <div *ngIf="serialNumberField.errors?.['fieldConstraint']">
+                Driver License must consist of 1 digit leading 2 capitals followed by 6 digits.
+              </div>
+            </div>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-success"
+            [disabled]="completeRegistrationForm.form.invalid"
+          >Complete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
