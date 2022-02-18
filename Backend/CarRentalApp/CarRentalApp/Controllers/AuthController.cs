@@ -1,54 +1,71 @@
+using CarRentalApp.Exceptions;
 using CarRentalApp.Models.DTOs;
-using CarRentalApp.Models.Entities;
+using CarRentalApp.Models.DTOs.Registration;
 using Microsoft.AspNetCore.Mvc;
-using CarRentalApp.Services.Authentication;
-using CarRentalApp.Services.Registration;
-using Microsoft.AspNetCore.Authorization;
+using CarRentalApp.Services.Identity;
+using CarRentalApp.Services.Token;
 
 namespace CarRentalApp.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    public class AuthController: ControllerBase
+    public class AuthController : ControllerBase
     {
-        private readonly AuthenticationService _authenticationService;
-        private readonly RegistrationService _registrationService;
+        private readonly UserService _userService;
+        private readonly TokenService _tokenService;
 
         public AuthController(
-            AuthenticationService authenticationService,
-            RegistrationService registrationService
+            UserService userService,
+            TokenService tokenService
         )
         {
-            _authenticationService = authenticationService;
-            _registrationService = registrationService;
+            _userService = userService;
+            _tokenService = tokenService;
         }
 
         [HttpPost]
         public async Task<IActionResult> Login(UserLoginDTO model)
         {
-            var authenticationResponse = await _authenticationService.AuthenticateAsync(model);
-            return Ok(authenticationResponse);
+            var user = await _userService.GetUserAsync(model.Username);
+            if (_userService.Validate(user, model))
+            {
+                var authenticationResponse = await _tokenService.GetAccess(user);
+                return Ok(authenticationResponse);
+            }
+
+            var token = _tokenService.GenerateRefreshToken(user);
+            throw new SharedException(
+                ErrorTypes.AdditionalDataRequired,
+                token,
+                "Registration completion required"
+            );
         }
 
         [HttpPost]
         public async Task<IActionResult> LoginAdmin(UserLoginDTO model)
         {
-            var authenticationResponse = await _authenticationService.AuthenticateAdminAsync(model);
+            var user = await _userService.GetUserAsync(model.Username);
+            _userService.ValidateAdmin(user, model);
+            var authenticationResponse = await _tokenService.GetAccess(user);
             return Ok(authenticationResponse);
         }
 
         [HttpPost]
         public async Task<IActionResult> Refresh(RefreshTokenDTO model)
         {
-            var authenticationResponse = await _authenticationService.ReAuthenticateAsync(model);
+            var token = await _tokenService.PopTokenAsync(model);
+
+            _tokenService.ValidateTokenLifetime(model);
+
+            var user = await _userService.GetByRefreshTokenAsync(token);
+            var authenticationResponse = await _tokenService.GetAccess(user);
             return Ok(authenticationResponse);
         }
-
-        [Authorize]
+        
         [HttpPost]
         public async Task<IActionResult> Logout(RefreshTokenDTO model)
         {
-            await _authenticationService.DeAuthenticateAsync(model);
+            await _tokenService.PopTokenAsync(model);
             return Ok();
         }
 
@@ -61,17 +78,16 @@ namespace CarRentalApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(UserRegistrationDTO model)
         {
-            var user = await _registrationService.RegisterAsync(model);
-            var authenticationResponse = await _authenticationService.GetAccess(user);
-            return Ok(authenticationResponse);
+            await _userService.RegisterAsync(model);
+            return Ok();
         }
 
         [HttpPost]
         public async Task<IActionResult> CompleteRegistration(CompleteRegistrationDTO model)
         {
-            var user = await _registrationService.CompleteRegistrationAsync(model);
-            var authenticationResponse = await _authenticationService.GetAccess(user);
-            return Ok(authenticationResponse);
+            var userId = _tokenService.GetUserId(model.Token);
+            await _userService.CompleteRegistrationAsync(userId, model);
+            return Ok();
         }
     }
 }

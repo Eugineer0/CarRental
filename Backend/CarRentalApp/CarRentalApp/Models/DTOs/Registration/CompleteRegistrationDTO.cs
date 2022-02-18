@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CarRentalApp.Models.DTOs;
+namespace CarRentalApp.Models.DTOs.Registration;
 
 public class CompleteRegistrationDTO
 {

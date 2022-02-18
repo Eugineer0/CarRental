@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using CarRentalApp.Configuration;
-using CarRentalApp.DAOs;
+using CarRentalApp.Contexts;
 using CarRentalApp.Exceptions;
-using CarRentalApp.Models;
 using CarRentalApp.Models.DTOs;
+using CarRentalApp.Models.DTOs.Registration;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Services.Authentication;
-using CarRentalApp.Services.Token;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace CarRentalApp.Services.Identity
@@ -14,36 +14,25 @@ namespace CarRentalApp.Services.Identity
     public class UserService
     {
         private readonly PasswordService _passwordService;
-        private readonly TokenService _tokenService;
-
         private readonly IMapper _userMapper;
-
-        private readonly UserDAO _userDAO;
-
         private readonly ClientRequirements _clientRequirements;
+        private readonly CarRentalDbContext _carRentalDbContext;
 
         public UserService(
-            UserDAO userDAO,
             PasswordService passwordService,
             IMapper userMapper,
-            IOptions<ClientRequirements> clientRequirements, TokenService tokenService)
+            IOptions<ClientRequirements> clientRequirements, CarRentalDbContext carRentalDbContext)
         {
-            _userDAO = userDAO;
             _passwordService = passwordService;
             _userMapper = userMapper;
-            _tokenService = tokenService;
+            _carRentalDbContext = carRentalDbContext;
             _clientRequirements = clientRequirements.Value;
         }
 
-        public Task<bool> CheckIfExistsAsync(UserRegistrationDTO userRegistrationDTO)
+        /// <exception cref="SharedException">User not found by <paramref name="userId"/>.</exception>
+        public async Task CompleteRegistrationAsync(Guid userId, CompleteRegistrationDTO completeRegistrationDTO)
         {
-            return _userDAO.CheckUniquenessAsync(userRegistrationDTO.Username, userRegistrationDTO.Email);
-        }
-
-        /// <exception cref="SharedException">User not found by <paramref name="userInfo"/> username.</exception>
-        public async Task<User> GetExistingUserAsync(IContainUniqueUsername userInfo)
-        {
-            var user = await _userDAO.GetByUsernameAsync(userInfo.Username);
+            var user = await _carRentalDbContext.Users.FirstOrDefaultAsync(user => user.Id == userId);
             if (user == null)
             {
                 throw new SharedException(
@@ -53,15 +42,40 @@ namespace CarRentalApp.Services.Identity
                 );
             }
 
-            return user;
+            user.DriverLicenseSerialNumber = completeRegistrationDTO.DriverLicenseSerialNumber;
+            _carRentalDbContext.Users.Add(user);
+
+            await _carRentalDbContext.SaveChangesAsync();
         }
 
-        /// <exception cref="SharedException">
-        /// User not found by <paramref name="completeRegistrationDTO"/> token.</exception>
-        public async Task<User> GetExistingUserAsync(CompleteRegistrationDTO completeRegistrationDTO)
+        /// <exception cref="SharedException">User with such credentials already exists.</exception>
+        public async Task RegisterAsync(UserRegistrationDTO userRegistrationDTO)
         {
-            var userId = _tokenService.GetUserId(completeRegistrationDTO.Token);
-            var user = await _userDAO.GetByIdAsync(userId);
+            if (await _carRentalDbContext.Users
+                    .AnyAsync(
+                        u => u.Username.Equals(userRegistrationDTO.Username)
+                             || u.Email.Equals(userRegistrationDTO.Email)
+                    )
+               )
+            {
+                throw new SharedException(
+                    ErrorTypes.Conflict,
+                    "User with such email or username already exists"
+                );
+            }
+
+            var user = CreateFromDTO(userRegistrationDTO);
+            _carRentalDbContext.Users.Add(user);
+
+            await _carRentalDbContext.SaveChangesAsync();
+        }
+
+        /// <exception cref="SharedException">User not found by <paramref name="userInfo"/> username.</exception>
+        public async Task<User> GetUserAsync(string username)
+        {
+            var user = await _carRentalDbContext.Users
+                .Include(user => user.Roles)
+                .FirstOrDefaultAsync(user => user.Username.Equals(username));
             if (user == null)
             {
                 throw new SharedException(
@@ -75,9 +89,9 @@ namespace CarRentalApp.Services.Identity
         }
 
         /// <exception cref="SharedException"><paramref name="token"/> subject not found.</exception>
-        public async Task<User> GetUserByRefreshTokenAsync(RefreshToken token)
+        public async Task<User> GetByRefreshTokenAsync(RefreshToken token)
         {
-            var user = await _userDAO.GetByIdAsync(token.UserId);
+            var user = await _carRentalDbContext.Users.FirstOrDefaultAsync(user => user.Id == token.Id);
             if (user == null)
             {
                 throw new SharedException(
@@ -90,50 +104,22 @@ namespace CarRentalApp.Services.Identity
             return user;
         }
 
-        public async Task<User> RegisterAsync(UserRegistrationDTO clientRegistrationDTO)
+        public Task UpdateRolesAsync(User user, RolesDTO rolesDTO)
         {
-            var user = CreateFromDTO(clientRegistrationDTO);
-
-            await _userDAO.InsertUserAsync(user);
-
-            return user;
-        }
-
-        public Task MakeClientAsync(User user, CompleteRegistrationDTO completeRegistrationDto)
-        {
-            user.DriverLicenseSerialNumber = completeRegistrationDto.DriverLicenseSerialNumber;
-            user.Roles.Add(new UserRole() {Role = Roles.Client});
-
-            return _userDAO.UpdateUserAsync(user);
-        }
-
-        public Task UpdateRolesAsync(User user, UserDTO userDTO)
-        {
-            if (user.Roles.Select(role => role.Role).SequenceEqual(userDTO.Roles))
+            if (user.Roles.Select(role => role.Role).SequenceEqual(rolesDTO.Roles))
             {
                 return Task.CompletedTask;
             }
 
-            user.Roles = userDTO.Roles.Select(role => new UserRole() {Role = role}).ToList();
+            user.Roles = rolesDTO.Roles.Select(role => new UserRole() {Role = role}).ToList();
 
-            return _userDAO.UpdateUserAsync(user);
-        }
+            _carRentalDbContext.Users.Update(user);
 
-        private User CreateFromDTO(UserRegistrationDTO userRegistrationDTO)
-        {
-            var user = _userMapper.Map<UserRegistrationDTO, User>(userRegistrationDTO);
-
-            user.Salt = _passwordService.GenerateSalt();
-            user.HashedPassword = _passwordService.DigestPassword(userRegistrationDTO.Password, user.Salt);
-
-            user.Roles = new List<UserRole>() {new UserRole() {Role = Roles.None}};
-
-            return user;
+            return _carRentalDbContext.SaveChangesAsync();
         }
         
-        /// <exception cref="SharedException">Additional user info required.</exception>
         /// <exception cref="SharedException">Client role is not approved.</exception>
-        public bool ValidateClient(User user, UserLoginDTO userLoginDTO)
+        public bool Validate(User user, UserLoginDTO userLoginDTO)
         {
             ValidatePassword(user.HashedPassword, user.Salt, userLoginDTO.Password);
 
@@ -169,11 +155,12 @@ namespace CarRentalApp.Services.Identity
             }
         }
 
+
         /// <exception cref="SharedException">Empty roles set.</exception>
         /// <exception cref="SharedException">Cannot specify client role without additional info.</exception>
-        public void ValidateNewRoles(User user, UserDTO userDTO)
+        public void ValidateNewRoles(User user, RolesDTO rolesDTO)
         {
-            if (userDTO.Roles.Count < 1)
+            if (rolesDTO.Roles.Count < 1)
             {
                 throw new SharedException(
                     ErrorTypes.Invalid,
@@ -182,7 +169,7 @@ namespace CarRentalApp.Services.Identity
                 );
             }
 
-            if (userDTO.Roles.Intersect(UserRole.ClientRoles).Any())
+            if (rolesDTO.Roles.Intersect(UserRole.ClientRoles).Any())
             {
                 ValidateAge(user.DateOfBirth);
 
@@ -197,13 +184,31 @@ namespace CarRentalApp.Services.Identity
             }
         }
 
+        private User CreateFromDTO(UserRegistrationDTO userRegistrationDTO)
+        {
+            var user = _userMapper.Map<UserRegistrationDTO, User>(userRegistrationDTO);
+
+            user.Salt = _passwordService.GenerateSalt();
+            user.HashedPassword = _passwordService.DigestPassword(userRegistrationDTO.Password, user.Salt);
+
+            user.Roles = new List<UserRole>() {new UserRole() {Role = Roles.None}};
+
+            return user;
+        }
+
+        public static bool CheckMinimumAge(DateTime dateOfBirth, int minimumAge)
+        {
+            var criticalDate = dateOfBirth.AddYears(minimumAge);
+
+            return DateTime.Now.CompareTo(criticalDate) > 0;
+        }
+
         /// <exception cref="SharedException">Invalid user age.</exception>
         private void ValidateAge(DateTime dateOfBirth)
         {
             var minimumAge = _clientRequirements.MinimumAge;
-            var criticalDate = dateOfBirth.AddYears(minimumAge);
 
-            if (DateTime.Now.CompareTo(criticalDate) > 0)
+            if (CheckMinimumAge(dateOfBirth, minimumAge))
             {
                 throw new SharedException(
                     ErrorTypes.Conflict,
