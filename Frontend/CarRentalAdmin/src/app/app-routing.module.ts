@@ -8,6 +8,8 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { SecretComponent } from './secret/secret.component';
 import { RegisterComponent } from "./register/register.component";
 import { CompleteRegistrationComponent } from "./complete-registration/complete-registration.component";
+import { UsersComponent } from "./users/users.component";
+import { UserInfoComponent } from "./user-info/user-info.component";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: 'welcome'},
@@ -15,7 +17,9 @@ const routes: Routes = [
   {path: 'login', component: LoginComponent},
   {path: 'completeRegistration', component: CompleteRegistrationComponent},
   {path: 'welcome', component: WelcomeComponent},
-  {path: 'secret', canActivate: [AuthGuard], component: SecretComponent}
+  {path: 'secret', canActivate: [AuthGuard], component: SecretComponent},
+  {path: 'users', component: UsersComponent},
+  {path: 'users/:username', component: UserInfoComponent}
 ];
 
 @NgModule({

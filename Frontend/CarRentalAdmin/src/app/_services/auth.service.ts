@@ -28,7 +28,7 @@ export class AuthService {
     return !this.isLoggedIn();
   }
 
-  public register(admin: RegisterDTO): Observable<any> {
+  public register(admin: RegisterDTO): Observable<AuthResponse> {
     return this.http.post<AuthResponse>('/api/auth/register', admin)
       .pipe(
         tap(
@@ -39,7 +39,7 @@ export class AuthService {
       )
   }
 
-  public completeRegistration(admin: CompleteRegistrationDTO): Observable<any> {
+  public completeRegistration(admin: CompleteRegistrationDTO): Observable<AuthResponse> {
     return this.http.post<AuthResponse>('/api/auth/completeRegistration', admin)
       .pipe(
         tap(
@@ -50,7 +50,7 @@ export class AuthService {
       )
   }
 
-  public login(admin: LoginDTO): Observable<any> {
+  public login(admin: LoginDTO): Observable<AuthResponse> {
     return this.http.post<AuthResponse>('/api/auth/login', admin)
       .pipe(
         tap(
@@ -62,7 +62,7 @@ export class AuthService {
   }
 
   public logout(refreshToken: RefreshTokenRequest): Observable<any> {
-    return this.http.post<RefreshTokenRequest>('/api/auth/logout', refreshToken)
+    return this.http.post('/api/auth/logout', refreshToken)
       .pipe(
         tap(
           _ => {
@@ -72,7 +72,7 @@ export class AuthService {
       )
   }
 
-  public refresh(refreshToken: RefreshTokenRequest): Observable<any> {
+  public refresh(refreshToken: RefreshTokenRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>('/api/auth/refresh', refreshToken)
       .pipe(
         tap(

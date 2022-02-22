@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { Router } from "@angular/router";
 
 import { AuthService } from './_services/auth.service';
-import { Router } from "@angular/router";
 import { TokenService } from "./_services/token.service";
+
 import { RefreshTokenRequest } from "./_models/refresh-token-request";
 
 @Component({
@@ -38,7 +39,7 @@ export class AppComponent {
       this.authService.logout(refreshTokenRequest)
         .subscribe(
           _ => {
-            this.router.navigate(['welcome']);
+            this.router.navigateByUrl('welcome');
           }
         );
     }
