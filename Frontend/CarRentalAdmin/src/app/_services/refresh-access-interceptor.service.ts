@@ -13,7 +13,7 @@ import {
 import { AuthService } from "./auth.service";
 import { TokenService } from "./token.service";
 
-import { RefreshTokenRequest } from "../_models/refresh-token-request";
+import { RefreshTokenRequest } from "../_models/auth/refresh-token-request";
 
 @Injectable({
   providedIn: 'root'

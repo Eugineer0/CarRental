@@ -3,11 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { LoginDTO } from '../_models/login';
-import { RegisterDTO } from "../_models/register";
-import { CompleteRegistrationDTO } from "../_models/complete-registration";
-import { AuthResponse } from '../_models/auth-responce';
-import { RefreshTokenRequest } from "../_models/refresh-token-request";
+import { LoginDTO } from '../_models/auth/login';
+import { RegisterDTO } from "../_models/auth/register";
+import { CompleteRegistrationDTO } from "../_models/auth/complete-registration";
+import { AuthResponse } from '../_models/auth/auth-responce';
+import { RefreshTokenRequest } from "../_models/auth/refresh-token-request";
 
 import { TokenService } from "./token.service";
 
@@ -28,7 +28,7 @@ export class AuthService {
     return !this.isLoggedIn();
   }
 
-  public register(admin: RegisterDTO): Observable<any> {
+  public register(admin: RegisterDTO): Observable<AuthResponse> {
     return this.http.post<AuthResponse>('/api/auth/register', admin)
       .pipe(
         tap(
@@ -39,7 +39,7 @@ export class AuthService {
       )
   }
 
-  public completeRegistration(admin: CompleteRegistrationDTO): Observable<any> {
+  public completeRegistration(admin: CompleteRegistrationDTO): Observable<AuthResponse> {
     return this.http.post<AuthResponse>('/api/auth/completeRegistration', admin)
       .pipe(
         tap(
@@ -50,8 +50,8 @@ export class AuthService {
       )
   }
 
-  public login(admin: LoginDTO): Observable<any> {
-    return this.http.post<AuthResponse>('/api/auth/login', admin)
+  public login(admin: LoginDTO): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>('/api/auth/loginAdmin', admin)
       .pipe(
         tap(
           response => {
@@ -62,7 +62,7 @@ export class AuthService {
   }
 
   public logout(refreshToken: RefreshTokenRequest): Observable<any> {
-    return this.http.post<RefreshTokenRequest>('/api/auth/logout', refreshToken)
+    return this.http.post('/api/auth/logout', refreshToken)
       .pipe(
         tap(
           _ => {
@@ -72,7 +72,7 @@ export class AuthService {
       )
   }
 
-  public refresh(refreshToken: RefreshTokenRequest): Observable<any> {
+  public refresh(refreshToken: RefreshTokenRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>('/api/auth/refresh', refreshToken)
       .pipe(
         tap(

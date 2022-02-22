@@ -12,32 +12,38 @@ import { RefreshAccessInterceptor } from "./_services/refresh-access-interceptor
 import { FieldConstraintDirective } from './field-constraint.directive';
 
 import { AppComponent } from './app.component';
-import { WelcomeComponent } from './welcome/welcome.component';
-import { SecretComponent } from './secret/secret.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { CompleteRegistrationComponent } from './complete-registration/complete-registration.component';
+import { UsersComponent } from './users/users.component';
+import { UserInfoComponent } from './user-info/user-info.component';
+import { CentersComponent } from './centers/centers.component';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatCheckboxModule } from "@angular/material/checkbox";
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
-    WelcomeComponent,
-    SecretComponent,
     FieldConstraintDirective,
     RegisterComponent,
-    CompleteRegistrationComponent
+    CompleteRegistrationComponent,
+    UsersComponent,
+    UserInfoComponent,
+    CentersComponent
   ],
   imports: [
     AppRoutingModule,
     HttpClientModule,
     BrowserModule,
-    FormsModule
+    FormsModule,
+    NoopAnimationsModule,
+    MatCheckboxModule
   ],
   providers: [
     AuthService,
-    {provide: HTTP_INTERCEPTORS, useClass: RefreshAccessInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: AuthorizationInterceptor, multi: true},
+    {provide: HTTP_INTERCEPTORS, useClass: RefreshAccessInterceptor, multi: true},
   ],
   bootstrap: [AppComponent]
 })

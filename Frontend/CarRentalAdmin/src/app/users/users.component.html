@@ -1,0 +1,34 @@
+<p>users works!</p>
+
+<table class="table table-hover table-sm">
+  <thead>
+  <tr>
+    <th scope="col">Username</th>
+    <th scope="col">Name</th>
+    <th scope="col">Surname</th>
+    <th scope="col">Date of birth</th>
+    <th scope="col">Passport number</th>
+    <th scope="col">Email</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let user of users">
+    <td>
+      <button
+        class="btn btn-primary"
+        routerLink="/users/{{user.username}}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="left"
+        title="Click to edit roles"
+      >
+        {{user.username}}
+      </button>
+    </td>
+    <td>{{user.name}}</td>
+    <td>{{user.surname}}</td>
+    <td>{{user.dateOfBirth}}</td>
+    <td>{{user.passportNumber}}</td>
+    <td>{{user.email}}</td>
+  </tr>
+  </tbody>
+</table>
