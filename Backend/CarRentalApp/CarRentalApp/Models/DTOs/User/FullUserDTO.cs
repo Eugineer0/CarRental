@@ -6,5 +6,5 @@ public class FullUserDTO: MinimalUserDTO
 {
     public string DriverLicenseSerialNumber { get; set; }
     
-    public ICollection<Roles> Roles { get; set; }
+    public ICollection<String> Roles { get; set; }
 }

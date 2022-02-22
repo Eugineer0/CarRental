@@ -20,7 +20,7 @@
 
         public DateTime DateOfBirth { get; set; }
 
-        public ICollection<UserRole> Roles { get; set; }
+        public ICollection<UserRole> UserRoles { get; set; }
 
         public string? DriverLicenseSerialNumber { get; set; }
     }

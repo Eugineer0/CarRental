@@ -6,10 +6,11 @@ using CarRentalApp.Models.DTOs;
 using CarRentalApp.Models.DTOs.Registration;
 using CarRentalApp.Models.Entities;
 using CarRentalApp.Services.Authentication;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace CarRentalApp.Services.Identity
+namespace CarRentalApp.Services
 {
     public class UserService
     {
@@ -64,7 +65,7 @@ namespace CarRentalApp.Services.Identity
                 );
             }
 
-            var user = CreateFromDTO(userRegistrationDTO);
+            var user = ConvertFromDTO(userRegistrationDTO);
             _carRentalDbContext.Users.Add(user);
 
             await _carRentalDbContext.SaveChangesAsync();
@@ -76,7 +77,7 @@ namespace CarRentalApp.Services.Identity
         public async Task<User> GetUserAsync(string username)
         {
             var user = await _carRentalDbContext.Users
-                .Include(user => user.Roles)
+                .Include(user => user.UserRoles)
                 .FirstOrDefaultAsync(user => user.Username.Equals(username));
             if (user == null)
             {
@@ -89,17 +90,27 @@ namespace CarRentalApp.Services.Identity
 
             return user;
         }
-        
-        public async Task<IEnumerable<MinimalUserDTO>> GetAllUsersAsync()
+
+        public async Task<IEnumerable<MinimalUserDTO>> GetAllMinimalUserDTOsAsync()
         {
-            return _carRentalDbContext.Users
-                .Include(user => user.Roles);
+            return _carRentalDbContext.Users.Select(user => user.Adapt<User, MinimalUserDTO>());
+        }
+
+        public async Task<FullUserDTO> GetFullUserDTOAsync(string username)
+        {
+            var user = await GetUserAsync(username);
+            var userDTO = user.Adapt<User, FullUserDTO>();
+            userDTO.Roles = user.UserRoles.Select(role => role.Role.ToString()).ToList();
+
+            return userDTO;
         }
 
         /// <exception cref="SharedException"><paramref name="token"/> subject not found.</exception>
         public async Task<User> GetByRefreshTokenAsync(RefreshToken token)
         {
-            var user = await _carRentalDbContext.Users.FirstOrDefaultAsync(user => user.Id == token.Id);
+            var user = await _carRentalDbContext.Users
+                .Include(user => user.UserRoles)
+                .FirstOrDefaultAsync(user => user.Id == token.UserId);
             if (user == null)
             {
                 throw new SharedException(
@@ -112,14 +123,14 @@ namespace CarRentalApp.Services.Identity
             return user;
         }
 
-        public Task UpdateRolesAsync(User user, RolesDTO rolesDTO)
+        public Task UpdateRolesAsync(User user, IEnumerable<Roles> roles)
         {
-            if (user.Roles.Select(role => role.Role).SequenceEqual(rolesDTO.Roles))
+            if (user.UserRoles.Select(role => role.Role).SequenceEqual(roles))
             {
                 return Task.CompletedTask;
             }
 
-            user.Roles = rolesDTO.Roles.Select(role => new UserRole() {Role = role}).ToList();
+            user.UserRoles = roles.Select(role => new UserRole() {Role = role}).ToList();
 
             _carRentalDbContext.Users.Update(user);
 
@@ -132,7 +143,7 @@ namespace CarRentalApp.Services.Identity
         {
             ValidatePassword(user.HashedPassword, user.Salt, userLoginDTO.Password);
 
-            if (user.Roles.Select(role => role.Role).Intersect(UserRole.ClientRoles).Any())
+            if (user.UserRoles.Select(role => role.Role).Intersect(UserRole.ClientRoles).Any())
             {
                 return true;
             }
@@ -154,7 +165,7 @@ namespace CarRentalApp.Services.Identity
         {
             ValidatePassword(user.HashedPassword, user.Salt, userLoginDTO.Password);
 
-            if (!user.Roles.Select(role => role.Role).Intersect(UserRole.AdminRoles).Any())
+            if (!user.UserRoles.Select(role => role.Role).Intersect(UserRole.AdminRoles).Any())
             {
                 throw new SharedException(
                     ErrorTypes.AccessDenied,
@@ -167,9 +178,13 @@ namespace CarRentalApp.Services.Identity
 
         /// <exception cref="SharedException">Empty roles set.</exception>
         /// <exception cref="SharedException">Cannot specify client role without additional info.</exception>
-        public void ValidateNewRoles(User user, RolesDTO rolesDTO)
+        public IEnumerable<Roles> ValidateNewRoles(User user, RolesDTO rolesDTO)
         {
-            if (rolesDTO.Roles.Count < 1)
+            var roles = rolesDTO.Roles
+                .Select(role => (Roles) Enum.Parse(typeof(Roles), role))
+                .ToList();
+            
+            if (roles.Count < 1)
             {
                 throw new SharedException(
                     ErrorTypes.Invalid,
@@ -178,7 +193,7 @@ namespace CarRentalApp.Services.Identity
                 );
             }
 
-            if (rolesDTO.Roles.Intersect(UserRole.ClientRoles).Any())
+            if (roles.Intersect(UserRole.ClientRoles).Any())
             {
                 ValidateAge(user.DateOfBirth);
 
@@ -191,16 +206,18 @@ namespace CarRentalApp.Services.Identity
                     );
                 }
             }
+
+            return roles;
         }
 
-        private User CreateFromDTO(UserRegistrationDTO userRegistrationDTO)
+        private User ConvertFromDTO(UserRegistrationDTO userRegistrationDTO)
         {
-            var user = _userMapper.Map<UserRegistrationDTO, User>(userRegistrationDTO);
+            var user = userRegistrationDTO.Adapt<UserRegistrationDTO, User>();
 
             user.Salt = _passwordService.GenerateSalt();
             user.HashedPassword = _passwordService.DigestPassword(userRegistrationDTO.Password, user.Salt);
 
-            user.Roles = new List<UserRole>() {new UserRole() {Role = Roles.None}};
+            user.UserRoles = new List<UserRole>() {new UserRole() {Role = Roles.None}};
 
             return user;
         }

@@ -6,5 +6,5 @@ namespace CarRentalApp.Models.DTOs;
 public class RolesDTO
 {
     [Required]
-    public ICollection<Roles> Roles { get; set; }
+    public ICollection<String> Roles { get; set; }
 }

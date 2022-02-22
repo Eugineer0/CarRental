@@ -1,8 +1,8 @@
 using CarRentalApp.Exceptions;
 using CarRentalApp.Models.DTOs;
 using CarRentalApp.Models.DTOs.Registration;
+using CarRentalApp.Services;
 using Microsoft.AspNetCore.Mvc;
-using CarRentalApp.Services.Identity;
 using CarRentalApp.Services.Token;
 using Microsoft.AspNetCore.Authorization;
 

@@ -1,5 +1,5 @@
 ﻿using CarRentalApp.Models.DTOs;
-using CarRentalApp.Services.Identity;
+using CarRentalApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,8 +21,8 @@ namespace CarRentalApp.Controllers
         public async Task<IActionResult> ChangeRoles(string username, RolesDTO model)
         {
             var user = await _userService.GetUserAsync(username);
-            _userService.ValidateNewRoles(user, model);
-            await _userService.UpdateRolesAsync(user, model);
+            var roles = _userService.ValidateNewRoles(user, model);
+            await _userService.UpdateRolesAsync(user, roles);
             return Ok();
         }
         
@@ -30,14 +30,14 @@ namespace CarRentalApp.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MinimalUserDTO>>> GetAllUsers()
         {
-            return Ok(await _userService.GetAllUsersAsync());
+            return Ok(await _userService.GetAllMinimalUserDTOsAsync());
         }
         
         [Authorize(Roles = "SuperAdmin")]
         [HttpGet("{username}")]
         public async Task<ActionResult<FullUserDTO>> GetUser(string username)
         {
-            return Ok(await _userService.GetUserAsync(username));
+            return Ok(await _userService.GetFullUserDTOAsync(username));
         }
     }
 }

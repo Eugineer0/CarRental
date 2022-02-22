@@ -145,7 +145,7 @@ namespace CarRentalApp.Services.Token
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
             };
 
-            foreach (var role in user.Roles.Select(r => r.Role))
+            foreach (var role in user.UserRoles.Select(r => r.Role))
             {
                 jwtClaims.Add(new Claim("role", role.ToString()));
             }
