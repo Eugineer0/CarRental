@@ -1,8 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace CarRentalApp.Models.DTOs;
 
-namespace CarRentalApp.Models.DTOs;
-
-public class UserDTO: RolesDTO
+public class MinimalUserDTO
 {
     public string Email { get; set; }
     
@@ -15,6 +13,4 @@ public class UserDTO: RolesDTO
     public DateTime DateOfBirth { get; set; }
     
     public string PassportNumber { get; set; }
-
-    public string DriverLicenseSerialNumber { get; set; }
 }

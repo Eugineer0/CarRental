@@ -10,6 +10,7 @@ namespace CarRentalApp.Mappers
         public UserMapperProfile()
         {
             CreateMap<UserRegistrationDTO, User>();
+            CreateMap<User, FullUserDTO>();
         }
     }
 }

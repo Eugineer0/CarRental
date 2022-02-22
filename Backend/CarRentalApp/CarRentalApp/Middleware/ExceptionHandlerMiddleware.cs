@@ -37,6 +37,7 @@ namespace CarRentalApp.Middleware
             {
                 case ErrorTypes.AdditionalDataRequired:
                 {
+                    httpContext.Response.Headers.Location = "/completeRegistration";
                     result = new ObjectResult(exception.Message)
                     {
                         StatusCode = StatusCodes.Status308PermanentRedirect,

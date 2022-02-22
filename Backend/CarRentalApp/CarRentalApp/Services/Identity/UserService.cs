@@ -89,6 +89,12 @@ namespace CarRentalApp.Services.Identity
 
             return user;
         }
+        
+        public async Task<IEnumerable<MinimalUserDTO>> GetAllUsersAsync()
+        {
+            return _carRentalDbContext.Users
+                .Include(user => user.Roles);
+        }
 
         /// <exception cref="SharedException"><paramref name="token"/> subject not found.</exception>
         public async Task<User> GetByRefreshTokenAsync(RefreshToken token)
