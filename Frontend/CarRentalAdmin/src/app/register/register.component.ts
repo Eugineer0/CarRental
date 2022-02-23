@@ -4,7 +4,7 @@ import { Router } from "@angular/router";
 
 import { AuthService } from "../_services/auth.service";
 
-import { RegisterDTO } from "../_models/register";
+import { RegisterDTO } from "../_models/auth/register";
 
 @Component({
   selector: 'app-register',

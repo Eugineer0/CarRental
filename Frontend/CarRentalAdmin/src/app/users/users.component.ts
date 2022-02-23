@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
-import { UserMinimal } from "../_models/user-minimal";
+import { UserMinimal } from "../_models/user/user-minimal";
+import { UserService } from "../_services/user.service";
 
 @Component({
   selector: 'app-users',
@@ -9,48 +10,20 @@ import { UserMinimal } from "../_models/user-minimal";
 })
 export class UsersComponent implements OnInit {
   public users: UserMinimal[] = [];
-  public selectedUser: UserMinimal = {
-    dateOfBirth: new Date(),
-    email: 'adad@gmail.com',
-    name: 'pidor',
-    passportNumber: 'string',
-    surname: 'string',
-    username: 'string'
-  };
 
-  constructor() {
+  constructor(
+    private userService: UserService,
+  ) {
   }
 
-  ngOnInit(): void {
-    this.users = [
-      {
-        dateOfBirth: new Date(),
-        email: 'adad@gmail.com',
-        name: 'pidor',
-        passportNumber: 'string',
-        surname: 'string',
-        username: 'Qwer'
-      },
-      {
-        dateOfBirth: new Date(),
-        email: 'adad@gmail.com',
-        name: 'pedofil',
-        passportNumber: 'string',
-        surname: 'string',
-        username: 'Qwer1'
-      },
-      {
-        dateOfBirth: new Date(),
-        email: 'adad@gmail.com',
-        name: 'traher',
-        passportNumber: 'string',
-        surname: 'string',
-        username: 'Sadmin'
-      }
-    ]
+  public ngOnInit(): void {
+    this.getUsers()
   }
 
-  onSelect(user: UserMinimal): void {
-    this.selectedUser = user;
+  private getUsers(): void {
+    this.userService.getUsers()
+      .subscribe(
+        users => this.users = users
+      )
   }
 }

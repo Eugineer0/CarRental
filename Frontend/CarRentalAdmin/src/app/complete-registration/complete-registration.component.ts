@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from "@angular/common/http";
 import { ActivatedRoute, Router } from "@angular/router";
 
-import { CompleteRegistrationDTO } from '../_models/complete-registration'
+import { CompleteRegistrationDTO } from '../_models/auth/complete-registration'
 
 import { AuthService } from "../_services/auth.service";
 

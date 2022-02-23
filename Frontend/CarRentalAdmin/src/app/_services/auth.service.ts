@@ -3,11 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { LoginDTO } from '../_models/login';
-import { RegisterDTO } from "../_models/register";
-import { CompleteRegistrationDTO } from "../_models/complete-registration";
-import { AuthResponse } from '../_models/auth-responce';
-import { RefreshTokenRequest } from "../_models/refresh-token-request";
+import { LoginDTO } from '../_models/auth/login';
+import { RegisterDTO } from "../_models/auth/register";
+import { CompleteRegistrationDTO } from "../_models/auth/complete-registration";
+import { AuthResponse } from '../_models/auth/auth-responce';
+import { RefreshTokenRequest } from "../_models/auth/refresh-token-request";
 
 import { TokenService } from "./token.service";
 
@@ -51,7 +51,7 @@ export class AuthService {
   }
 
   public login(admin: LoginDTO): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/auth/login', admin)
+    return this.http.post<AuthResponse>('/api/auth/loginAdmin', admin)
       .pipe(
         tap(
           response => {

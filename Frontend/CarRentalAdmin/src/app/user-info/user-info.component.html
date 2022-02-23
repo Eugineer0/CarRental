@@ -1,41 +1,50 @@
-<p>user-info works!</p>
-
-
-<div class="modal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Modal title</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true"></span>
-        </button>
+<table class="table table-hover table-sm">
+  <thead>
+  <tr>
+    <th scope="col">Username</th>
+    <th scope="col">Name</th>
+    <th scope="col">Surname</th>
+    <th scope="col">Date of birth</th>
+    <th scope="col">Passport number</th>
+    <th scope="col">Driver license</th>
+    <th scope="col">Email</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngIf="user">
+    <td>{{user.username}}</td>
+    <td>{{user.name}}</td>
+    <td>{{user.surname}}</td>
+    <td>{{user.dateOfBirth}}</td>
+    <td>{{user.passportNumber}}</td>
+    <td>{{user.driverLicenseSerialNumber}}</td>
+    <td>{{user.email}}</td>
+  </tr>
+  </tbody>
+</table>
+<div class="card m-3">
+  <h5 class="card-header">User roles</h5>
+  <div class="card-body">
+    <form name="form" (ngSubmit)="onSubmit()" #rolesForm="ngForm">
+      <div
+        class="form-check"
+        *ngFor="let role of allRoles"
+        id="roles"
+      >
+        <input
+          type="checkbox"
+          class="form-check-input"
+          [checked]="checkUserRole(role)"
+          [disabled]="processNoneRole(role)"
+          (change)="editRole(role)"
+        >
+        {{role}}
       </div>
-      <div class="modal-body">
-        <p>Modal body text goes here.</p>
+      <div class="text-right">
+        <button class="btn btn-success mr-1">Submit</button>
+        <button class="btn btn-secondary" type="button" (click)="rolesForm.reset(); resetRoles()">Reset</button>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary">Save changes</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
+    </form>
   </div>
 </div>
-
-<fieldset class="form-group">
-  <legend class="mt-4">Checkboxes</legend>
-  <div class="form-check">
-    <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-    <label class="form-check-label" for="flexCheckDefault">
-      Default checkbox
-    </label>
-  </div>
-  <div class="form-check">
-    <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
-    <label class="form-check-label" for="flexCheckChecked">
-      Checked checkbox
-    </label>
-  </div>
-</fieldset>
-
-
 <button class="btn btn-primary" (click)="goBack()">go back</button>

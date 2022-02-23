@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { UserMinimal } from "../_models/user-minimal";
-import { UserFull } from "../_models/user-full";
-import { UserRoles } from "../_models/roles";
+import { UserMinimal } from "../_models/user/user-minimal";
+import { UserFull, Roles } from "../_models/user/user-full";
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +23,7 @@ export class UserService {
     return this.http.get<UserFull>(`${this.usersUrl}/${username}`);
   }
 
-  public putRoles(username: string, roles: UserRoles): Observable<any> {
-    return this.http.put(`${this.usersUrl}/${username}`, roles);
+  public putRoles(username: string, roles: Roles[]): Observable<any> {
+    return this.http.put(`${this.usersUrl}/${username}`, {roles: roles});
   }
 }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from "@angular/common/http";
 
-import { LoginDTO } from '../_models/login';
+import { LoginDTO } from '../_models/auth/login';
 
 import { AuthService } from '../_services/auth.service';
 

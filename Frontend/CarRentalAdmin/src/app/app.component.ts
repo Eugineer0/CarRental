@@ -4,7 +4,7 @@ import { Router } from "@angular/router";
 import { AuthService } from './_services/auth.service';
 import { TokenService } from "./_services/token.service";
 
-import { RefreshTokenRequest } from "./_models/refresh-token-request";
+import { RefreshTokenRequest } from "./_models/auth/refresh-token-request";
 
 @Component({
   selector: 'app-root',
@@ -39,7 +39,7 @@ export class AppComponent {
       this.authService.logout(refreshTokenRequest)
         .subscribe(
           _ => {
-            this.router.navigateByUrl('welcome');
+            this.router.navigateByUrl('home');
           }
         );
     }

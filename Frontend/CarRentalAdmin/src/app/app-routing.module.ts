@@ -4,8 +4,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './_services/auth.guard';
 
 import { LoginComponent } from './login/login.component';
-import { WelcomeComponent } from './welcome/welcome.component';
-import { SecretComponent } from './secret/secret.component';
 import { RegisterComponent } from "./register/register.component";
 import { CompleteRegistrationComponent } from "./complete-registration/complete-registration.component";
 import { UsersComponent } from "./users/users.component";
@@ -16,10 +14,8 @@ const routes: Routes = [
   {path: 'register', component: RegisterComponent},
   {path: 'login', component: LoginComponent},
   {path: 'completeRegistration', component: CompleteRegistrationComponent},
-  {path: 'welcome', component: WelcomeComponent},
-  {path: 'secret', canActivate: [AuthGuard], component: SecretComponent},
-  {path: 'users', component: UsersComponent},
-  {path: 'users/:username', component: UserInfoComponent}
+  {path: 'users', canActivate: [AuthGuard],  component: UsersComponent},
+  {path: 'users/:username', canActivate: [AuthGuard], component: UserInfoComponent}
 ];
 
 @NgModule({
