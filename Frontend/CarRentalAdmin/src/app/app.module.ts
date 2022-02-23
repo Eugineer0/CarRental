@@ -17,9 +17,8 @@ import { RegisterComponent } from './register/register.component';
 import { CompleteRegistrationComponent } from './complete-registration/complete-registration.component';
 import { UsersComponent } from './users/users.component';
 import { UserInfoComponent } from './user-info/user-info.component';
-import { CentersComponent } from './centers/centers.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatCheckboxModule } from "@angular/material/checkbox";
+import { RentalCentersComponent } from './rental-centers/rental-centers.component';
 
 @NgModule({
   declarations: [
@@ -30,15 +29,14 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
     CompleteRegistrationComponent,
     UsersComponent,
     UserInfoComponent,
-    CentersComponent
+    RentalCentersComponent,
   ],
   imports: [
     AppRoutingModule,
     HttpClientModule,
     BrowserModule,
     FormsModule,
-    NoopAnimationsModule,
-    MatCheckboxModule
+    NoopAnimationsModule
   ],
   providers: [
     AuthService,
