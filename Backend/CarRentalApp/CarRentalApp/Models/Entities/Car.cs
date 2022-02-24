@@ -7,6 +7,6 @@ public class Car
     public string RegistrationNumber { get; set; }
 
     public CarType Type { get; set; }
-    
+
     public ICollection<Order> Orders { get; set; }
 }

@@ -6,7 +6,6 @@ using CarRentalApp.Services.Authentication;
 using CarRentalApp.Contexts;
 using Microsoft.EntityFrameworkCore;
 using CarRentalApp.Configuration.JWT.Refresh;
-using CarRentalApp.Mappers;
 using CarRentalApp.Middleware;
 using CarRentalApp.Services;
 
@@ -32,11 +31,9 @@ builder.Services.AddDbContext<CarRentalDbContext>(
 
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
-
+builder.Services.AddScoped<CarService>();
+builder.Services.AddScoped<RentalCenterService>();
 builder.Services.AddScoped<PasswordService>();
-
-builder.Services.AddAutoMapper(typeof(UserMapperProfile));
-builder.Services.AddAutoMapper(typeof(CarMapperProfile));
 
 var accessJwtConfig = new AccessJwtConfig();
 builder.Configuration.Bind(AccessJwtConfig.Section, accessJwtConfig);
@@ -47,10 +44,7 @@ accessJwtValidationParams.IssuerSigningKey = TokenService.GetKey(accessJwtConfig
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(
-        options =>
-        {
-            options.TokenValidationParameters = accessJwtValidationParams;
-        }
+        options => { options.TokenValidationParameters = accessJwtValidationParams; }
     );
 
 builder.Services.AddCors(

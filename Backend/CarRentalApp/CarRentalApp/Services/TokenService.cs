@@ -10,6 +10,7 @@ using CarRentalApp.Configuration.JWT.Refresh;
 using CarRentalApp.Contexts;
 using CarRentalApp.Exceptions;
 using CarRentalApp.Models.DTOs;
+using CarRentalApp.Models.DTOs.Auth;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalApp.Services.Token
@@ -103,7 +104,7 @@ namespace CarRentalApp.Services.Token
                 RefreshToken = refreshToken,
             };
         }
-        
+
         /// <exception cref="SharedException">Claim 'sub' of <paramref name="tokenString"/> not found.</exception>
         /// <exception cref="SharedException">Claim 'sub' value is invalid.</exception>
         public Guid GetUserId(string tokenString)
@@ -134,7 +135,7 @@ namespace CarRentalApp.Services.Token
 
             return userId;
         }
-        
+
         private string GenerateAccessToken(User user)
         {
             var accessJwtGenerationParams = _accessJwtConfig.GenerationParameters;
@@ -195,7 +196,7 @@ namespace CarRentalApp.Services.Token
         private async Task InvalidateRelatedRefreshTokensAsync(RefreshTokenDTO refreshTokenDTO)
         {
             var userId = GetUserId(refreshTokenDTO.Token);
-            
+
             var tokens = await _carRentalDbContext.RefreshTokens
                 .Where(t => t.UserId == userId)
                 .ToListAsync();

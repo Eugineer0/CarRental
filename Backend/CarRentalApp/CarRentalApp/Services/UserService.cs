@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using CarRentalApp.Configuration;
+﻿using CarRentalApp.Configuration;
 using CarRentalApp.Contexts;
 using CarRentalApp.Exceptions;
 using CarRentalApp.Models.DTOs;
@@ -15,17 +14,14 @@ namespace CarRentalApp.Services
     public class UserService
     {
         private readonly PasswordService _passwordService;
-        private readonly IMapper _userMapper;
         private readonly ClientRequirements _clientRequirements;
         private readonly CarRentalDbContext _carRentalDbContext;
 
         public UserService(
             PasswordService passwordService,
-            IMapper userMapper,
             IOptions<ClientRequirements> clientRequirements, CarRentalDbContext carRentalDbContext)
         {
             _passwordService = passwordService;
-            _userMapper = userMapper;
             _carRentalDbContext = carRentalDbContext;
             _clientRequirements = clientRequirements.Value;
         }
@@ -183,7 +179,7 @@ namespace CarRentalApp.Services
             var roles = rolesDTO.Roles
                 .Select(role => (Roles) Enum.Parse(typeof(Roles), role))
                 .ToList();
-            
+
             if (roles.Count < 1)
             {
                 throw new SharedException(

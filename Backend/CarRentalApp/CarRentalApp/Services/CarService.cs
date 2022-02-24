@@ -1,31 +1,29 @@
-﻿using AutoMapper;
-using CarRentalApp.Contexts;
+﻿using CarRentalApp.Contexts;
 using CarRentalApp.Models.DTOs.Car;
 using CarRentalApp.Models.Entities;
+using Mapster;
 
 namespace CarRentalApp.Services
 {
     public class CarService
     {
-        private readonly IMapper _carMapper;
         private readonly CarRentalDbContext _carRentalDbContext;
 
-        public CarService(CarRentalDbContext carRentalDbContext, IMapper carMapper)
+        public CarService(CarRentalDbContext carRentalDbContext)
         {
             _carRentalDbContext = carRentalDbContext;
-            _carMapper = carMapper;
         }
 
         public async Task<IEnumerable<CarDTO>> GetCars(RentalCenter rentalCenter)
         {
-            return rentalCenter.Cars.Select(car => _carMapper.Map<Car, CarDTO>(car));
+            return rentalCenter.Cars.Select(car => car.Adapt<Car, CarDTO>());
         }
 
         public async Task<IEnumerable<CarDTO>> GetAccessibleCars(RentalCenter rentalCenter, DateTime startRent, DateTime finishRent)
         {
             return rentalCenter.Cars
                 .Where(car => CheckIfAccessible(car, startRent, finishRent))
-                .Select(car => _carMapper.Map<Car, CarDTO>(car));
+                .Select(car => car.Adapt<Car, CarDTO>());
         }
 
         private bool CheckIfAccessible(Car car, DateTime start, DateTime finish)

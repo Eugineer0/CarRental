@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using CarRentalApp.Contexts;
+﻿using CarRentalApp.Contexts;
 using CarRentalApp.Models.DTOs.RentalCenter;
 using CarRentalApp.Models.Entities;
 using Mapster;
@@ -9,14 +8,12 @@ namespace CarRentalApp.Services
 {
     public class RentalCenterService
     {
-        private readonly IMapper _rentalCenterMapper;
         private readonly CarRentalDbContext _carRentalDbContext;
         private readonly CarService _carService;
 
-        public RentalCenterService(CarRentalDbContext carRentalDbContext, IMapper rentalCenterMapper, CarService carService)
+        public RentalCenterService(CarRentalDbContext carRentalDbContext, CarService carService)
         {
             _carRentalDbContext = carRentalDbContext;
-            _rentalCenterMapper = rentalCenterMapper;
             _carService = carService;
         }
 
@@ -33,7 +30,7 @@ namespace CarRentalApp.Services
         {
             return _carRentalDbContext.RentalCenters
                 .Include(center => center.Cars)
-                .Select(center => _rentalCenterMapper.Map<RentalCenter, RentalCenterDTO>(center));
+                .Select(center => center.Adapt<RentalCenter, RentalCenterDTO>());
         }
 
         public async Task<IEnumerable<RentalCenterDTO>> GetCentersFilteredByDate(DateTime start, DateTime finish)
@@ -42,12 +39,12 @@ namespace CarRentalApp.Services
                 .Include(center => center.Cars)
                 .ThenInclude(car => car.Orders)
                 .Select(center => ConvertToDTO(center, start, finish));
-            
+
             IEnumerable<RentalCenterDTO> centers = await Task.WhenAll(centerTasks);
 
             return centers;
         }
-        
+
         private async Task<RentalCenterDTO> ConvertToDTO(RentalCenter rentalCenter, DateTime start, DateTime finish)
         {
             var rentalCenterDTO = rentalCenter.Adapt<RentalCenter, RentalCenterDTO>();
@@ -55,7 +52,5 @@ namespace CarRentalApp.Services
 
             return rentalCenterDTO;
         }
-
-
     }
 }
