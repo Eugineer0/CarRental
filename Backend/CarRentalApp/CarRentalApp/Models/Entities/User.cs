@@ -4,23 +4,23 @@
     {
         public Guid Id { get; set; }
 
-        public string Email { get; set; }
+        public string Email { get; set; } = null!;
 
-        public string Username { get; set; }
+        public string Username { get; set; } = null!;
 
-        public byte[] HashedPassword { get; set; }
+        public byte[] HashedPassword { get; set; } = null!;
 
-        public byte[] Salt { get; set; }
+        public byte[] Salt { get; set; } = null!;
 
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
-        public string Surname { get; set; }
+        public string Surname { get; set; } = null!;
 
-        public string PassportNumber { get; set; }
+        public string PassportNumber { get; set; } = null!;
 
         public DateTime DateOfBirth { get; set; }
 
-        public ICollection<UserRole> Roles { get; set; }
+        public ICollection<UserRole> Roles { get; set; } = null!;
 
         public string? DriverLicenseSerialNumber { get; set; }
     }

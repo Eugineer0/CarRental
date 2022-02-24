@@ -1,5 +1,6 @@
-﻿using CarRentalApp.Models.DTOs;
-using CarRentalApp.Services.Identity;
+﻿using CarRentalApp.Models.Dto;
+using CarRentalApp.Models.Entities;
+using CarRentalApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,12 +18,18 @@ namespace CarRentalApp.Controllers
         }
 
         [Authorize(Roles = "SuperAdmin")]
-        [HttpPut("{username}")]
-        public async Task<IActionResult> ChangeRoles(string username, RolesDTO model)
+        [HttpPut("{username}/roles")]
+        public async Task<IActionResult> ModifyRoles(string username, RolesDto model)
         {
-            var user = await _userService.GetUserAsync(username);
-            _userService.ValidateNewRoles(user, model);
-            await _userService.UpdateRolesAsync(user, model);
+            await _userService.ModifyUserRolesAsync(username, model);
+            return Ok();
+        }
+
+        [Authorize(Roles = UserRole.AdminRolesString)]
+        [HttpPut("{username}/[action]")]
+        public async Task<IActionResult> ApproveClient(string username)
+        {
+            await _userService.ApproveClientAsync(username);
             return Ok();
         }
     }

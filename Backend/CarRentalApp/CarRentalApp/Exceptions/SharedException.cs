@@ -3,7 +3,7 @@
     public class SharedException : Exception
     {
         public ErrorTypes ErrorType { get; set; }
-        
+
         public string? DeveloperInfo { get; set; }
 
         public SharedException(ErrorTypes errorType, string message)
@@ -12,7 +12,7 @@
             ErrorType = errorType;
             DeveloperInfo = null;
         }
-        
+
         public SharedException(ErrorTypes errorType, string message, string developerInfo)
             : base(message, null)
         {

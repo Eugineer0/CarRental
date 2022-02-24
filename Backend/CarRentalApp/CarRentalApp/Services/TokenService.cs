@@ -1,18 +1,18 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using CarRentalApp.Configuration.JWT.Access;
-using Microsoft.IdentityModel.Tokens;
-using CarRentalApp.Models.Entities;
 using CarRentalApp.Configuration.JWT;
-using Microsoft.Extensions.Options;
+using CarRentalApp.Configuration.JWT.Access;
 using CarRentalApp.Configuration.JWT.Refresh;
 using CarRentalApp.Contexts;
 using CarRentalApp.Exceptions;
-using CarRentalApp.Models.DTOs;
+using CarRentalApp.Models.Dto;
+using CarRentalApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
-namespace CarRentalApp.Services.Token
+namespace CarRentalApp.Services
 {
     public class TokenService
     {
@@ -22,30 +22,43 @@ namespace CarRentalApp.Services.Token
 
         public TokenService(
             IOptions<AccessJwtConfig> accessJwtConfig,
-            IOptions<RefreshJwtConfig> refreshJwtConfig, CarRentalDbContext carRentalDbContext)
+            IOptions<RefreshJwtConfig> refreshJwtConfig,
+            CarRentalDbContext carRentalDbContext
+        )
         {
             _carRentalDbContext = carRentalDbContext;
             _accessJwtConfig = accessJwtConfig.Value;
             _refreshJwtConfig = refreshJwtConfig.Value;
         }
 
+        /// <summary>
+        /// Gets string secret key from <paramref name="jwtParams"/> and returns its symmetric representation.
+        /// </summary>
+        /// <param name="jwtParams">params, containing string secret key.</param>
+        /// <returns>Symmetric representation of string key.</returns>
         public static SecurityKey GetKey(GenerationParameters jwtParams)
         {
             return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtParams.Secret));
         }
 
-        /// <exception cref="SharedException">Token not found by <paramref name="refreshTokenDto"/>.</exception>
-        public async Task<RefreshToken> PopTokenAsync(RefreshTokenDTO refreshTokenDTO)
+        /// <summary>
+        /// Removes token model found by <paramref name="refreshTokenDto"/> and returns it.
+        /// </summary>
+        /// <param name="refreshTokenDto">ejected token prototype.</param>
+        /// <returns>token model, removed from database.</returns>
+        /// <exception cref="SharedException">Token not found by <paramref name="refreshTokenDto"/>. For safety reasons all related tokens will be revoked</exception>
+        public async Task<RefreshToken> PopTokenAsync(RefreshTokenDto refreshTokenDto)
         {
+            var userId = GetUserId(refreshTokenDto.Token);
             var token = await _carRentalDbContext.RefreshTokens
-                .FirstOrDefaultAsync(t => t.Token.Equals(refreshTokenDTO.Token));
+               .FirstOrDefaultAsync(token => token.UserId == userId);
             if (token == null)
             {
                 SharedException? innerException = null;
 
                 try
                 {
-                    await InvalidateRelatedRefreshTokensAsync(refreshTokenDTO);
+                    await InvalidateRelatedRefreshTokensAsync(refreshTokenDto);
                 }
                 catch (SharedException exception)
                 {
@@ -66,11 +79,15 @@ namespace CarRentalApp.Services.Token
             return token;
         }
 
-        /// <exception cref="SharedException"><paramref name="refreshTokenDto"/> is expired.</exception>
-        public void ValidateTokenLifetime(RefreshTokenDTO refreshTokenDTO)
+        /// <summary>
+        /// Validates token 'expiration' claim.
+        /// </summary>
+        /// <param name="tokenString">token to be validated.</param>
+        /// <exception cref="SharedException"><paramref name="tokenString"/> is expired.</exception>
+        public void ValidateTokenLifetime(string tokenString)
         {
             var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = handler.ReadJwtToken(refreshTokenDTO.Token);
+            var jwtSecurityToken = handler.ReadJwtToken(tokenString);
             var expires = jwtSecurityToken.ValidTo;
 
             var refreshJwtValidationParams = GetRefreshValidationParams();
@@ -90,20 +107,30 @@ namespace CarRentalApp.Services.Token
             }
         }
 
-        public async Task<AuthenticationDTO> GetAccess(User user)
+        /// <summary>
+        /// Generates and returns pair of user-oriented tokens, saves refresh token to database.
+        /// </summary>
+        /// <param name="user">user to get access.</param>
+        /// <returns>Pair of auth tokens.</returns>
+        public async Task<AuthenticationDto> GetAccess(User user)
         {
             var accessToken = GenerateAccessToken(user);
             var refreshToken = GenerateRefreshToken(user);
 
             await StoreRefreshTokenAsync(refreshToken, user);
 
-            return new AuthenticationDTO()
+            return new AuthenticationDto()
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
             };
         }
 
+        /// <summary>
+        /// Gets user id from <paramref name="tokenString"/> and returns it.
+        /// </summary>
+        /// <param name="tokenString">token to be parsed.</param>
+        /// <returns>User id, stored in 'sub' claim.</returns>
         /// <exception cref="SharedException">Claim 'sub' of <paramref name="tokenString"/> not found.</exception>
         /// <exception cref="SharedException">Claim 'sub' value is invalid.</exception>
         public Guid GetUserId(string tokenString)
@@ -111,8 +138,9 @@ namespace CarRentalApp.Services.Token
             var handler = new JwtSecurityTokenHandler();
             var jwtSecurityToken = handler.ReadJwtToken(tokenString);
             var userIdString = jwtSecurityToken.Claims
-                .FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?
-                .Value;
+               .FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)
+             ?
+            .Value;
 
             if (userIdString == null)
             {
@@ -135,6 +163,34 @@ namespace CarRentalApp.Services.Token
             return userId;
         }
 
+        /// <summary>
+        /// Generates long-term token to refresh access.
+        /// </summary>
+        /// <param name="user">token owner.</param>
+        /// <returns>Generated refresh token.</returns>
+        public string GenerateRefreshToken(User user)
+        {
+            var refreshJwtGenerationParams = _refreshJwtConfig.GenerationParameters;
+
+            var jwtClaims = new List<Claim>()
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString())
+            };
+
+            var refreshToken = new JwtSecurityToken(
+                claims: jwtClaims,
+                expires: DateTimeOffset.Now.UtcDateTime.AddSeconds(refreshJwtGenerationParams.LifeTimeSeconds),
+                signingCredentials: GetJWTCredentials(refreshJwtGenerationParams)
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(refreshToken);
+        }
+
+        /// <summary>
+        /// Generates short-term token to access resources according to <paramref name="user"/> roles.
+        /// </summary>
+        /// <param name="user">token owner.</param>
+        /// <returns>Generated access token.</returns>
         private string GenerateAccessToken(User user)
         {
             var accessJwtGenerationParams = _accessJwtConfig.GenerationParameters;
@@ -161,24 +217,11 @@ namespace CarRentalApp.Services.Token
             return new JwtSecurityTokenHandler().WriteToken(accessToken);
         }
 
-        public string GenerateRefreshToken(User user)
-        {
-            var refreshJwtGenerationParams = _refreshJwtConfig.GenerationParameters;
-
-            var jwtClaims = new List<Claim>()
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString())
-            };
-
-            var refreshToken = new JwtSecurityToken(
-                claims: jwtClaims,
-                expires: DateTimeOffset.Now.UtcDateTime.AddSeconds(refreshJwtGenerationParams.LifeTimeSeconds),
-                signingCredentials: GetJWTCredentials(refreshJwtGenerationParams)
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(refreshToken);
-        }
-
+        /// <summary>
+        /// Saves refresh token model based on <paramref name="refreshTokenString"/> and <paramref name="user"/>.
+        /// </summary>
+        /// <param name="refreshTokenString">token prototype to be saved.</param>
+        /// <param name="user">token owner.</param>
         private Task StoreRefreshTokenAsync(string refreshTokenString, User user)
         {
             var refreshToken = new RefreshToken()
@@ -192,19 +235,27 @@ namespace CarRentalApp.Services.Token
             return _carRentalDbContext.SaveChangesAsync();
         }
 
-        private async Task InvalidateRelatedRefreshTokensAsync(RefreshTokenDTO refreshTokenDTO)
+        /// <summary>
+        /// Revokes all stored tokens with same 'sub' claim as <paramref name="refreshTokenDto"/> contains.
+        /// </summary>
+        /// <param name="refreshTokenDto">token prototype to revoke relative tokens.</param>
+        private async Task InvalidateRelatedRefreshTokensAsync(RefreshTokenDto refreshTokenDto)
         {
-            var userId = GetUserId(refreshTokenDTO.Token);
+            var userId = GetUserId(refreshTokenDto.Token);
 
             var tokens = await _carRentalDbContext.RefreshTokens
-                .Where(t => t.UserId == userId)
-                .ToListAsync();
+               .Where(t => t.UserId == userId)
+               .ToListAsync();
 
             _carRentalDbContext.RefreshTokens.RemoveRange(tokens);
 
             await _carRentalDbContext.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Gathers token validation params from JWT config and secret key from token generation params and returns it.
+        /// </summary>
+        /// <returns>Gathered token validation params.</returns>
         private TokenValidationParameters GetRefreshValidationParams()
         {
             var refreshJwtValidationParams = _refreshJwtConfig.ValidationParameters;
@@ -213,6 +264,11 @@ namespace CarRentalApp.Services.Token
             return refreshJwtValidationParams;
         }
 
+        /// <summary>
+        /// Gets signing credentials for token generation from passed token generation params.
+        /// </summary>
+        /// <param name="jwtParams">params, which contain string secret key.</param>
+        /// <returns>Signing credentials for token generation.</returns>
         private SigningCredentials GetJWTCredentials(GenerationParameters jwtParams)
         {
             return new SigningCredentials(

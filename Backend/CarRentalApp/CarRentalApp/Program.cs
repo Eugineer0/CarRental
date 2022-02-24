@@ -1,14 +1,11 @@
 using CarRentalApp.Configuration;
 using CarRentalApp.Configuration.JWT.Access;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using CarRentalApp.Services.Identity;
-using CarRentalApp.Services.Token;
-using CarRentalApp.Services.Authentication;
 using CarRentalApp.Contexts;
 using Microsoft.EntityFrameworkCore;
 using CarRentalApp.Configuration.JWT.Refresh;
-using CarRentalApp.Mappers;
 using CarRentalApp.Middleware;
+using CarRentalApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,8 +31,6 @@ builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
 
 builder.Services.AddScoped<PasswordService>();
-
-builder.Services.AddAutoMapper(typeof(UserMapperProfile));
 
 var accessJwtConfig = new AccessJwtConfig();
 builder.Configuration.Bind(AccessJwtConfig.Section, accessJwtConfig);

@@ -32,7 +32,7 @@ namespace CarRentalApp.Middleware
             };
 
             ActionResult result;
-            
+
             switch (exception.ErrorType)
             {
                 case ErrorTypes.AdditionalDataRequired:
@@ -77,7 +77,7 @@ namespace CarRentalApp.Middleware
                     break;
                 }
             }
-            
+
             await result.ExecuteResultAsync(actionContext);
         }
     }

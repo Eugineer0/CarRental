@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using CarRentalApp.Exceptions;
-using CarRentalApp.Services.Identity;
+using CarRentalApp.Services;
 
 namespace CarRentalApp.ValidationAttributes
 {

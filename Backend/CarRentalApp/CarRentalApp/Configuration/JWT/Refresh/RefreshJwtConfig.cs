@@ -6,8 +6,8 @@ namespace CarRentalApp.Configuration.JWT.Refresh
     {
         public const string Section = "RefreshJwtConfig";
 
-        public RefreshTokenGenerationParameters GenerationParameters { get; set; }
+        public RefreshTokenGenerationParameters GenerationParameters { get; set; } = null!;
 
-        public TokenValidationParameters ValidationParameters { get; set; }
+        public TokenValidationParameters ValidationParameters { get; set; } = null!;
     }
 }

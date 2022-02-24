@@ -5,11 +5,11 @@ namespace CarRentalApp.Contexts
 {
     public class CarRentalDbContext : DbContext
     {
-        public DbSet<User> Users { get; set; }
-        
-        public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<User> Users => Set<User>();
 
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<UserRole> UserRoles => Set<UserRole>();
+
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         public CarRentalDbContext(DbContextOptions<CarRentalDbContext> options) : base(options)
         {
