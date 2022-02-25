@@ -8,6 +8,8 @@ import { RegisterComponent } from "./register/register.component";
 import { CompleteRegistrationComponent } from "./complete-registration/complete-registration.component";
 import { UsersComponent } from "./users/users.component";
 import { UserInfoComponent } from "./user-info/user-info.component";
+import { RentalCentersComponent } from "./rental-centers/rental-centers.component";
+import { RentalCenterInfoComponent } from "./rental-center-info/rental-center-info.component";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: 'welcome'},
@@ -15,7 +17,9 @@ const routes: Routes = [
   {path: 'login', component: LoginComponent},
   {path: 'completeRegistration', component: CompleteRegistrationComponent},
   {path: 'users', canActivate: [AuthGuard],  component: UsersComponent},
-  {path: 'users/:username', canActivate: [AuthGuard], component: UserInfoComponent}
+  {path: 'users/:username', canActivate: [AuthGuard], component: UserInfoComponent},
+  {path: 'rental-centers',  component: RentalCentersComponent},
+  {path: 'rental-centers/:name',  component: RentalCenterInfoComponent},
 ];
 
 @NgModule({

@@ -19,6 +19,7 @@ import { UsersComponent } from './users/users.component';
 import { UserInfoComponent } from './user-info/user-info.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RentalCentersComponent } from './rental-centers/rental-centers.component';
+import { RentalCenterInfoComponent } from './rental-center-info/rental-center-info.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { RentalCentersComponent } from './rental-centers/rental-centers.componen
     UsersComponent,
     UserInfoComponent,
     RentalCentersComponent,
+    RentalCenterInfoComponent,
   ],
   imports: [
     AppRoutingModule,

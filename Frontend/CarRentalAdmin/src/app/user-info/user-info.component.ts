@@ -21,7 +21,7 @@ export class UserInfoComponent implements OnInit {
   constructor(
     private location: Location,
     private userService: UserService,
-    private route: ActivatedRoute,
+    private route: ActivatedRoute
   ) {
   }
 
@@ -40,7 +40,7 @@ export class UserInfoComponent implements OnInit {
       this.userService.getUser(this.username)
         .subscribe(user => {
             this.user = user;
-            this.copyRoles(user.roles);
+            this.copyRoles(user.roles, this.roles);
           }
         );
     }
@@ -56,8 +56,11 @@ export class UserInfoComponent implements OnInit {
 
   public onSubmit(): void {
     if(this.username) {
-    this.userService.putRoles(this.username, this.roles)
-      .subscribe();
+      this.userService.putRoles(this.username, this.roles)
+        .subscribe();
+      if(this.user) {
+        this.copyRoles(this.roles, this.user.roles);
+      }
     }
   }
 
@@ -89,15 +92,15 @@ export class UserInfoComponent implements OnInit {
     if (this.user) {
       console.log(this.user.roles);
 
-      this.roles = this.user.roles;
+      this.copyRoles(this.user.roles, this.roles);
 
       console.log(this.user.roles);
     }
   }
 
-  private copyRoles(roles: Roles[]): void {
-    for(let role of roles) {
-      this.roles.push(role);
+  private copyRoles(source: Roles[], dest: Roles[]): void {
+    for(let role of source) {
+      dest.push(role);
     }
   }
 }

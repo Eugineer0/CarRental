@@ -21,10 +21,9 @@ export class RentalCenterService {
     return this.http.get<RentalCenter[]>(this.rentalCentersUrl);
   }
 
-  public getCenterAccessibleCars(name: string, startRent: Date, finishRent: Date): Observable<ArrayBuffer> {
+  public getCenterAccessibleCars(name: string): Observable<Car[]> {
     return this.http.get<Car[]>(
-      `${this.rentalCentersUrl}/${name}`,
-      {queryParams: {start: startRent}, {finish: finishRent}}
+      `${this.rentalCentersUrl}/${name}`
     );
   }
 }

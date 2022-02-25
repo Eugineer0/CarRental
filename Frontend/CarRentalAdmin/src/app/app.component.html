@@ -5,17 +5,15 @@
       <li class="nav-item">
         <a class="nav-link" routerLink="/home" routerLinkActive="active">Home</a>
       </li>
-      <span *ngIf="isLoggedIn()">
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/users" routerLinkActive="active">Users</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/services" routerLinkActive="active">Additional services</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/centers" routerLinkActive="active">Rental centers</a>
-        </li>
-      </span>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/users" routerLinkActive="active">Users</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/services" routerLinkActive="active">Additional services</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/rental-centers" routerLinkActive="active">Rental centers</a>
+      </li>
     </ul>
     <ul class="navbar-nav">
       <li
@@ -49,6 +47,6 @@
     </ul>
   </div>
 </nav>
-<div class="container">
+<div class="container-l">
   <router-outlet></router-outlet>
 </div>

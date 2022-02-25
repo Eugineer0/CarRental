@@ -1,1 +1,87 @@
-<p>rental-centers works!</p>
+<div class="row align-items-start mx-0">
+  <div class="col-md-2">
+    <div class="card mb-0">
+      <h5 class="card-header">Filter</h5>
+      <div class="card-body">
+        <form name="form" (ngSubmit)="onSubmit()" #filterForm="ngForm">
+          <div class="form-group">
+            <label class="mb-0 mt-2" for="country">Country</label>
+            <select
+              class="form-control"
+              id="country"
+            >
+              <option
+                *ngFor="let country of countries"
+                [value]="country"
+              >{{country}}</option>
+            </select>
+            <label class="mb-0 mt-2" for="city">City</label>
+            <select
+              class="form-control"
+              id="city"
+            >
+              <option
+                *ngFor="let city of cities"
+                [value]="city"
+              >{{city}}</option>
+            </select>
+            <label class="mb-0 mt-2" for="minimumCarsNumber">Minimum cars accessible</label>
+            <input
+              min="0"
+              type="number"
+              class="form-control"
+              id="minimumCarsNumber"
+            >
+            <label class="mb-0 mt-2" for="startRent">Rental start</label>
+            <span class="form-control" id="startRent">
+              <input type="date" class="form-control" id="startDate">
+              <input type="time" class="form-control" id="StartTime">
+            </span>
+            <label class="mb-0 mt-2" for="finishRent">Rental finish</label>
+            <span class="form-control" id="finishRent">
+              <input type="date" class="form-control" id="finishDate">
+              <input type="time" class="form-control" id="finishTime">
+            </span>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary col-12"
+            [disabled]="filterForm.form.invalid"
+          >Find</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <table class="table table-hover table-sm">
+      <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Country</th>
+        <th scope="col">City</th>
+        <th scope="col">Address</th>
+        <th scope="col">Accessible cars</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let center of centers">
+        <td>
+          <button
+            class="btn btn-primary"
+            routerLink="/rental-centers/{{center.name}}"
+            data-bs-toggle="tooltip"
+            data-bs-placement="left"
+            title="Click to to view detail info"
+          >
+            {{center.name}}
+          </button>
+        </td>
+        <td>{{center.country}}</td>
+        <td>{{center.city}}</td>
+        <td>{{center.address}}</td>
+        <td>{{center.accessibleCarsNumber}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

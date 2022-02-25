@@ -24,6 +24,6 @@ export class UserService {
   }
 
   public putRoles(username: string, roles: Roles[]): Observable<any> {
-    return this.http.put(`${this.usersUrl}/${username}`, {roles: roles});
+    return this.http.put(`${this.usersUrl}/${username}/roles`, {roles: roles});
   }
 }

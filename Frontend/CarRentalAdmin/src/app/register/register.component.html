@@ -113,6 +113,29 @@
                 Surname must start from capital and contain only latin letters or hyphen in composite variant.
               </div>
             </div>
+            <label class="mb-0 mt-2" for="dateOfBirth">Date of birth</label>
+            <input
+              #dateOfBirthField="ngModel"
+              required
+              appFieldConstraint="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+              type="date"
+              name="dateOfBirth"
+              class="form-control"
+              id="dateOfBirth"
+              (ngModelChange)="resetRegisterStatus()"
+              [(ngModel)]="admin.dateOfBirth"
+            >
+            <div
+              *ngIf="dateOfBirthField.invalid && (dateOfBirthField.dirty || dateOfBirthField.touched)"
+              class="alert alert-danger"
+            >
+              <div *ngIf="dateOfBirthField.errors?.['required']">
+                Date of birth is required.
+              </div>
+              <div *ngIf="passwordField.errors?.['fieldConstraint']">
+                Incorrect date of birth format
+              </div>
+            </div>
             <label class="mb-0 mt-2" for="passportNumber">Passport number</label>
             <input
               #passportNumberField="ngModel"
