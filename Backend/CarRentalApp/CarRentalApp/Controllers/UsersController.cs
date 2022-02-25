@@ -1,5 +1,7 @@
-﻿using CarRentalApp.Models.Dto;
-using CarRentalApp.Models.Entities;
+﻿using System.Collections.Immutable;
+using CarRentalApp.Models.BLL;
+using CarRentalApp.Models.DAL;
+using CarRentalApp.Models.WEB.Requests;
 using CarRentalApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,14 +21,17 @@ namespace CarRentalApp.Controllers
 
         [Authorize(Roles = "SuperAdmin")]
         [HttpPut("{username}/roles")]
-        public async Task<IActionResult> ModifyRoles(string username, RolesDto model)
+        public async Task<IActionResult> ModifyRoles(string username, RolesModificationRequest request)
         {
-            await _userService.ModifyUserRolesAsync(username, model);
-            return Ok();
+            var roles = request.Roles
+                .Select(role => (Roles) Enum.Parse(typeof(Roles), role))
+                .ToImmutableHashSet();
+            await _userService.ModifyRolesAsync(username, roles);
+            return NoContent();
         }
 
-        [Authorize(Roles = UserRole.AdminRolesString)]
-        [HttpPut("{username}/[action]")]
+        [Authorize(Roles = RolesInfo.AdminRolesString)]
+        [HttpPost("{username}/approve-client")]
         public async Task<IActionResult> ApproveClient(string username)
         {
             await _userService.ApproveClientAsync(username);

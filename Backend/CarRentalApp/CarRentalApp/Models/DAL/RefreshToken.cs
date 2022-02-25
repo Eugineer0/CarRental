@@ -1,4 +1,4 @@
-﻿namespace CarRentalApp.Models.Entities
+﻿namespace CarRentalApp.Models.DAL
 {
     public class RefreshToken
     {

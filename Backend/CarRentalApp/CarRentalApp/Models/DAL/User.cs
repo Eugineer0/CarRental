@@ -1,4 +1,4 @@
-﻿namespace CarRentalApp.Models.Entities
+﻿namespace CarRentalApp.Models.DAL
 {
     public class User
     {
@@ -20,8 +20,8 @@
 
         public DateTime DateOfBirth { get; set; }
 
-        public ICollection<UserRole> Roles { get; set; } = null!;
-
         public string? DriverLicenseSerialNumber { get; set; }
+
+        public List<UserRole> Roles { get; set; } = null!;
     }
 }

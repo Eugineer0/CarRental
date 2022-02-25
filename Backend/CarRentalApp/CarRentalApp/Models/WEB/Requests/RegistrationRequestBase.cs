@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using CarRentalApp.ValidationAttributes;
 
-namespace CarRentalApp.Models.Dto.Registration
+namespace CarRentalApp.Models.WEB.Requests
 {
-    public class UserRegistrationDto
+    public abstract class RegistrationRequestBase
     {
         [Required]
         [StringLength(
@@ -68,15 +68,5 @@ namespace CarRentalApp.Models.Dto.Registration
             ErrorMessage = "Incorrect format: The {0} value must consist of 2 capitals leading 7 digits"
         )]
         public string PassportNumber { get; set; } = null!;
-
-        [Required]
-        [MinimumAge(minimumAge: 14, ErrorMessage = "Incorrect input: Admin have to reach {1} years")]
-        public virtual DateTime? DateOfBirth { get; set; }
-
-        [RegularExpression(
-            "[0-9]{1}[A-Z]{2}[0-9]{6}",
-            ErrorMessage = "Incorrect format: The {0} value must consist of 1 digit leading 2 capitals, followed by 6 digits"
-        )]
-        public virtual string DriverLicenseSerialNumber { get; set; } = null!;
     }
 }

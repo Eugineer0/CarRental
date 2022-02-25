@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CarRentalApp.Models.Dto
+namespace CarRentalApp.Models.WEB.Requests
 {
-    public class UserLoginDto
+    public class UserLoginRequest
     {
         [Required]
         public string Username { get; set; } = null!;

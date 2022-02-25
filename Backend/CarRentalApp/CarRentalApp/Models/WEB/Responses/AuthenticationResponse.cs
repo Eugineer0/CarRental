@@ -1,6 +1,6 @@
-﻿namespace CarRentalApp.Models.Dto
+﻿namespace CarRentalApp.Models.WEB.Responses
 {
-    public class AuthenticationDto
+    public class AuthenticationResponse
     {
         public string AccessToken { get; set; } = null!;
 

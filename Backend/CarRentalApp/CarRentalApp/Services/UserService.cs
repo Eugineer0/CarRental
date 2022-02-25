@@ -1,9 +1,8 @@
 ﻿using CarRentalApp.Configuration;
 using CarRentalApp.Contexts;
 using CarRentalApp.Exceptions;
-using CarRentalApp.Models.Dto;
-using CarRentalApp.Models.Dto.Registration;
-using CarRentalApp.Models.Entities;
+using CarRentalApp.Models.BLL;
+using CarRentalApp.Models.DAL;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -31,15 +30,16 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Gets user by token and fills in driver license field
+        /// Gets user by <paramref name="tokenString"/> and fills in <paramref name="driverLicenseSerialNumber"/> field
         /// </summary>
-        /// <param name="completeRegistrationDto">pair of auth token and driver license serial number</param>
-        public async Task CompleteRegistrationAsync(CompleteRegistrationDto completeRegistrationDto)
+        /// <param name="driverLicenseSerialNumber">serial number to be added to user info</param>
+        /// <param name="tokenString">auth token with info about user</param>
+        public async Task CompleteRegistrationAsync(string driverLicenseSerialNumber, string tokenString)
         {
-            var userId = _tokenService.GetUserId(completeRegistrationDto.Token);
+            var userId = _tokenService.GetUserId(tokenString);
             var user = await GetByIdAsync(userId);
 
-            user.DriverLicenseSerialNumber = completeRegistrationDto.DriverLicenseSerialNumber;
+            user.DriverLicenseSerialNumber = driverLicenseSerialNumber;
 
             await _carRentalDbContext.SaveChangesAsync();
         }
@@ -47,15 +47,15 @@ namespace CarRentalApp.Services
         /// <summary>
         /// Validates passed user prototype as client and returns generated access object for that user.
         /// </summary>
-        /// <param name="userLoginDto">user prototype to login.</param>
+        /// <param name="loginModel">user prototype to login.</param>
         /// <returns>Generated access object.</returns>
         /// <exception cref="SharedException">User must specify driver license field</exception>
-        public async Task<AuthenticationDto> LoginAsync(UserLoginDto userLoginDto)
+        public async Task<AccessModel> LoginAsync(LoginModel loginModel)
         {
-            var user = await GetByUsernameAsync(userLoginDto.Username);
-            if (ValidateClient(user, userLoginDto))
+            var user = await GetByUsernameAsync(loginModel.Username);
+            if (ValidateClient(user, loginModel))
             {
-                return await _tokenService.GetAccess(user);
+                return await _tokenService.GetAccessAsync(user);
             }
 
             var token = _tokenService.GenerateRefreshToken(user);
@@ -69,23 +69,23 @@ namespace CarRentalApp.Services
         /// <summary>
         /// Validates passed user prototype as admin and returns generated access object for that user.
         /// </summary>
-        /// <param name="userLoginDto">user prototype to login.</param>
+        /// <param name="loginModel">user prototype to login.</param>
         /// <returns>Generated access object.</returns>
-        public async Task<AuthenticationDto> LoginAdminAsync(UserLoginDto userLoginDto)
+        public async Task<AccessModel> LoginAdminAsync(LoginModel loginModel)
         {
-            var user = await GetByUsernameAsync(userLoginDto.Username);
-            ValidateAdmin(user, userLoginDto);
-            return await _tokenService.GetAccess(user);
+            var user = await GetByUsernameAsync(loginModel.Username);
+            ValidateAdmin(user, loginModel);
+            return await _tokenService.GetAccessAsync(user);
         }
 
         /// <summary>
         /// Checks uniqueness of credentials and saves created user model in database.
         /// </summary>
-        /// <param name="userRegistrationDto">user prototype to register.</param>
-        public async Task RegisterAsync(UserRegistrationDto userRegistrationDto)
+        /// <param name="registrationModel">user prototype to register.</param>
+        public async Task RegisterAsync(RegistrationModel registrationModel)
         {
-            await CheckCredentialsUniqueness(userRegistrationDto.Email, userRegistrationDto.Username);
-            var user = CreateFromDto(userRegistrationDto);
+            await CheckCredentialsUniqueness(registrationModel.Email, registrationModel.Username);
+            var user = CreateEntity(registrationModel);
             _carRentalDbContext.Users.Add(user);
             await _carRentalDbContext.SaveChangesAsync();
         }
@@ -93,16 +93,16 @@ namespace CarRentalApp.Services
         /// <summary>
         /// Validates passed token and replaces it with new refresh token.
         /// </summary>
-        /// <param name="refreshTokenDto">token prototype to authenticate user.</param>
+        /// <param name="refreshTokenString">auth token.</param>
         /// <returns>Generated access object.</returns>
-        public async Task<AuthenticationDto> RefreshAccessAsync(RefreshTokenDto refreshTokenDto)
+        public async Task<AccessModel> RefreshAccessAsync(string refreshTokenString)
         {
-            var token = await _tokenService.PopTokenAsync(refreshTokenDto);
+            var token = await _tokenService.PopTokenAsync(refreshTokenString);
 
             _tokenService.ValidateTokenLifetime(token.Token);
 
             var user = await GetByIdAsync(token.UserId);
-            return await _tokenService.GetAccess(user);
+            return await _tokenService.GetAccessAsync(user);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace CarRentalApp.Services
         {
             var user = await GetByUsernameAsync(username);
 
-            if (user.Roles.Select(role => role.Role).Intersect(UserRole.ClientRoles).Any())
+            if (user.Roles.CheckIfIntersects(RolesInfo.ClientRoles))
             {
                 return;
             }
@@ -131,19 +131,36 @@ namespace CarRentalApp.Services
             }
 
             user.Roles.Add(new UserRole() { Role = Roles.Client });
+            user.Roles.RemoveAll(role => role.Role == Roles.None);
             await _carRentalDbContext.SaveChangesAsync();
         }
 
         /// <summary>
-        /// Validates passed roles and assign them to existing user model found by username.
+        /// Validates passed <paramref name="roles"/> and assign them to existing user model found by <paramref name="username"/>.
         /// </summary>
         /// <param name="username">user model field.</param>
-        /// <param name="rolesDto">object, containing array of roles.</param>
-        public async Task ModifyUserRolesAsync(string username, RolesDto rolesDto)
+        /// <param name="roles">object, containing array of roles.</param>
+        /// <exception cref="SharedException">Cannot specify client role without additional info.</exception>
+        public async Task ModifyRolesAsync(string username, IReadOnlySet<Roles> roles)
         {
+            ValidateRoles(roles);
             var user = await GetByUsernameAsync(username);
-            ValidateNewRoles(user, rolesDto);
-            await UpdateRolesAsync(user, rolesDto);
+
+            if (roles.CheckIfIntersects(RolesInfo.ClientRoles))
+            {
+                ValidateAge(user.DateOfBirth);
+
+                if (user.DriverLicenseSerialNumber == null)
+                {
+                    throw new SharedException(
+                        ErrorTypes.Conflict,
+                        "Roles modifying failed",
+                        "User cannot become a client without specifying DriverLicenseSerialNumber"
+                    );
+                }
+            }
+
+            await UpdateRolesAsync(user, roles);
         }
 
         /// <summary>
@@ -170,8 +187,8 @@ namespace CarRentalApp.Services
         private async Task<User> GetByUsernameAsync(string username)
         {
             var user = await _carRentalDbContext.Users
-               .Include(user => user.Roles)
-               .FirstOrDefaultAsync(user => user.Username.Equals(username));
+                .Include(user => user.Roles)
+                .FirstOrDefaultAsync(user => user.Username.Equals(username));
             if (user == null)
             {
                 throw new SharedException(
@@ -193,14 +210,14 @@ namespace CarRentalApp.Services
         private async Task<User> GetByIdAsync(Guid userId)
         {
             var user = await _carRentalDbContext.Users
-               .Include(user => user.Roles)
-               .FirstOrDefaultAsync(user => user.Id == userId);
+                .Include(user => user.Roles)
+                .FirstOrDefaultAsync(user => user.Id == userId);
             if (user == null)
             {
                 throw new SharedException(
-                    ErrorTypes.AuthFailed,
-                    "Invalid token",
-                    "User not found by refresh token userId"
+                    ErrorTypes.NotFound,
+                    "User not found",
+                    "User with such Id not found"
                 );
             }
 
@@ -208,16 +225,16 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Checks if <paramref name="userLoginDto"/> corresponds <paramref name="user"/> and has on of client`s roles.
+        /// Checks if <paramref name="loginModel"/> corresponds <paramref name="user"/> and has on of client`s roles.
         /// </summary>
         /// <param name="user">existing user model.</param>
-        /// <param name="userLoginDto">years.</param>
+        /// <param name="loginModel">years.</param>
         /// <exception cref="SharedException">Client role is not approved.</exception>
-        private bool ValidateClient(User user, UserLoginDto userLoginDto)
+        private bool ValidateClient(User user, LoginModel loginModel)
         {
-            _passwordService.ValidatePassword(user.HashedPassword, user.Salt, userLoginDto.Password);
+            _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
 
-            if (user.Roles.Select(role => role.Role).Intersect(UserRole.ClientRoles).Any())
+            if (user.Roles.CheckIfIntersects(RolesInfo.ClientRoles))
             {
                 return true;
             }
@@ -235,16 +252,16 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Checks if <paramref name="userLoginDto"/> corresponds <paramref name="user"/> and has on of admin`s roles.
+        /// Checks if <paramref name="loginModel"/> corresponds <paramref name="user"/> and has on of admin`s roles.
         /// </summary>
         /// <param name="user">existing user model.</param>
-        /// <param name="userLoginDto">user prototype to be validated.</param>
+        /// <param name="loginModel">user prototype to be validated.</param>
         /// <exception cref="SharedException">Inconsistent user role.</exception>
-        private void ValidateAdmin(User user, UserLoginDto userLoginDto)
+        private void ValidateAdmin(User user, LoginModel loginModel)
         {
-            _passwordService.ValidatePassword(user.HashedPassword, user.Salt, userLoginDto.Password);
+            _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
 
-            if (!user.Roles.Select(role => role.Role).Intersect(UserRole.AdminRoles).Any())
+            if (!user.Roles.CheckIfIntersects(RolesInfo.AdminRoles))
             {
                 throw new SharedException(
                     ErrorTypes.AccessDenied,
@@ -254,53 +271,46 @@ namespace CarRentalApp.Services
             }
         }
 
-
         /// <summary>
-        /// Checks if <paramref name="rolesDto"/> contains valid roles array against <paramref name="user"/> model.
+        /// Checks if <paramref name="roles"/> are valid and can be assigned to user.
         /// </summary>
-        /// <param name="user">existing user model.</param>
-        /// <param name="rolesDto">object. containing array of roles.</param>
+        /// <param name="roles">set of roles to validate.</param>
         /// <exception cref="SharedException">Empty roles set.</exception>
-        /// <exception cref="SharedException">Cannot specify client role without additional info.</exception>
-        private void ValidateNewRoles(User user, RolesDto rolesDto)
+        /// <exception cref="SharedException">Inconsistent role set.</exception>
+        private void ValidateRoles(IReadOnlySet<Roles> roles)
         {
-            if (rolesDto.Roles.Count < 1)
+            if (!roles.Any())
             {
                 throw new SharedException(
                     ErrorTypes.Invalid,
-                    "Role changing failed",
+                    "Roles modifying failed",
                     "User must have at least 1 role"
                 );
             }
 
-            if (rolesDto.Roles.Intersect(UserRole.ClientRoles).Any())
+            if (roles.Contains(Roles.None) && roles.Count > 1)
             {
-                ValidateAge(user.DateOfBirth);
-
-                if (user.DriverLicenseSerialNumber == null)
-                {
-                    throw new SharedException(
-                        ErrorTypes.Conflict,
-                        "Role changing failed",
-                        "User cannot become a client without specifying DriverLicenseSerialNumber"
-                    );
-                }
+                throw new SharedException(
+                    ErrorTypes.Invalid,
+                    "Roles modifying failed",
+                    "User must have single 'None' role or other roles"
+                );
             }
         }
 
         /// <summary>
-        /// Creates user model from <paramref name="userRegistrationDto"/> with None role.
+        /// Creates user model from <paramref name="registrationModel"/> with None role.
         /// </summary>
-        /// <param name="userRegistrationDto">user prototype.</param>
+        /// <param name="registrationModel">user prototype.</param>
         /// <returns> Newly created user.</returns>
-        private User CreateFromDto(UserRegistrationDto userRegistrationDto)
+        private User CreateEntity(RegistrationModel registrationModel)
         {
-            var user = userRegistrationDto.Adapt<UserRegistrationDto, User>();
+            var user = registrationModel.Adapt<RegistrationModel, User>();
 
             user.Salt = _passwordService.GenerateSalt();
-            user.HashedPassword = _passwordService.DigestPassword(userRegistrationDto.Password, user.Salt);
+            user.HashedPassword = _passwordService.DigestPassword(registrationModel.Password, user.Salt);
 
-            user.Roles = new List<UserRole>() { new UserRole() { Role = Roles.None } };
+            user.Roles = new List<UserRole>() { new() { Role = Roles.None } };
 
             return user;
         }
@@ -332,7 +342,7 @@ namespace CarRentalApp.Services
         /// <exception cref="SharedException">User with such credentials already exists.</exception>
         private async Task CheckCredentialsUniqueness(string email, string username)
         {
-            if (await _carRentalDbContext.Users.AnyAsync(user => user.Email.Equals(username)))
+            if (await _carRentalDbContext.Users.AnyAsync(user => user.Username.Equals(username)))
             {
                 throw new SharedException(
                     ErrorTypes.Conflict,
@@ -340,7 +350,7 @@ namespace CarRentalApp.Services
                 );
             }
 
-            if (await _carRentalDbContext.Users.AnyAsync(user => user.Username.Equals(email)))
+            if (await _carRentalDbContext.Users.AnyAsync(user => user.Email.Equals(email)))
             {
                 throw new SharedException(
                     ErrorTypes.Conflict,
@@ -350,18 +360,18 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Assigns passed array of roles to <paramref name="user"/>.
+        /// Assigns passed set of roles to <paramref name="user"/>.
         /// </summary>
         /// <param name="user">user model to be updated.</param>
-        /// <param name="rolesDto">object, containing array of roles.</param>
-        private Task UpdateRolesAsync(User user, RolesDto rolesDto)
+        /// <param name="roles">set of roles.</param>
+        private Task UpdateRolesAsync(User user, IReadOnlySet<Roles> roles)
         {
-            if (user.Roles.Select(role => role.Role).SequenceEqual(rolesDto.Roles))
+            if (user.Roles.Select(role => role.Role).SequenceEqual(roles))
             {
                 return Task.CompletedTask;
             }
 
-            user.Roles = rolesDto.Roles.Select(role => new UserRole() { Role = role }).ToList();
+            user.Roles = roles.Select(role => new UserRole() { Role = role }).ToList();
 
             return _carRentalDbContext.SaveChangesAsync();
         }

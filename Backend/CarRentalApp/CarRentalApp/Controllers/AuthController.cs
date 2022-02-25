@@ -1,6 +1,7 @@
-using CarRentalApp.Models.Dto;
-using CarRentalApp.Models.Dto.Registration;
+using CarRentalApp.Models.BLL;
+using CarRentalApp.Models.WEB.Requests;
 using CarRentalApp.Services;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,52 +24,61 @@ namespace CarRentalApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(UserLoginDto model)
+        public async Task<IActionResult> Login(UserLoginRequest request)
         {
-            var access = await _userService.LoginAsync(model);
-            return Ok(access);
+            var model = request.Adapt<LoginModel>();
+            var response = await _userService.LoginAsync(model);
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> LoginAdmin(UserLoginDto model)
+        public async Task<IActionResult> LoginAdmin(UserLoginRequest request)
         {
-            var access = await _userService.LoginAdminAsync(model);
-            return Ok(access);
+            var model = request.Adapt<LoginModel>();
+            var response = await _userService.LoginAdminAsync(model);
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Refresh(RefreshTokenDto model)
+        public async Task<IActionResult> Refresh(RefreshAccessRequest request)
         {
-            var access = await _userService.RefreshAccessAsync(model);
-            return Ok(access);
+            var response = await _userService.RefreshAccessAsync(request.RefreshToken);
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Logout(RefreshTokenDto model)
+        public async Task<IActionResult> Logout(RefreshAccessRequest request)
         {
-            await _tokenService.PopTokenAsync(model);
+            await _tokenService.PopTokenAsync(request.RefreshToken);
             return Ok();
         }
 
         [HttpPost]
-        public Task<IActionResult> RegisterClient(ClientRegistrationDto model)
+        public Task<IActionResult> Register(ClientRegistrationRequest request)
         {
-            return Register(model);
+            var model = request.Adapt<RegistrationModel>();
+            return RegisterModel(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(UserRegistrationDto model)
+        public Task<IActionResult> RegisterAdmin(AdminRegistrationRequest request)
         {
-            await _userService.RegisterAsync(model);
-            return Ok();
+            var model = request.Adapt<RegistrationModel>();
+            return RegisterModel(model);
         }
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> CompleteRegistration(CompleteRegistrationDto model)
+        public async Task<IActionResult> CompleteRegistration(RegistrationCompletionRequest request)
         {
-            await _userService.CompleteRegistrationAsync(model);
+            await _userService.CompleteRegistrationAsync(request.DriverLicenseSerialNumber, request.Token);
             return Ok();
+        }
+
+        private async Task<IActionResult> RegisterModel(RegistrationModel model)
+        {
+            await _userService.RegisterAsync(model);
+            return Created($"api/users/{model.Username}", null);
         }
     }
 }
