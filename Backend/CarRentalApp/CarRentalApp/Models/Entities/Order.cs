@@ -4,6 +4,8 @@ public class Order
 {
     public int Id { get; set; }
 
+    public decimal OverallPrice { get; set; }
+
     public DateTime StartRent { get; set; }
 
     public DateTime FinishRent { get; set; }

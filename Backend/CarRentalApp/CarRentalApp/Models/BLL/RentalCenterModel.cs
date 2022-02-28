@@ -1,9 +1,7 @@
-﻿namespace CarRentalApp.Models.Entities;
+﻿namespace CarRentalApp.Models.BLL;
 
-public class RentalCenter
+public class RentalCenterModel
 {
-    public Guid Id { get; set; }
-
     public string Name { get; set; }
 
     public string Country { get; set; }
@@ -12,5 +10,5 @@ public class RentalCenter
 
     public string Address { get; set; }
 
-    public IEnumerable<Car> Cars { get; set; }
+    public IEnumerable<CarModel> Cars { get; set; }
 }

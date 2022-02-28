@@ -222,7 +222,7 @@ namespace CarRentalApp.Services
         {
             var criticalDate = dateOfBirth.AddYears(minimumAge);
 
-            return DateTime.Now.CompareTo(criticalDate) > 0;
+            return criticalDate.Ticks < DateTime.Now.Ticks;
         }
 
         /// <exception cref="SharedException">Invalid user age.</exception>

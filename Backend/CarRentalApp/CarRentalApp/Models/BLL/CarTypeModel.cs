@@ -1,11 +1,9 @@
 ﻿using CarRentalApp.Models.Entities;
 
-namespace CarRentalApp.Models.DTOs.Car;
+namespace CarRentalApp.Models.BLL;
 
-public class CarDTO
+public class CarTypeModel
 {
-    public string RegistrationNumber { get; set; }
-
     public string Brand { get; set; }
 
     public string Model { get; set; }
@@ -27,4 +25,6 @@ public class CarDTO
     public decimal PricePerHour { get; set; }
 
     public decimal PricePerDay { get; set; }
+
+    public IEnumerable<ServiceModel> AvailableServices { get; set; }
 }

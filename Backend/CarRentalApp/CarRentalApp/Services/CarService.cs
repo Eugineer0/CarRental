@@ -1,5 +1,5 @@
 ﻿using CarRentalApp.Contexts;
-using CarRentalApp.Models.DTOs.Car;
+using CarRentalApp.Models.BLL;
 using CarRentalApp.Models.Entities;
 using Mapster;
 
@@ -14,26 +14,42 @@ namespace CarRentalApp.Services
             _carRentalDbContext = carRentalDbContext;
         }
 
-        public async Task<IEnumerable<CarDTO>> GetCars(RentalCenter rentalCenter)
+        public IEnumerable<CarModel> GetCars(IEnumerable<Car> cars)
         {
-            return rentalCenter.Cars.Select(car => car.Adapt<Car, CarDTO>());
+            return cars.Select(ConvertToModel);
         }
 
-        public async Task<IEnumerable<CarDTO>> GetAccessibleCars(RentalCenter rentalCenter, DateTime startRent, DateTime finishRent)
+        public async Task<IEnumerable<CarModel>> GetAccessibleCars(IEnumerable<Car> cars, DateTime startRent, DateTime finishRent)
         {
-            return rentalCenter.Cars
-                .Where(car => CheckIfAccessible(car, startRent, finishRent))
-                .Select(car => car.Adapt<Car, CarDTO>());
+            return cars.Where(car => CheckIfAvailable(car, startRent, finishRent))
+                .Select(car => car.Adapt<CarModel>());
         }
 
-        private bool CheckIfAccessible(Car car, DateTime start, DateTime finish)
+        public bool CheckIfAvailable(Car car, DateTime start, DateTime finish)
         {
             return car.Orders
-                .Select(order => new {order.FinishRent, order.StartRent})
-                .Any(date =>
-                    CheckIfBefore(date.StartRent, start)
-                    || CheckIfAfter(date.FinishRent, finish)
+                .Select(order => new { order.FinishRent, order.StartRent })
+                .All(
+                    date =>
+                        CheckIfAfter(date.FinishRent, start)
+                        && CheckIfAfter(date.StartRent, finish)
                 );
+        }
+
+        public CarModel ConvertToModel(Car car)
+        {
+            var model = car.Type.Adapt<CarModel>();
+            model.RegistrationNumber = car.RegistrationNumber;
+
+            return model;
+        }
+
+        private TypeAdapterConfig GetTypeAdapterConfig()
+        {
+            var config = new TypeAdapterConfig();
+            config.NewConfig<Car, CarModel>();
+
+            return config;
         }
 
         private bool CheckIfBefore(DateTime target, DateTime candidate)

@@ -106,6 +106,9 @@ namespace CarRentalApp.Migrations
                     b.Property<Guid>("CarId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("OverallPrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("FinishRent")
                         .HasColumnType("datetime2");
 

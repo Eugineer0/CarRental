@@ -1,6 +1,7 @@
 ﻿using CarRentalApp.Models.DTOs.Car;
 using CarRentalApp.Models.DTOs.RentalCenter;
 using CarRentalApp.Services;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarRentalApp.Controllers
@@ -18,30 +19,65 @@ namespace CarRentalApp.Controllers
             _carService = carService;
         }
 
-        // [HttpGet]
-        // public async Task<ActionResult<IEnumerable<RentalCenterDTO>>> GetCenters()
-        // {
-        //     return Ok(await _rentalCenterService.GetAllCenters());
-        // }
-
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RentalCenterDTO>>> GetCenters(DateTime start, DateTime finish)
+        public async Task<ActionResult<IEnumerable<RentalCenterDTO>>> GetCenters()
         {
-            var centers = await _rentalCenterService.GetCentersFilteredByDate(start, finish);
+            var result = await _rentalCenterService.GetCenterModelsAsync();
 
-            return Ok(centers);
+            var response = result.Select(
+                center =>
+                {
+                    var output = center.Adapt<RentalCenterDTO>();
+                    output.AvailableCarsNumber = center.Cars.Count();
+
+                    return output;
+                }
+            );
+
+            return Ok(response);
+        }
+
+        [HttpGet("{name}")]
+        public async Task<ActionResult<RentalCenterDTO>> GetCenter(string name)
+        {
+            var result = await _rentalCenterService.GetCenterModelAsync(name);
+            var response = result.Adapt<RentalCenterDTO>();
+            return Ok(response);
+        }
+
+        [HttpPost("filtered")]
+        public async Task<ActionResult<IEnumerable<RentalCenterDTO>>> GetFilteredCenters(CenterFilterRequest request)
+        {
+            var result = await _rentalCenterService.GetFilteredCenterModelsAsync(request);
+
+            var response = result.Select(
+                center =>
+                {
+                    var output = center.Adapt<RentalCenterDTO>();
+                    output.AvailableCarsNumber = center.Cars.Count();
+
+                    return output;
+                }
+            );
+
+            return Ok(response);
         }
 
         [HttpGet("{name}/cars")]
-        public async Task<ActionResult<IEnumerable<CarDTO>>> GetCenterAccessibleCars(
-            string name,
-            DateTime start,
-            DateTime finish
-        )
+        public async Task<ActionResult<IEnumerable<CarDTO>>> GetCenterCars(string name)
         {
-            var rentalCenter = await _rentalCenterService.GetCenterAsync(name);
+            var result = await _rentalCenterService.GetCenterCarModelsAsync(name);
 
-            return Ok(await _carService.GetAccessibleCars(rentalCenter, start, finish));
+            var response = result.Select(
+                car =>
+                {
+                    var output = car.Adapt<CarDTO>();
+
+                    return output;
+                }
+            );
+
+            return Ok(response);
         }
     }
 }
