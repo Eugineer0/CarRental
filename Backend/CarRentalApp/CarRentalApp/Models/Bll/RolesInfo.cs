@@ -1,6 +1,6 @@
-﻿using CarRentalApp.Models.DAL;
+﻿using CarRentalApp.Models.Dal;
 
-namespace CarRentalApp.Models.BLL
+namespace CarRentalApp.Models.Bll
 {
     public static class RolesInfo
     {

@@ -1,14 +1,12 @@
-﻿using CarRentalApp.Models.DAL;
-
-namespace CarRentalApp.Models.BLL
+﻿namespace CarRentalApp.Models.Bll
 {
-    public class UserModel
+    public class RegistrationModel
     {
-        public Guid Id { get; set; }
-
         public string Email { get; set; } = null!;
 
         public string Username { get; set; } = null!;
+
+        public string Password { get; set; } = null!;
 
         public string Name { get; set; } = null!;
 
@@ -18,8 +16,6 @@ namespace CarRentalApp.Models.BLL
 
         public DateTime DateOfBirth { get; set; }
 
-        public string? DriverLicenseSerialNumber { get; set; } = null!;
-
-        public ICollection<Roles> Roles { get; set; } = null!;
+        public string? DriverLicenseSerialNumber { get; set; }
     }
 }

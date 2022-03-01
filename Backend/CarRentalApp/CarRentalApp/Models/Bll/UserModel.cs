@@ -1,12 +1,14 @@
-﻿namespace CarRentalApp.Models.BLL
+﻿using CarRentalApp.Models.Dal;
+
+namespace CarRentalApp.Models.Bll
 {
-    public class RegistrationModel
+    public class UserModel
     {
+        public Guid Id { get; set; }
+
         public string Email { get; set; } = null!;
 
         public string Username { get; set; } = null!;
-
-        public string Password { get; set; } = null!;
 
         public string Name { get; set; } = null!;
 
@@ -16,6 +18,8 @@
 
         public DateTime DateOfBirth { get; set; }
 
-        public string? DriverLicenseSerialNumber { get; set; }
+        public string? DriverLicenseSerialNumber { get; set; } = null!;
+
+        public IEnumerable<Roles> Roles { get; set; } = null!;
     }
 }

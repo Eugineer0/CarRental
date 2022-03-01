@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using CarRentalApp.Models.DAL;
+using CarRentalApp.Models.Dal;
 
-namespace CarRentalApp.Models.WEB.Requests
+namespace CarRentalApp.Models.Web.Requests
 {
     public class RolesModificationRequest
     {

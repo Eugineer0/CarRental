@@ -1,8 +1,8 @@
 ﻿using CarRentalApp.Configuration;
 using CarRentalApp.Contexts;
 using CarRentalApp.Exceptions;
-using CarRentalApp.Models.BLL;
-using CarRentalApp.Models.DAL;
+using CarRentalApp.Models.Bll;
+using CarRentalApp.Models.Dal;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -98,7 +98,7 @@ namespace CarRentalApp.Services
         /// </summary>
         /// <param name="userId">unique credential of user.</param>
         /// <returns>Model of existing user.</returns>
-        public async Task<UserModel> GetById(Guid userId)
+        public async Task<UserModel> GetAsync(Guid userId)
         {
             return (await GetByIdAsync(userId)).Adapt<UserModel>();
         }

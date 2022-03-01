@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CarRentalApp.Models.WEB.Requests
+namespace CarRentalApp.Models.Web.Requests
 {
     public class UserLoginRequest
     {

@@ -1,5 +1,5 @@
-using CarRentalApp.Models.BLL;
-using CarRentalApp.Models.WEB.Requests;
+using CarRentalApp.Models.Bll;
+using CarRentalApp.Models.Web.Requests;
 using CarRentalApp.Services;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
@@ -44,7 +44,7 @@ namespace CarRentalApp.Controllers
         {
             var token = await _tokenService.PopTokenAsync(request.RefreshToken);
             _tokenService.ValidateTokenLifetime(token.Token);
-            var user = await _userService.GetById(token.Id);
+            var user = await _userService.GetAsync(token.Id);
             return await AuthenticateAsync(user);
         }
 

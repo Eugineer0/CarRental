@@ -1,4 +1,4 @@
-﻿namespace CarRentalApp.Models.BLL
+﻿namespace CarRentalApp.Models.Bll
 {
     public class AccessModel
     {
