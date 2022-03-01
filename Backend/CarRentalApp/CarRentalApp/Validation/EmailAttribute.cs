@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace CarRentalApp.ValidationAttributes
+namespace CarRentalApp.Validation
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class EmailAttribute : ValidationAttribute

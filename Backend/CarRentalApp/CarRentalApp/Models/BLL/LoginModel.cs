@@ -1,7 +1,9 @@
-﻿namespace CarRentalApp.Models.BLL;
-
-public class LoginModel
+﻿namespace CarRentalApp.Models.BLL
 {
-    public string Password { get; set; } = null!;
-    public string Username { get; set; } = null!;
+    public class LoginModel
+    {
+        public string Password { get; set; } = null!;
+
+        public string Username { get; set; } = null!;
+    }
 }

@@ -23,9 +23,7 @@ namespace CarRentalApp.Controllers
         [HttpPut("{username}/roles")]
         public async Task<IActionResult> ModifyRoles(string username, RolesModificationRequest request)
         {
-            var roles = request.Roles
-                .Select(role => (Roles) Enum.Parse(typeof(Roles), role))
-                .ToImmutableHashSet();
+            var roles = request.Roles.ToImmutableHashSet();
             await _userService.ModifyRolesAsync(username, roles);
             return NoContent();
         }

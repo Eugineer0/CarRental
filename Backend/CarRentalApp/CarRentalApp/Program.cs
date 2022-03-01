@@ -24,7 +24,7 @@ builder.Services.Configure<ClientRequirements>(
 var configurationString = builder.Configuration.GetConnectionString("CarRentalDB");
 
 builder.Services.AddDbContext<CarRentalDbContext>(
-     options => options.UseSqlServer(configurationString)
+    options => options.UseSqlServer(configurationString)
 );
 
 builder.Services.AddScoped<TokenService>();

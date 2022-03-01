@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CarRentalApp.Controllers
 {
     [ApiController]
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly UserService _userService;
@@ -23,62 +23,71 @@ namespace CarRentalApp.Controllers
             _tokenService = tokenService;
         }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public async Task<IActionResult> Login(UserLoginRequest request)
         {
             var model = request.Adapt<LoginModel>();
-            var response = await _userService.LoginAsync(model);
-            return Ok(response);
+            var user = await _userService.GetValidClientAsync(model);
+            return await AuthenticateAsync(user);
         }
 
-        [HttpPost]
+        [HttpPost("login-admin")]
         public async Task<IActionResult> LoginAdmin(UserLoginRequest request)
         {
             var model = request.Adapt<LoginModel>();
-            var response = await _userService.LoginAdminAsync(model);
-            return Ok(response);
+            var user = await _userService.GetValidAdminAsync(model);
+            return await AuthenticateAsync(user);
         }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public async Task<IActionResult> Refresh(RefreshAccessRequest request)
         {
-            var response = await _userService.RefreshAccessAsync(request.RefreshToken);
-            return Ok(response);
+            var token = await _tokenService.PopTokenAsync(request.RefreshToken);
+            _tokenService.ValidateTokenLifetime(token.Token);
+            var user = await _userService.GetById(token.Id);
+            return await AuthenticateAsync(user);
         }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public async Task<IActionResult> Logout(RefreshAccessRequest request)
         {
             await _tokenService.PopTokenAsync(request.RefreshToken);
             return Ok();
         }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public Task<IActionResult> Register(ClientRegistrationRequest request)
         {
             var model = request.Adapt<RegistrationModel>();
-            return RegisterModel(model);
+            return RegisterUserAsync(model);
         }
 
-        [HttpPost]
+        [HttpPost("register-admin")]
         public Task<IActionResult> RegisterAdmin(AdminRegistrationRequest request)
         {
             var model = request.Adapt<RegistrationModel>();
-            return RegisterModel(model);
+            return RegisterUserAsync(model);
         }
 
         [Authorize]
-        [HttpPost]
+        [HttpPost("complete-registration")]
         public async Task<IActionResult> CompleteRegistration(RegistrationCompletionRequest request)
         {
-            await _userService.CompleteRegistrationAsync(request.DriverLicenseSerialNumber, request.Token);
+            var userId = _tokenService.GetUserId(request.Token);
+            await _userService.AddUserInfoAsync(userId, request.DriverLicenseSerialNumber);
             return Ok();
         }
 
-        private async Task<IActionResult> RegisterModel(RegistrationModel model)
+        private async Task<IActionResult> RegisterUserAsync(RegistrationModel model)
         {
             await _userService.RegisterAsync(model);
             return Created($"api/users/{model.Username}", null);
+        }
+
+        private async Task<IActionResult> AuthenticateAsync(UserModel user)
+        {
+            var response = await _tokenService.GetAccessAsync(user);
+            return Ok(response);
         }
     }
 }

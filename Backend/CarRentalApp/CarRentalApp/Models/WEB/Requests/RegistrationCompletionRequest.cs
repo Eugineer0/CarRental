@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using CarRentalApp.Validation;
 
 namespace CarRentalApp.Models.WEB.Requests
 {
@@ -6,8 +7,8 @@ namespace CarRentalApp.Models.WEB.Requests
     {
         [Required]
         [RegularExpression(
-            "[0-9]{1}[A-Z]{2}[0-9]{6}",
-            ErrorMessage = "Incorrect format: The {0} value must consist of 1 digit leading 2 capitals followed by 6 digits"
+            ValidationConstants.DriverLicenseRegExp,
+            ErrorMessage = ValidationConstants.DriverLicenseErrorMessage
         )]
         public string DriverLicenseSerialNumber { get; set; } = null!;
 

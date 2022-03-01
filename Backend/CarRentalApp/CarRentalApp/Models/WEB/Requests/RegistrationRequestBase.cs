@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using CarRentalApp.ValidationAttributes;
+using CarRentalApp.Validation;
 
 namespace CarRentalApp.Models.WEB.Requests
 {
@@ -9,7 +9,7 @@ namespace CarRentalApp.Models.WEB.Requests
         [StringLength(
             maximumLength: 254,
             MinimumLength = 3,
-            ErrorMessage = "Incorrect format: The {0} value must have length between {2} and {1} characters"
+            ErrorMessage = ValidationConstants.StringLengthErrorMessage
         )]
         [Email(ErrorMessage = "Incorrect format: The {0} is invalid")]
         public string Email { get; set; } = null!;
@@ -18,7 +18,7 @@ namespace CarRentalApp.Models.WEB.Requests
         [StringLength(
             maximumLength: 25,
             MinimumLength = 1,
-            ErrorMessage = "Incorrect format: The {0} value must have length between {2} and {1} characters"
+            ErrorMessage = ValidationConstants.StringLengthErrorMessage
         )]
         [RegularExpression(
             "\\w*",
@@ -30,7 +30,7 @@ namespace CarRentalApp.Models.WEB.Requests
         [StringLength(
             maximumLength: 25,
             MinimumLength = 5,
-            ErrorMessage = "Incorrect format: The {0} value must have length between {2} and {1} characters"
+            ErrorMessage = ValidationConstants.StringLengthErrorMessage
         )]
         [RegularExpression(
             ".*(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).*",
@@ -42,7 +42,7 @@ namespace CarRentalApp.Models.WEB.Requests
         [StringLength(
             maximumLength: 64,
             MinimumLength = 1,
-            ErrorMessage = "Incorrect format: The {0} value must have length between {2} and {1} characters"
+            ErrorMessage = ValidationConstants.StringLengthErrorMessage
         )]
         [RegularExpression(
             "[A-Z]{1}[a-z]*((-[A-Z])?[a-z]*)*",
@@ -54,7 +54,7 @@ namespace CarRentalApp.Models.WEB.Requests
         [StringLength(
             maximumLength: 64,
             MinimumLength = 1,
-            ErrorMessage = "Incorrect format: The {0} value must have length between {2} and {1} characters"
+            ErrorMessage = ValidationConstants.StringLengthErrorMessage
         )]
         [RegularExpression(
             "[A-Z]{1}[a-z]*((-[A-Z])?[a-z]*)*",

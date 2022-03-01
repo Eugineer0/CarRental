@@ -1,8 +1,9 @@
-﻿namespace CarRentalApp.Models.BLL;
-
-public class AccessModel
+﻿namespace CarRentalApp.Models.BLL
 {
-    public string AccessToken { get; set; } = null!;
+    public class AccessModel
+    {
+        public string AccessToken { get; set; } = null!;
 
-    public string RefreshToken { get; set; } = null!;
+        public string RefreshToken { get; set; } = null!;
+    }
 }

@@ -43,11 +43,11 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Removes token model found by <paramref name="refreshAccessRequest"/> and returns it.
+        /// Removes token model found by <paramref name="refreshTokenString"/> and returns it.
         /// </summary>
-        /// <param name="refreshAccessRequest">ejected token prototype.</param>
+        /// <param name="refreshTokenString">ejected token string.</param>
         /// <returns>token model, removed from database.</returns>
-        /// <exception cref="SharedException">Token not found by <paramref name="refreshAccessRequest"/>. For safety reasons all related tokens will be revoked</exception>
+        /// <exception cref="SharedException">Token not found by <paramref name="refreshTokenString"/>. For safety reasons all related tokens will be revoked</exception>
         public async Task<RefreshToken> PopTokenAsync(string refreshTokenString)
         {
             var token = await _carRentalDbContext.RefreshTokens
@@ -66,7 +66,7 @@ namespace CarRentalApp.Services
                     innerException = exception;
                 }
 
-                await RevokeRefreshTokensByIdAsync(userId);
+                await RevokeRefreshTokensByUserIdAsync(userId);
 
                 throw new SharedException(
                     ErrorTypes.AuthFailed,
@@ -115,7 +115,7 @@ namespace CarRentalApp.Services
         /// </summary>
         /// <param name="user">user to get access.</param>
         /// <returns>Pair of auth tokens.</returns>
-        public async Task<AccessModel> GetAccessAsync(User user)
+        public async Task<AccessModel> GetAccessAsync(UserModel user)
         {
             var accessToken = GenerateAccessToken(user);
             var refreshToken = GenerateRefreshToken(user);
@@ -170,7 +170,7 @@ namespace CarRentalApp.Services
         /// </summary>
         /// <param name="user">token owner.</param>
         /// <returns>Generated refresh token.</returns>
-        public string GenerateRefreshToken(User user)
+        public string GenerateRefreshToken(UserModel user)
         {
             var refreshJwtGenerationParams = _refreshJwtConfig.GenerationParameters;
 
@@ -193,7 +193,7 @@ namespace CarRentalApp.Services
         /// </summary>
         /// <param name="user">token owner.</param>
         /// <returns>Generated access token.</returns>
-        private string GenerateAccessToken(User user)
+        private string GenerateAccessToken(UserModel user)
         {
             var accessJwtGenerationParams = _accessJwtConfig.GenerationParameters;
 
@@ -203,7 +203,7 @@ namespace CarRentalApp.Services
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
             };
 
-            foreach (var role in user.Roles.Select(r => r.Role))
+            foreach (var role in user.Roles)
             {
                 jwtClaims.Add(new Claim("role", role.ToString()));
             }
@@ -241,7 +241,7 @@ namespace CarRentalApp.Services
         /// Revokes all stored tokens with specified <paramref name="userId"/>.
         /// </summary>
         /// <param name="userId">token model field.</param>
-        private async Task RevokeRefreshTokensByIdAsync(Guid userId)
+        private async Task RevokeRefreshTokensByUserIdAsync(Guid userId)
         {
             await _carRentalDbContext.RefreshTokens
                 .Where(t => t.UserId == userId)

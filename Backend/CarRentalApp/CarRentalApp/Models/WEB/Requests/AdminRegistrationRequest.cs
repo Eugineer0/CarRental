@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using CarRentalApp.ValidationAttributes;
+using CarRentalApp.Validation;
 
 namespace CarRentalApp.Models.WEB.Requests
 {

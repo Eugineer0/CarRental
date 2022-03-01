@@ -30,13 +30,12 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Gets user by <paramref name="tokenString"/> and fills in <paramref name="driverLicenseSerialNumber"/> field
+        /// Adds <paramref name="driverLicenseSerialNumber"/> to existing user with specified <paramref name="userId"/>.
         /// </summary>
-        /// <param name="driverLicenseSerialNumber">serial number to be added to user info</param>
-        /// <param name="tokenString">auth token with info about user</param>
-        public async Task CompleteRegistrationAsync(string driverLicenseSerialNumber, string tokenString)
+        /// <param name="userId">unique credential of user to be updated</param>
+        /// <param name="driverLicenseSerialNumber">value to fill in user field</param>
+        public async Task AddUserInfoAsync(Guid userId, string driverLicenseSerialNumber)
         {
-            var userId = _tokenService.GetUserId(tokenString);
             var user = await GetByIdAsync(userId);
 
             user.DriverLicenseSerialNumber = driverLicenseSerialNumber;
@@ -45,20 +44,21 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Validates passed user prototype as client and returns generated access object for that user.
+        /// Validates passed user prototype as client and returns existing user model.
         /// </summary>
         /// <param name="loginModel">user prototype to login.</param>
-        /// <returns>Generated access object.</returns>
+        /// <returns>Existing user model.</returns>
         /// <exception cref="SharedException">User must specify driver license field</exception>
-        public async Task<AccessModel> LoginAsync(LoginModel loginModel)
+        public async Task<UserModel> GetValidClientAsync(LoginModel loginModel)
         {
             var user = await GetByUsernameAsync(loginModel.Username);
+            var userModel = user.Adapt<UserModel>();
             if (ValidateClient(user, loginModel))
             {
-                return await _tokenService.GetAccessAsync(user);
+                return userModel;
             }
 
-            var token = _tokenService.GenerateRefreshToken(user);
+            var token = _tokenService.GenerateRefreshToken(userModel);
             throw new SharedException(
                 ErrorTypes.AdditionalDataRequired,
                 token,
@@ -67,15 +67,18 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Validates passed user prototype as admin and returns generated access object for that user.
+        /// Validates passed user prototype as admin and returns existing user model.
         /// </summary>
-        /// <param name="loginModel">user prototype to login.</param>
-        /// <returns>Generated access object.</returns>
-        public async Task<AccessModel> LoginAdminAsync(LoginModel loginModel)
+        /// <param name="loginModel">user prototype to validate.</param>
+        /// <returns>Existing user model.</returns>
+        public async Task<UserModel> GetValidAdminAsync(LoginModel loginModel)
         {
             var user = await GetByUsernameAsync(loginModel.Username);
             ValidateAdmin(user, loginModel);
-            return await _tokenService.GetAccessAsync(user);
+            var userModel = user.Adapt<UserModel>();
+            userModel.Roles = (ICollection<Roles>) user.Roles.Select(role => role.Role);
+
+            return userModel;
         }
 
         /// <summary>
@@ -91,24 +94,19 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Validates passed token and replaces it with new refresh token.
+        /// Finds user with specified <paramref name="userId"/> and returns it model representation.
         /// </summary>
-        /// <param name="refreshTokenString">auth token.</param>
-        /// <returns>Generated access object.</returns>
-        public async Task<AccessModel> RefreshAccessAsync(string refreshTokenString)
+        /// <param name="userId">unique credential of user.</param>
+        /// <returns>Model of existing user.</returns>
+        public async Task<UserModel> GetById(Guid userId)
         {
-            var token = await _tokenService.PopTokenAsync(refreshTokenString);
-
-            _tokenService.ValidateTokenLifetime(token.Token);
-
-            var user = await GetByIdAsync(token.UserId);
-            return await _tokenService.GetAccessAsync(user);
+            return (await GetByIdAsync(userId)).Adapt<UserModel>();
         }
 
         /// <summary>
-        /// Updates user model found by passed username with client role.
+        /// Updates user found by passed username with client role.
         /// </summary>
-        /// <param name="username">user model field.</param>
+        /// <param name="username">unique credential of user.</param>
         /// <exception cref="SharedException">User with such <paramref name="username"/> does not meet requirements.</exception>
         public async Task ApproveClientAsync(string username)
         {
@@ -136,9 +134,9 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Validates passed <paramref name="roles"/> and assign them to existing user model found by <paramref name="username"/>.
+        /// Validates passed <paramref name="roles"/> and assign them to existing user found by <paramref name="username"/>.
         /// </summary>
-        /// <param name="username">user model field.</param>
+        /// <param name="username">unique credential of user.</param>
         /// <param name="roles">object, containing array of roles.</param>
         /// <exception cref="SharedException">Cannot specify client role without additional info.</exception>
         public async Task ModifyRolesAsync(string username, IReadOnlySet<Roles> roles)
@@ -179,9 +177,9 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Finds user model with specified <paramref name="username"/> and returns it.
+        /// Finds user with specified <paramref name="username"/> and returns it.
         /// </summary>
-        /// <param name="username">unique credential of user model.</param>
+        /// <param name="username">unique credential of user.</param>
         /// <returns> Existing user with <paramref name="username"/>.</returns>
         /// <exception cref="SharedException">User not found by <paramref name="username"/>.</exception>
         private async Task<User> GetByUsernameAsync(string username)
@@ -202,10 +200,10 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Finds user model with specified <paramref name="userId"/> and returns it.
+        /// Finds user with specified <paramref name="userId"/> and returns it.
         /// </summary>
-        /// <param name="userId">unique credential of user model.</param>
-        /// <returns> Existing user with <paramref name="userId"/>.</returns>
+        /// <param name="userId">unique credential of user.</param>
+        /// <returns>Existing user with <paramref name="userId"/>.</returns>
         /// <exception cref="SharedException">User not found by <paramref name="userId"/>.</exception>
         private async Task<User> GetByIdAsync(Guid userId)
         {
@@ -225,10 +223,11 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Checks if <paramref name="loginModel"/> corresponds <paramref name="user"/> and has on of client`s roles.
+        /// Checks if <paramref name="loginModel"/> corresponds <paramref name="user"/> and has one of clients roles.
         /// </summary>
-        /// <param name="user">existing user model.</param>
-        /// <param name="loginModel">years.</param>
+        /// <param name="user">existing entity.</param>
+        /// <param name="loginModel">credentials model to validate.</param>
+        /// <returns>True - if password and roles are correct, False - if password is correct, but has no clients roles.</returns>
         /// <exception cref="SharedException">Client role is not approved.</exception>
         private bool ValidateClient(User user, LoginModel loginModel)
         {
@@ -252,9 +251,9 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Checks if <paramref name="loginModel"/> corresponds <paramref name="user"/> and has on of admin`s roles.
+        /// Checks if <paramref name="loginModel"/> corresponds <paramref name="user"/> and has on of admins roles.
         /// </summary>
-        /// <param name="user">existing user model.</param>
+        /// <param name="user">existing entity.</param>
         /// <param name="loginModel">user prototype to be validated.</param>
         /// <exception cref="SharedException">Inconsistent user role.</exception>
         private void ValidateAdmin(User user, LoginModel loginModel)
@@ -293,13 +292,13 @@ namespace CarRentalApp.Services
                 throw new SharedException(
                     ErrorTypes.Invalid,
                     "Roles modifying failed",
-                    "User must have single 'None' role or other roles"
+                    "User must have either single 'None' role or other roles"
                 );
             }
         }
 
         /// <summary>
-        /// Creates user model from <paramref name="registrationModel"/> with None role.
+        /// Creates user from <paramref name="registrationModel"/> with None role.
         /// </summary>
         /// <param name="registrationModel">user prototype.</param>
         /// <returns> Newly created user.</returns>
@@ -337,8 +336,8 @@ namespace CarRentalApp.Services
         /// <summary>
         /// Checks if <paramref name="email"/> and/or <paramref name="username"/> are unique among all users.
         /// </summary>
-        /// <param name="email">unique credential of user model.</param>
-        /// <param name="username">unique credential of user model.</param>
+        /// <param name="email">unique credential of user.</param>
+        /// <param name="username">unique credential of user.</param>
         /// <exception cref="SharedException">User with such credentials already exists.</exception>
         private async Task CheckCredentialsUniqueness(string email, string username)
         {
@@ -362,7 +361,7 @@ namespace CarRentalApp.Services
         /// <summary>
         /// Assigns passed set of roles to <paramref name="user"/>.
         /// </summary>
-        /// <param name="user">user model to be updated.</param>
+        /// <param name="user">entity to be updated.</param>
         /// <param name="roles">set of roles.</param>
         private Task UpdateRolesAsync(User user, IReadOnlySet<Roles> roles)
         {

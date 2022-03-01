@@ -1,14 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using CarRentalApp.Exceptions;
 using CarRentalApp.Services;
 
-namespace CarRentalApp.ValidationAttributes
+namespace CarRentalApp.Validation
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class MinimumAgeAttribute : ValidationAttribute
     {
         private readonly int _minimumAge;
+
         public MinimumAgeAttribute(int minimumAge)
         {
             _minimumAge = minimumAge;
