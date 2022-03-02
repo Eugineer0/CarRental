@@ -5,6 +5,6 @@ namespace CarRentalApp.Models.DTOs;
 public class FullUserDTO: MinimalUserDTO
 {
     public string DriverLicenseSerialNumber { get; set; }
-    
-    public ICollection<String> Roles { get; set; }
+
+    public IEnumerable<Roles> Roles { get; set; }
 }

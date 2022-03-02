@@ -19,7 +19,9 @@ namespace CarRentalApp.Services
 
         public UserService(
             PasswordService passwordService,
-            IOptions<ClientRequirements> clientRequirements, CarRentalDbContext carRentalDbContext)
+            IOptions<ClientRequirements> clientRequirements,
+            CarRentalDbContext carRentalDbContext
+        )
         {
             _passwordService = passwordService;
             _carRentalDbContext = carRentalDbContext;
@@ -51,7 +53,7 @@ namespace CarRentalApp.Services
             if (await _carRentalDbContext.Users
                     .AnyAsync(
                         u => u.Username.Equals(userRegistrationDTO.Username)
-                             || u.Email.Equals(userRegistrationDTO.Email)
+                            || u.Email.Equals(userRegistrationDTO.Email)
                     )
                )
             {
@@ -96,7 +98,7 @@ namespace CarRentalApp.Services
         {
             var user = await GetUserAsync(username);
             var userDTO = user.Adapt<User, FullUserDTO>();
-            userDTO.Roles = user.UserRoles.Select(role => role.Role.ToString()).ToList();
+            userDTO.Roles = user.UserRoles.Select(role => role.Role).ToList();
 
             return userDTO;
         }
@@ -126,7 +128,7 @@ namespace CarRentalApp.Services
                 return Task.CompletedTask;
             }
 
-            user.UserRoles = roles.Select(role => new UserRole() {Role = role}).ToList();
+            user.UserRoles = roles.Select(role => new UserRole() { Role = role }).ToList();
 
             _carRentalDbContext.Users.Update(user);
 
@@ -171,16 +173,11 @@ namespace CarRentalApp.Services
             }
         }
 
-
         /// <exception cref="SharedException">Empty roles set.</exception>
         /// <exception cref="SharedException">Cannot specify client role without additional info.</exception>
         public IEnumerable<Roles> ValidateNewRoles(User user, RolesDTO rolesDTO)
         {
-            var roles = rolesDTO.Roles
-                .Select(role => (Roles) Enum.Parse(typeof(Roles), role))
-                .ToList();
-
-            if (roles.Count < 1)
+            if (rolesDTO.Roles.Count < 1)
             {
                 throw new SharedException(
                     ErrorTypes.Invalid,
@@ -189,7 +186,7 @@ namespace CarRentalApp.Services
                 );
             }
 
-            if (roles.Intersect(UserRole.ClientRoles).Any())
+            if (rolesDTO.Roles.Intersect(UserRole.ClientRoles).Any())
             {
                 ValidateAge(user.DateOfBirth);
 
@@ -203,7 +200,7 @@ namespace CarRentalApp.Services
                 }
             }
 
-            return roles;
+            return rolesDTO.Roles;
         }
 
         private User ConvertFromDTO(UserRegistrationDTO userRegistrationDTO)
@@ -213,7 +210,7 @@ namespace CarRentalApp.Services
             user.Salt = _passwordService.GenerateSalt();
             user.HashedPassword = _passwordService.DigestPassword(userRegistrationDTO.Password, user.Salt);
 
-            user.UserRoles = new List<UserRole>() {new UserRole() {Role = Roles.None}};
+            user.UserRoles = new List<UserRole>() { new UserRole() { Role = Roles.None } };
 
             return user;
         }

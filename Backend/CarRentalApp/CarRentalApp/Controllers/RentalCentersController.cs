@@ -42,6 +42,7 @@ namespace CarRentalApp.Controllers
         {
             var result = await _rentalCenterService.GetCenterModelAsync(name);
             var response = result.Adapt<RentalCenterDTO>();
+            response.AvailableCarsNumber = result.Cars.Count();
             return Ok(response);
         }
 
