@@ -5,10 +5,9 @@ export interface UserFull extends UserMinimal {
   roles: Roles[];
 }
 
-export enum Roles
-{
-  None = 'None',
-  Client = 'Client',
-  Admin = 'Admin',
-  SuperAdmin = 'SuperAdmin'
+export enum Roles {
+  None = 0,
+  Client = 1,
+  Admin = 2,
+  SuperAdmin = 3
 }

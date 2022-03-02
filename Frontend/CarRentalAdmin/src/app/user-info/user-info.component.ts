@@ -13,7 +13,7 @@ import { UserFull, Roles } from "../_models/user/user-full";
 })
 export class UserInfoComponent implements OnInit {
   public user: UserFull | undefined;
-  public allRoles = Object.keys(Roles);
+  public allRoles: Roles[] = Object.keys(Roles).filter(value => isNaN(Number(value))).map(key => Roles[key as keyof typeof Roles]);
 
   private roles: Roles[] = [];
   private username: string | null = null;
@@ -25,11 +25,12 @@ export class UserInfoComponent implements OnInit {
   ) {
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
+    console.log(Object.values(Roles));
     this.getUser()
   }
 
-  goBack(): void {
+  public goBack(): void {
     this.location.back();
   }
 
@@ -46,27 +47,26 @@ export class UserInfoComponent implements OnInit {
     }
   }
 
-  checkUserRole(role: string): boolean {
-    return this.roles.includes(Roles[role as keyof typeof Roles]);
+  public checkUserRole(role: Roles): boolean {
+    return this.roles.includes(role);
   }
 
-  processNoneRole(role: string): boolean {
-    return role === Roles.None
+  public isNoneRole(role: Roles): boolean {
+    return role === Roles.None;
   }
 
   public onSubmit(): void {
-    if(this.username) {
+    if (this.username) {
       this.userService.putRoles(this.username, this.roles)
         .subscribe();
-      if(this.user) {
+      if (this.user) {
         this.copyRoles(this.roles, this.user.roles);
       }
     }
   }
 
-  public editRole(role: string): void {
-    const enumRole = Roles[role as keyof typeof Roles];
-    const index = this.roles.indexOf(enumRole);
+  public editRoles(role: Roles): void {
+    const index = this.roles.indexOf(role);
 
     if (index > -1) {
       this.roles.splice(index, 1);
@@ -75,7 +75,7 @@ export class UserInfoComponent implements OnInit {
         this.roles.push(Roles.None);
       }
     } else {
-      this.roles.push(enumRole);
+      this.roles.push(role);
 
       if (this.roles.length > 1) {
         const index = this.roles.indexOf(Roles.None);
@@ -84,22 +84,21 @@ export class UserInfoComponent implements OnInit {
         }
       }
     }
-
-    console.log(this.user?.roles);
   }
 
   public resetRoles(): void {
     if (this.user) {
-      console.log(this.user.roles);
-
       this.copyRoles(this.user.roles, this.roles);
-
-      console.log(this.user.roles);
     }
   }
 
+  public showRole(role: Roles): string {
+    return Roles[role];
+  }
+
   private copyRoles(source: Roles[], dest: Roles[]): void {
-    for(let role of source) {
+    dest.splice(0);
+    for (let role of source) {
       dest.push(role);
     }
   }

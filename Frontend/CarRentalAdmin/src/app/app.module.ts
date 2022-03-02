@@ -42,8 +42,8 @@ import { RentalCenterInfoComponent } from './rental-center-info/rental-center-in
   ],
   providers: [
     AuthService,
-    {provide: HTTP_INTERCEPTORS, useClass: AuthorizationInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: RefreshAccessInterceptor, multi: true},
+    {provide: HTTP_INTERCEPTORS, useClass: AuthorizationInterceptor, multi: true},
   ],
   bootstrap: [AppComponent]
 })

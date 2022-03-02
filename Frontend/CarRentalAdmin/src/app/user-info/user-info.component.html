@@ -25,7 +25,7 @@
 <div class="card m-3">
   <h5 class="card-header">User roles</h5>
   <div class="card-body">
-    <form name="form" (ngSubmit)="onSubmit()" #rolesForm="ngForm">
+    <form name="form" (ngSubmit)="onSubmit()">
       <div
         class="form-check"
         *ngFor="let role of allRoles"
@@ -35,10 +35,10 @@
           type="checkbox"
           class="form-check-input"
           [checked]="checkUserRole(role)"
-          [disabled]="processNoneRole(role)"
-          (change)="editRole(role)"
+          [disabled]="isNoneRole(role)"
+          (change)="editRoles(role)"
         >
-        {{role}}
+        {{showRole(role)}}
       </div>
       <div class="d-grid gap-2 d-md-flex justify-content-md-end">
         <button class="btn btn-success mr-1">Submit</button>
