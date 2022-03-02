@@ -75,10 +75,7 @@ namespace CarRentalApp.Services
         {
             var user = await GetByUsernameAsync(loginModel.Username);
             ValidateAdmin(user, loginModel);
-            var userModel = user.Adapt<UserModel>();
-            userModel.Roles = user.Roles.Select(role => role.Role).ToList();
-
-            return userModel;
+            return CreateModel(user);
         }
 
         /// <summary>
@@ -100,7 +97,19 @@ namespace CarRentalApp.Services
         /// <returns>Model of existing user.</returns>
         public async Task<UserModel> GetAsync(Guid userId)
         {
-            return (await GetByIdAsync(userId)).Adapt<UserModel>();
+            var user = await GetByIdAsync(userId);
+            return CreateModel(user);
+        }
+
+        /// <summary>
+        /// Finds user with specified <paramref name="username"/> and returns it model representation.
+        /// </summary>
+        /// <param name="username">unique credential of user.</param>
+        /// <returns>Model of existing user.</returns>
+        public async Task<UserModel> GetAsync(string username)
+        {
+            var user = await GetByUsernameAsync(username);
+            return CreateModel(user);
         }
 
         /// <summary>
@@ -186,7 +195,7 @@ namespace CarRentalApp.Services
         {
             var user = await _carRentalDbContext.Users
                 .Include(user => user.Roles)
-                .FirstOrDefaultAsync(user => user.Username.Equals(username));
+                .FirstOrDefaultAsync(user => user.Username == username);
             if (user == null)
             {
                 throw new SharedException(
@@ -301,7 +310,7 @@ namespace CarRentalApp.Services
         /// Creates user from <paramref name="registrationModel"/> with None role.
         /// </summary>
         /// <param name="registrationModel">user prototype.</param>
-        /// <returns> Newly created user.</returns>
+        /// <returns>Newly created user.</returns>
         private User CreateEntity(RegistrationModel registrationModel)
         {
             var user = registrationModel.Adapt<RegistrationModel, User>();
@@ -312,6 +321,19 @@ namespace CarRentalApp.Services
             user.Roles = new List<UserRole>() { new() { Role = Roles.None } };
 
             return user;
+        }
+
+        /// <summary>
+        /// Creates user model from <paramref name="user"/> entity.
+        /// </summary>
+        /// <param name="user">existing entity.</param>
+        /// <returns>Model created on existing user.</returns>
+        private UserModel CreateModel(User user)
+        {
+            var userModel = user.Adapt<UserModel>();
+            userModel.UserRoles = user.Roles.Select(role => role.Role);
+
+            return userModel;
         }
 
         /// <summary>

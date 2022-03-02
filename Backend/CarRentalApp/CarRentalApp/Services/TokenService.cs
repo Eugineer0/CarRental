@@ -50,7 +50,7 @@ namespace CarRentalApp.Services
         public async Task<RefreshToken> PopTokenAsync(string refreshTokenString)
         {
             var token = await _carRentalDbContext.RefreshTokens
-                .FirstOrDefaultAsync(t => t.Token.Equals(refreshTokenString));
+                .FirstOrDefaultAsync(t => t.Token == refreshTokenString);
             if (token == null)
             {
                 var userId = Guid.Empty;
@@ -202,7 +202,7 @@ namespace CarRentalApp.Services
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
             };
 
-            foreach (var role in user.Roles)
+            foreach (var role in user.UserRoles)
             {
                 jwtClaims.Add(new Claim("role", role.ToString()));
             }
@@ -242,8 +242,9 @@ namespace CarRentalApp.Services
         /// <param name="userId">token model field.</param>
         private async Task RevokeRefreshTokensByUserIdAsync(Guid userId)
         {
-            var tokens = _carRentalDbContext.RefreshTokens
-                .Where(t => t.UserId == userId);
+            var tokens = await _carRentalDbContext.RefreshTokens
+                .Where(t => t.UserId == userId)
+                .ToListAsync();
 
             _carRentalDbContext.RefreshTokens.RemoveRange(tokens);
 

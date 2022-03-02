@@ -44,7 +44,7 @@ namespace CarRentalApp.Controllers
         {
             var token = await _tokenService.PopTokenAsync(request.RefreshToken);
             _tokenService.ValidateTokenLifetime(token.Token);
-            var user = await _userService.GetAsync(token.Id);
+            var user = await _userService.GetAsync(token.UserId);
             return await AuthenticateAsync(user);
         }
 

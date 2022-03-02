@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using CarRentalApp.Models.Bll;
-using CarRentalApp.Models.Dal;
 using CarRentalApp.Models.Web.Requests;
 using CarRentalApp.Services;
 using Microsoft.AspNetCore.Authorization;

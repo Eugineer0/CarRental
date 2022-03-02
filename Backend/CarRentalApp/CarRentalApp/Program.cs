@@ -41,10 +41,7 @@ accessJwtValidationParams.IssuerSigningKey = TokenService.GetKey(accessJwtConfig
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(
-        options =>
-        {
-            options.TokenValidationParameters = accessJwtValidationParams;
-        }
+        options => { options.TokenValidationParameters = accessJwtValidationParams; }
     );
 
 builder.Services.AddCors(
