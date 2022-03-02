@@ -3,5 +3,5 @@ export interface RentalCenter {
   country: string;
   city: string;
   address: string;
-  accessibleCarsNumber: number;
+  availableCarsNumber: number;
 }

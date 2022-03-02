@@ -9,6 +9,8 @@
             <select
               class="form-control"
               id="country"
+              name="country"
+              [(ngModel)]="filter.country"
             >
               <option
                 *ngFor="let country of countries"
@@ -19,6 +21,8 @@
             <select
               class="form-control"
               id="city"
+              name="city"
+              [(ngModel)]="filter.city"
             >
               <option
                 *ngFor="let city of cities"
@@ -31,16 +35,22 @@
               type="number"
               class="form-control"
               id="minimumCarsNumber"
+              name="minimumCarsNumber"
+              [(ngModel)]="filter.minimumAvailableCarsNumber"
             >
             <label class="mb-0 mt-2" for="startRent">Rental start</label>
-            <span class="form-control" id="startRent">
-              <input type="date" class="form-control" id="startDate">
-              <input type="time" class="form-control" id="StartTime">
+            <span class="form-control" id="startRent" >
+              <input type="date" class="form-control" id="startDate" name="startRent"
+                     [(ngModel)]="filter.startRent">
+              <input type="time" class="form-control" id="StartTime"name="startRentTime"
+                     [(ngModel)]="startRentTime">
             </span>
             <label class="mb-0 mt-2" for="finishRent">Rental finish</label>
             <span class="form-control" id="finishRent">
-              <input type="date" class="form-control" id="finishDate">
-              <input type="time" class="form-control" id="finishTime">
+              <input type="date" class="form-control" id="finishDate" name="finishRent"
+                     [(ngModel)]="filter.finishRent">
+              <input type="time" class="form-control" id="finishTime" name="finishRentTime"
+                     [(ngModel)]="finishRentTime">
             </span>
           </div>
           <button
@@ -79,7 +89,7 @@
         <td>{{center.country}}</td>
         <td>{{center.city}}</td>
         <td>{{center.address}}</td>
-        <td>{{center.accessibleCarsNumber}}</td>
+        <td>{{center.availableCarsNumber}}</td>
       </tr>
       </tbody>
     </table>
