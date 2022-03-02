@@ -76,7 +76,7 @@ namespace CarRentalApp.Services
             var user = await GetByUsernameAsync(loginModel.Username);
             ValidateAdmin(user, loginModel);
             var userModel = user.Adapt<UserModel>();
-            userModel.Roles = (ICollection<Roles>) user.Roles.Select(role => role.Role);
+            userModel.Roles = user.Roles.Select(role => role.Role).ToList();
 
             return userModel;
         }

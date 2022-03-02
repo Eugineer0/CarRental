@@ -242,9 +242,10 @@ namespace CarRentalApp.Services
         /// <param name="userId">token model field.</param>
         private async Task RevokeRefreshTokensByUserIdAsync(Guid userId)
         {
-            await _carRentalDbContext.RefreshTokens
-                .Where(t => t.UserId == userId)
-                .ForEachAsync(token => _carRentalDbContext.RefreshTokens.Remove(token));
+            var tokens = _carRentalDbContext.RefreshTokens
+                .Where(t => t.UserId == userId);
+
+            _carRentalDbContext.RefreshTokens.RemoveRange(tokens);
 
             await _carRentalDbContext.SaveChangesAsync();
         }

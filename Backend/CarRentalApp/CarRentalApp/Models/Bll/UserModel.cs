@@ -18,7 +18,7 @@ namespace CarRentalApp.Models.Bll
 
         public DateTime DateOfBirth { get; set; }
 
-        public string? DriverLicenseSerialNumber { get; set; } = null!;
+        public string? DriverLicenseSerialNumber { get; set; }
 
         public IEnumerable<Roles> Roles { get; set; } = null!;
     }
