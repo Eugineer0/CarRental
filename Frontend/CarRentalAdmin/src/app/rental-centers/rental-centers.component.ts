@@ -15,22 +15,11 @@ export class RentalCentersComponent implements OnInit {
   public centers: RentalCenter[] = [];
   public cities: string[] = [];
   public countries: string[] = [];
-  public filter: FilterRequest = {
-    country: undefined,
-    city: undefined,
-    minimumAvailableCarsNumber: undefined,
-    startRent: undefined,
-    finishRent: undefined
-  }
-
-  public startRentTime: Time = {
-    hours: 0,
-    minutes: 0
-  }
-  public finishRentTime: Time = {
-    hours: 23,
-    minutes: 59
-  }
+  public filter: FilterRequest = this.initFilter();
+  public finishRentDate: Date | undefined = undefined;
+  public startRentDate: Date | undefined = undefined;
+  public startRentTime: Time | undefined = undefined;
+  public finishRentTime: Time | undefined = undefined;
 
   constructor(
     private rentalCenterService: RentalCenterService,
@@ -48,7 +37,7 @@ export class RentalCentersComponent implements OnInit {
           this.centers = centers;
           this.cities = centers.map(center => center.city);
           for (let country of centers.map(center => center.country)) {
-            if(!this.countries.includes(country)) {
+            if (!this.countries.includes(country)) {
               this.countries.push(country);
             }
           }
@@ -57,17 +46,31 @@ export class RentalCentersComponent implements OnInit {
   }
 
   onSubmit() {
-    this.filter.startRent?.setMinutes(this.startRentTime.minutes);
-    this.filter.startRent?.setHours(this.startRentTime.hours);
-
-    this.filter.finishRent?.setMinutes(this.finishRentTime.minutes);
-    this.filter.finishRent?.setHours(this.finishRentTime.hours);
-
+    this.processDates();
     this.rentalCenterService.getFilteredRentalCenters(this.filter)
       .subscribe(
         centers => {
           this.centers = centers;
         }
       );
+  }
+
+  private processDates(): void {
+    this.filter.startRent = new Date(this.startRentDate + ' ' + this.startRentTime);
+    this.filter.finishRent = new Date(this.finishRentDate + ' ' + this.finishRentTime);
+  }
+
+  public initFilter(): FilterRequest {
+    return {
+      country: undefined,
+      city: undefined,
+      minimumAvailableCarsNumber: undefined,
+      startRent: undefined,
+      finishRent: undefined
+    }
+  }
+
+  public resetFilter(): void {
+    this.filter = this.initFilter();
   }
 }

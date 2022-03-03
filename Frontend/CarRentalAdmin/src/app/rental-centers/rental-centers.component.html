@@ -2,6 +2,7 @@
   <div class="col-md-2.3">
     <div class="card mb-0">
       <h5 class="card-header">Filter</h5>
+      <button class="btn btn-primary btn-sm" (click)="resetFilter()">Reset</button>
       <div class="card-body">
         <form name="form" (ngSubmit)="onSubmit()" #filterForm="ngForm">
           <div class="form-group">
@@ -38,26 +39,50 @@
               name="minimumCarsNumber"
               [(ngModel)]="filter.minimumAvailableCarsNumber"
             >
-            <label class="mb-0 mt-2" for="startRent">Rental start</label>
-            <span class="form-control" id="startRent" >
-              <input type="date" class="form-control" id="startDate" name="startRent"
-                     [(ngModel)]="filter.startRent">
-              <input type="time" class="form-control" id="StartTime"name="startRentTime"
-                     [(ngModel)]="startRentTime">
-            </span>
-            <label class="mb-0 mt-2" for="finishRent">Rental finish</label>
-            <span class="form-control" id="finishRent">
-              <input type="date" class="form-control" id="finishDate" name="finishRent"
-                     [(ngModel)]="filter.finishRent">
-              <input type="time" class="form-control" id="finishTime" name="finishRentTime"
-                     [(ngModel)]="finishRentTime">
+            <label class="mb-0 mt-2" for="rentlPeriod">Rent period</label>
+            <span class="form-control" id="rentlPeriod">
+              <label class="mb-0 mt-2" for="startDate">Start</label>
+              <input
+                required
+                type="date"
+                class="form-control"
+                id="startDate"
+                name="startRent"
+                [(ngModel)]="startRentDate"
+              >
+              <input
+                required
+                type="time"
+                class="form-control"
+                id="StartTime"
+                name="startRentTime"
+                [(ngModel)]="startRentTime"
+              >
+              <label class="mb-0 mt-2" for="finishDate">Finish</label>
+              <input
+                required
+                type="date"
+                class="form-control"
+                id="finishDate"
+                name="finishRent"
+                [(ngModel)]="finishRentDate"
+              >
+              <input
+                required
+                type="time"
+                class="form-control"
+                id="finishTime"
+                name="finishRentTime"
+                [(ngModel)]="finishRentTime"
+              >
             </span>
           </div>
           <button
             type="submit"
             class="btn btn-primary col-12"
             [disabled]="filterForm.form.invalid"
-          >Find</button>
+          >Find
+          </button>
         </form>
       </div>
     </div>

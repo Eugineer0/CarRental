@@ -12,11 +12,13 @@ import { UserFull, Roles } from "../_models/user/user-full";
   styleUrls: ['./user-info.component.css']
 })
 export class UserInfoComponent implements OnInit {
-  public user: UserFull | undefined;
+  public user: UserFull | null = null;
+  public errorMessage: string | null = null;
   public allRoles: Roles[] = Object.keys(Roles).filter(value => isNaN(Number(value))).map(key => Roles[key as keyof typeof Roles]);
 
   private roles: Roles[] = [];
   private username: string | null = null;
+  private editRolesFailed: boolean = false;
 
   constructor(
     private location: Location,
@@ -34,19 +36,6 @@ export class UserInfoComponent implements OnInit {
     this.location.back();
   }
 
-  private getUser(): void {
-    this.username = this.route.snapshot.paramMap.get('username');
-
-    if (this.username) {
-      this.userService.getUser(this.username)
-        .subscribe(user => {
-            this.user = user;
-            this.copyRoles(user.roles, this.roles);
-          }
-        );
-    }
-  }
-
   public checkUserRole(role: Roles): boolean {
     return this.roles.includes(role);
   }
@@ -58,10 +47,18 @@ export class UserInfoComponent implements OnInit {
   public onSubmit(): void {
     if (this.username) {
       this.userService.putRoles(this.username, this.roles)
-        .subscribe();
-      if (this.user) {
-        this.copyRoles(this.roles, this.user.roles);
-      }
+        .subscribe(
+          _ => {
+            if (this.user) {
+              this.copyRoles(this.roles, this.user.roles);
+            }
+          },
+          error => {
+            this.resetRoles();
+            this.editRolesFailed = true;
+            this.errorMessage = error.error;
+          }
+        );
     }
   }
 
@@ -94,6 +91,19 @@ export class UserInfoComponent implements OnInit {
 
   public showRole(role: Roles): string {
     return Roles[role];
+  }
+
+  private getUser(): void {
+    this.username = this.route.snapshot.paramMap.get('username');
+
+    if (this.username) {
+      this.userService.getUser(this.username)
+        .subscribe(user => {
+            this.user = user;
+            this.copyRoles(user.roles, this.roles);
+          }
+        );
+    }
   }
 
   private copyRoles(source: Roles[], dest: Roles[]): void {

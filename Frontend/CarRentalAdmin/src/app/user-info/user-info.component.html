@@ -1,50 +1,56 @@
-<table class="table table-hover table-sm">
-  <thead>
-  <tr>
-    <th scope="col">Username</th>
-    <th scope="col">Name</th>
-    <th scope="col">Surname</th>
-    <th scope="col">Date of birth</th>
-    <th scope="col">Passport number</th>
-    <th scope="col">Driver license</th>
-    <th scope="col">Email</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr *ngIf="user">
-    <td>{{user.username}}</td>
-    <td>{{user.name}}</td>
-    <td>{{user.surname}}</td>
-    <td>{{user.dateOfBirth}}</td>
-    <td>{{user.passportNumber}}</td>
-    <td>{{user.driverLicenseSerialNumber}}</td>
-    <td>{{user.email}}</td>
-  </tr>
-  </tbody>
-</table>
-<div class="card m-3">
-  <h5 class="card-header">User roles</h5>
-  <div class="card-body">
-    <form name="form" (ngSubmit)="onSubmit()">
-      <div
-        class="form-check"
-        *ngFor="let role of allRoles"
-        id="roles"
-      >
-        <input
-          type="checkbox"
-          class="form-check-input"
-          [checked]="checkUserRole(role)"
-          [disabled]="isNoneRole(role)"
-          (change)="editRoles(role)"
-        >
-        {{showRole(role)}}
-      </div>
-      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-        <button class="btn btn-success mr-1">Submit</button>
-        <button class="btn btn-secondary" type="button" (click)="resetRoles()">Reset</button>
-      </div>
-    </form>
+<div class="m-3" *ngIf="user">
+  <div *ngIf="user">
+    {{errorMessage}}
   </div>
+  <table class="table table-hover table-sm">
+    <thead>
+    <tr>
+      <th scope="col">Username</th>
+      <th scope="col">Name</th>
+      <th scope="col">Surname</th>
+      <th scope="col">Date of birth</th>
+      <th scope="col">Passport number</th>
+      <th scope="col">Driver license</th>
+      <th scope="col">Email</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>{{user.username}}</td>
+      <td>{{user.name}}</td>
+      <td>{{user.surname}}</td>
+      <td>{{user.dateOfBirth}}</td>
+      <td>{{user.passportNumber}}</td>
+      <td>{{user.driverLicenseSerialNumber || 'NULL'}}</td>
+      <td>{{user.email}}</td>
+    </tr>
+    </tbody>
+  </table>
+  <div class="card col-2 p-0 m-3">
+    <h5 class="card-header m-0">User roles</h5>
+    <div class="card-body">
+      <form name="form" (ngSubmit)="onSubmit()">
+        <div
+          class="form-check"
+          *ngFor="let role of allRoles"
+          id="roles"
+        >
+          <input
+            type="checkbox"
+            class="form-check-input"
+            [checked]="checkUserRole(role)"
+            [disabled]="isNoneRole(role)"
+            (change)="editRoles(role)"
+          >
+          {{showRole(role)}}
+        </div>
+        <div class="d-grid gap-2 d-md-flex mt-3">
+          <button class="btn btn-success mr-1">Submit</button>
+          <button class="btn btn-secondary" type="button" (click)="resetRoles()">Reset</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <button class="btn btn-primary btn-sm" (click)="goBack()">go back</button>
 </div>
-<button class="btn btn-primary" (click)="goBack()">go back</button>
+
