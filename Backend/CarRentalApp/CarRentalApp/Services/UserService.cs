@@ -52,8 +52,10 @@ namespace CarRentalApp.Services
         public async Task<UserModel> GetValidClientAsync(LoginModel loginModel)
         {
             var user = await GetByUsernameAsync(loginModel.Username);
-            var userModel = user.Adapt<UserModel>();
-            if (ValidateClient(user, loginModel))
+            _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
+
+            var userModel = user.Adapt<User, UserModel>();
+            if (ValidateAsClient(user))
             {
                 return userModel;
             }
@@ -74,8 +76,18 @@ namespace CarRentalApp.Services
         public async Task<UserModel> GetValidAdminAsync(LoginModel loginModel)
         {
             var user = await GetByUsernameAsync(loginModel.Username);
-            ValidateAdmin(user, loginModel);
-            return CreateModel(user);
+            _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
+
+            if (user.Roles.Intersects(RolesInfo.AdminRoles))
+            {
+                return user.Adapt<User, UserModel>();
+            }
+
+            throw new SharedException(
+                ErrorTypes.AccessDenied,
+                "You do not have permission",
+                "User does not have admin role"
+            );
         }
 
         /// <summary>
@@ -95,10 +107,10 @@ namespace CarRentalApp.Services
         /// </summary>
         /// <param name="userId">unique credential of user.</param>
         /// <returns>Model of existing user.</returns>
-        public async Task<UserModel> GetAsync(Guid userId)
+        public async Task<UserModel> GetByAsync(Guid userId)
         {
             var user = await GetByIdAsync(userId);
-            return CreateModel(user);
+            return user.Adapt<UserModel>();
         }
 
         /// <summary>
@@ -106,10 +118,10 @@ namespace CarRentalApp.Services
         /// </summary>
         /// <param name="username">unique credential of user.</param>
         /// <returns>Model of existing user.</returns>
-        public async Task<UserModel> GetAsync(string username)
+        public async Task<UserModel> GetByAsync(string username)
         {
             var user = await GetByUsernameAsync(username);
-            return CreateModel(user);
+            return user.Adapt<UserModel>();
         }
 
         /// <summary>
@@ -121,7 +133,7 @@ namespace CarRentalApp.Services
         {
             var user = await GetByUsernameAsync(username);
 
-            if (user.Roles.CheckIfIntersects(RolesInfo.ClientRoles))
+            if (user.Roles.Intersects(RolesInfo.ClientRoles))
             {
                 return;
             }
@@ -153,7 +165,7 @@ namespace CarRentalApp.Services
             ValidateRoles(roles);
             var user = await GetByUsernameAsync(username);
 
-            if (roles.CheckIfIntersects(RolesInfo.ClientRoles))
+            if (roles.Intersects(RolesInfo.ClientRoles))
             {
                 ValidateAge(user.DateOfBirth);
 
@@ -232,17 +244,14 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Checks if <paramref name="loginModel"/> corresponds <paramref name="user"/> and has one of clients roles.
+        /// Checks if <paramref name="user"/> can be logged in as client.
         /// </summary>
         /// <param name="user">existing entity.</param>
-        /// <param name="loginModel">credentials model to validate.</param>
-        /// <returns>True - if password and roles are correct, False - if password is correct, but has no clients roles.</returns>
+        /// <returns>True - if user is already a client, False - if user cannot be a client.</returns>
         /// <exception cref="SharedException">Client role is not approved.</exception>
-        private bool ValidateClient(User user, LoginModel loginModel)
+        private bool ValidateAsClient(User user)
         {
-            _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
-
-            if (user.Roles.CheckIfIntersects(RolesInfo.ClientRoles))
+            if (user.Roles.Intersects(RolesInfo.ClientRoles))
             {
                 return true;
             }
@@ -260,26 +269,6 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Checks if <paramref name="loginModel"/> corresponds <paramref name="user"/> and has on of admins roles.
-        /// </summary>
-        /// <param name="user">existing entity.</param>
-        /// <param name="loginModel">user prototype to be validated.</param>
-        /// <exception cref="SharedException">Inconsistent user role.</exception>
-        private void ValidateAdmin(User user, LoginModel loginModel)
-        {
-            _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
-
-            if (!user.Roles.CheckIfIntersects(RolesInfo.AdminRoles))
-            {
-                throw new SharedException(
-                    ErrorTypes.AccessDenied,
-                    "You do not have permission",
-                    "User does not have admin role"
-                );
-            }
-        }
-
-        /// <summary>
         /// Checks if <paramref name="roles"/> are valid and can be assigned to user.
         /// </summary>
         /// <param name="roles">set of roles to validate.</param>
@@ -287,7 +276,7 @@ namespace CarRentalApp.Services
         /// <exception cref="SharedException">Inconsistent role set.</exception>
         private void ValidateRoles(IReadOnlySet<Roles> roles)
         {
-            if (!roles.Any())
+            if (roles.Count < 1)
             {
                 throw new SharedException(
                     ErrorTypes.Invalid,
@@ -324,19 +313,6 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Creates user model from <paramref name="user"/> entity.
-        /// </summary>
-        /// <param name="user">existing entity.</param>
-        /// <returns>Model created on existing user.</returns>
-        private UserModel CreateModel(User user)
-        {
-            var userModel = user.Adapt<UserModel>();
-            userModel.UserRoles = user.Roles.Select(role => role.Role);
-
-            return userModel;
-        }
-
-        /// <summary>
         /// Validates <paramref name="dateOfBirth"/> with minimum age from app config.
         /// </summary>
         /// <param name="dateOfBirth">date to check.</param>
@@ -356,14 +332,14 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Checks if <paramref name="email"/> and/or <paramref name="username"/> are unique among all users.
+        /// Checks if <paramref name="email"/> and <paramref name="username"/> are separately unique among all users.
         /// </summary>
         /// <param name="email">unique credential of user.</param>
         /// <param name="username">unique credential of user.</param>
         /// <exception cref="SharedException">User with such credentials already exists.</exception>
         private async Task CheckCredentialsUniqueness(string email, string username)
         {
-            if (await _carRentalDbContext.Users.AnyAsync(user => user.Username.Equals(username)))
+            if (await _carRentalDbContext.Users.AnyAsync(user => user.Username == username))
             {
                 throw new SharedException(
                     ErrorTypes.Conflict,
@@ -371,7 +347,7 @@ namespace CarRentalApp.Services
                 );
             }
 
-            if (await _carRentalDbContext.Users.AnyAsync(user => user.Email.Equals(email)))
+            if (await _carRentalDbContext.Users.AnyAsync(user => user.Email == email))
             {
                 throw new SharedException(
                     ErrorTypes.Conflict,

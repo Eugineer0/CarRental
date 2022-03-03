@@ -6,6 +6,6 @@ namespace CarRentalApp.Models.Web.Requests
     public class RolesModificationRequest
     {
         [Required]
-        public IEnumerable<Roles> Roles { get; set; } = null!;
+        public ISet<Roles> Roles { get; set; } = null!;
     }
 }

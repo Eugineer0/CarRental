@@ -202,7 +202,7 @@ namespace CarRentalApp.Services
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
             };
 
-            foreach (var role in user.UserRoles)
+            foreach (var role in user.Roles)
             {
                 jwtClaims.Add(new Claim("role", role.ToString()));
             }

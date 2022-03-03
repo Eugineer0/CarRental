@@ -10,12 +10,12 @@ namespace CarRentalApp.Models.Bll
         public static readonly IEnumerable<Roles> AdminRoles = new[] { Roles.Admin, Roles.SuperAdmin };
         public static readonly IEnumerable<Roles> ClientRoles = new[] { Roles.Client };
 
-        public static bool CheckIfIntersects(this IEnumerable<UserRole> roles, IEnumerable<Roles> candidate)
+        public static bool Intersects(this IEnumerable<UserRole> roles, IEnumerable<Roles> candidate)
         {
             return roles.Select(role => role.Role).Intersect(candidate).Any();
         }
 
-        public static bool CheckIfIntersects(this IEnumerable<Roles> roles, IEnumerable<Roles> candidate)
+        public static bool Intersects(this IEnumerable<Roles> roles, IEnumerable<Roles> candidate)
         {
             return roles.Intersect(candidate).Any();
         }

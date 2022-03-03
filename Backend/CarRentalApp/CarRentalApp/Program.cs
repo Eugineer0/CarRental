@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using CarRentalApp.Contexts;
 using Microsoft.EntityFrameworkCore;
 using CarRentalApp.Configuration.JWT.Refresh;
+using CarRentalApp.Configuration.Mappers;
 using CarRentalApp.Middleware;
 using CarRentalApp.Services;
+using MapsterMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +28,9 @@ var configurationString = builder.Configuration.GetConnectionString("CarRentalDB
 builder.Services.AddDbContext<CarRentalDbContext>(
     options => options.UseSqlServer(configurationString)
 );
+
+var mapper = new Mapper(MapsterConfig.GetConfig());
+builder.Services.AddSingleton<IMapper>(mapper);
 
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
