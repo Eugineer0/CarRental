@@ -34,7 +34,7 @@ namespace CarRentalApp.Services
         /// </summary>
         /// <param name="userId">unique credential of user to be updated</param>
         /// <param name="driverLicenseSerialNumber">value to fill in user field</param>
-        public async Task AddUserInfoAsync(Guid userId, string driverLicenseSerialNumber)
+        public async Task AddDriverLicenseByAsync(string driverLicenseSerialNumber, Guid userId)
         {
             var user = await GetByIdAsync(userId);
 
@@ -91,15 +91,18 @@ namespace CarRentalApp.Services
         }
 
         /// <summary>
-        /// Checks uniqueness of credentials and saves created user model in database.
+        /// Checks uniqueness of credentials and returns user model.
         /// </summary>
         /// <param name="registrationModel">user prototype to register.</param>
-        public async Task RegisterAsync(RegistrationModel registrationModel)
+        /// <returns>Model of saved user.</returns>
+        public async Task<UserModel> RegisterAsync(RegistrationModel registrationModel)
         {
             await CheckCredentialsUniqueness(registrationModel.Email, registrationModel.Username);
             var user = CreateEntity(registrationModel);
             _carRentalDbContext.Users.Add(user);
             await _carRentalDbContext.SaveChangesAsync();
+
+            return user.Adapt<UserModel>();
         }
 
         /// <summary>

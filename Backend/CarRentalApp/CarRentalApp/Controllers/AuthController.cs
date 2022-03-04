@@ -74,14 +74,14 @@ namespace CarRentalApp.Controllers
         public async Task<IActionResult> CompleteRegistration(RegistrationCompletionRequest request)
         {
             var userId = _tokenService.GetUserId(request.Token);
-            await _userService.AddUserInfoAsync(userId, request.DriverLicenseSerialNumber);
+            await _userService.AddDriverLicenseByAsync(request.DriverLicenseSerialNumber, userId);
             return Ok();
         }
 
         private async Task<IActionResult> RegisterUserAsync(RegistrationModel model)
         {
-            await _userService.RegisterAsync(model);
-            return Created($"api/users/{model.Username}", null);
+            var userModel = await _userService.RegisterAsync(model);
+            return Created($"api/users/{model.Username}", userModel);
         }
 
         private async Task<IActionResult> AuthenticateAsync(UserModel user)
