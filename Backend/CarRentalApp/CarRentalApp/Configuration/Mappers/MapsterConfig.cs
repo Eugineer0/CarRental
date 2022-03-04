@@ -4,15 +4,13 @@ using Mapster;
 
 namespace CarRentalApp.Configuration.Mappers
 {
-    public class MapsterConfig
+    public static class MapsterConfig
     {
-        public static TypeAdapterConfig GetConfig()
+        public static void Configure()
         {
-            var setter = TypeAdapterConfig<User, UserModel>
+            TypeAdapterConfig<User, UserModel>
                 .NewConfig()
                 .Map(dest => dest.Roles, src => src.Roles.Select(role => role.Role));
-
-            return setter.Config;
         }
     }
 }

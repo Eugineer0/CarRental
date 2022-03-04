@@ -7,7 +7,6 @@ using CarRentalApp.Configuration.JWT.Refresh;
 using CarRentalApp.Configuration.Mappers;
 using CarRentalApp.Middleware;
 using CarRentalApp.Services;
-using MapsterMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,8 +28,7 @@ builder.Services.AddDbContext<CarRentalDbContext>(
     options => options.UseSqlServer(configurationString)
 );
 
-var mapper = new Mapper(MapsterConfig.GetConfig());
-builder.Services.AddSingleton<IMapper>(mapper);
+MapsterConfig.Configure();
 
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();

@@ -74,7 +74,7 @@ namespace CarRentalApp.Controllers
         public async Task<IActionResult> CompleteRegistration(RegistrationCompletionRequest request)
         {
             var userId = _tokenService.GetUserId(request.Token);
-            await _userService.AddDriverLicenseByAsync(request.DriverLicenseSerialNumber, userId);
+            await _userService.AddDriverLicenseByAsync(userId, request.DriverLicenseSerialNumber);
             return Ok();
         }
 
