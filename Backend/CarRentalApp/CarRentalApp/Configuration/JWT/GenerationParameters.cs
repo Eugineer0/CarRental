@@ -2,8 +2,8 @@
 {
     public abstract class GenerationParameters
     {
-        public virtual int LifeTimeSeconds { get; set; }
+        public int LifeTimeSeconds { get; set; }
 
-        public virtual string Secret { get; set; }
+        public string Secret { get; set; } = null!;
     }
 }

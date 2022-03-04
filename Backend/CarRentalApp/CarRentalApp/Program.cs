@@ -1,56 +1,59 @@
+using CarRentalApp.Configuration;
 using CarRentalApp.Configuration.JWT.Access;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using CarRentalApp.Services.Identity;
-using CarRentalApp.Services.Token;
-using CarRentalApp.Services.Authentication;
-using CarRentalApp.Services.Data;
-using CarRentalApp.Models.Contexts;
+using CarRentalApp.Contexts;
 using Microsoft.EntityFrameworkCore;
+using CarRentalApp.Configuration.JWT.Refresh;
+using CarRentalApp.Configuration.Mappers;
+using CarRentalApp.Middleware;
+using CarRentalApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-var configurationString = builder.Configuration.GetConnectionString("sqlserver");
-builder.Services.AddDbContext<AuthenticationDbContext>(options => options.UseSqlServer(configurationString));
-
-builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<UserService>();
-
-builder.Services.AddScoped<PasswordService, ShaPasswordService>();
-
-builder.Services.AddScoped<TokenService>();
-
-builder.Services.AddScoped<AuthenticationService>();
-
 builder.Services.Configure<AccessJwtConfig>(
     builder.Configuration.GetSection(AccessJwtConfig.Section)
 );
+builder.Services.Configure<RefreshJwtConfig>(
+    builder.Configuration.GetSection(RefreshJwtConfig.Section)
+);
+builder.Services.Configure<ClientRequirements>(
+    builder.Configuration.GetSection(ClientRequirements.Section)
+);
+
+var configurationString = builder.Configuration.GetConnectionString("CarRentalDB");
+
+builder.Services.AddDbContext<CarRentalDbContext>(
+    options => options.UseSqlServer(configurationString)
+);
+
+MapsterConfig.Configure();
+
+builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<UserService>();
+
+builder.Services.AddScoped<PasswordService>();
 
 var accessJwtConfig = new AccessJwtConfig();
 builder.Configuration.Bind(AccessJwtConfig.Section, accessJwtConfig);
 
 var accessJwtValidationParams = accessJwtConfig.ValidationParameters;
-accessJwtValidationParams.IssuerSigningKey = new SymmetricSecurityKey(
-    Encoding.UTF8.GetBytes(accessJwtConfig.GenerationParameters.Secret)
-);
+accessJwtValidationParams.IssuerSigningKey = TokenService.GetKey(accessJwtConfig.GenerationParameters);
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = accessJwtValidationParams;
-        }
+    .AddJwtBearer(
+        options => { options.TokenValidationParameters = accessJwtValidationParams; }
     );
 
-builder.Services.AddCors(options =>
+builder.Services.AddCors(
+    options =>
     {
         options.AddDefaultPolicy(
-            builder =>
+            configurePolicy =>
             {
-                builder
+                configurePolicy
                     .AllowAnyOrigin()
                     .AllowAnyMethod()
                     .AllowAnyHeader();
@@ -60,6 +63,8 @@ builder.Services.AddCors(options =>
 );
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseRouting();
 

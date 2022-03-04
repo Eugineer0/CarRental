@@ -1,31 +1,93 @@
+using CarRentalApp.Models.Bll;
+using CarRentalApp.Models.Web.Requests;
+using CarRentalApp.Services;
+using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using CarRentalApp.Models.DTOs.Requests;
-using CarRentalApp.Services.Authentication;
 
 namespace CarRentalApp.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly AuthenticationService _authenticationService;
+        private readonly UserService _userService;
+        private readonly TokenService _tokenService;
 
-        public AuthController(AuthenticationService authenticationService)
+        public AuthController(
+            UserService userService,
+            TokenService tokenService
+        )
         {
-            _authenticationService = authenticationService;
+            _userService = userService;
+            _tokenService = tokenService;
         }
 
-        [HttpPost]
-        [Route("[action]")]
-        public async Task<IActionResult> Login([FromBody] UserLoginDTO model)
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Login(UserLoginRequest request)
         {
-            var authResponse = await _authenticationService.AuthenticateAsync(model);
-            if (authResponse == null)
-            {
-                return Unauthorized("Incorrect username or password");
-            }
+            var model = request.Adapt<LoginModel>();
+            var user = await _userService.GetValidClientAsync(model);
+            return await AuthenticateAsync(user);
+        }
 
-            return Ok(authResponse);
-        }        
+        [HttpPost("login-admin")]
+        public async Task<IActionResult> LoginAdmin(UserLoginRequest request)
+        {
+            var model = request.Adapt<LoginModel>();
+            var user = await _userService.GetValidAdminAsync(model);
+            return await AuthenticateAsync(user);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Refresh(RefreshAccessRequest request)
+        {
+            var token = await _tokenService.PopTokenAsync(request.RefreshToken);
+            _tokenService.ValidateTokenLifetime(token.Token);
+            var user = await _userService.GetByAsync(token.UserId);
+            return await AuthenticateAsync(user);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Logout(RefreshAccessRequest request)
+        {
+            await _tokenService.PopTokenAsync(request.RefreshToken);
+            return Ok();
+        }
+
+        [HttpPost("[action]")]
+        public Task<IActionResult> Register(ClientRegistrationRequest request)
+        {
+            var model = request.Adapt<RegistrationModel>();
+            return RegisterUserAsync(model);
+        }
+
+        [HttpPost("register-admin")]
+        public Task<IActionResult> RegisterAdmin(AdminRegistrationRequest request)
+        {
+            var model = request.Adapt<RegistrationModel>();
+            return RegisterUserAsync(model);
+        }
+
+        [Authorize]
+        [HttpPost("complete-registration")]
+        public async Task<IActionResult> CompleteRegistration(RegistrationCompletionRequest request)
+        {
+            var userId = _tokenService.GetUserId(request.Token);
+            await _userService.AddDriverLicenseByAsync(userId, request.DriverLicenseSerialNumber);
+            return Ok();
+        }
+
+        private async Task<IActionResult> RegisterUserAsync(RegistrationModel model)
+        {
+            var userModel = await _userService.RegisterAsync(model);
+            return Created($"api/users/{model.Username}", userModel);
+        }
+
+        private async Task<IActionResult> AuthenticateAsync(UserModel user)
+        {
+            var response = await _tokenService.GetAccessAsync(user);
+            return Ok(response);
+        }
     }
 }

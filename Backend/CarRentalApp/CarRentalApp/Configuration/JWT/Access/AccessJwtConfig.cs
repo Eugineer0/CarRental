@@ -5,8 +5,9 @@ namespace CarRentalApp.Configuration.JWT.Access
     public class AccessJwtConfig
     {
         public const string Section = "AccessJwtConfig";
-        public AccessTokenGenerationParameters GenerationParameters { get; set; }
 
-        public TokenValidationParameters ValidationParameters { get; set; }
+        public AccessTokenGenerationParameters GenerationParameters { get; set; } = null!;
+
+        public TokenValidationParameters ValidationParameters { get; set; } = null!;
     }
 }
