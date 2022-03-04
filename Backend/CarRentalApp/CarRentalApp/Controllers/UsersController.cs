@@ -33,7 +33,7 @@ namespace CarRentalApp.Controllers
             return Ok(await _userService.GetAllMinimalUserDTOsAsync());
         }
 
-        [Authorize(Roles = "SuperAdmin")]
+       // [Authorize(Roles = "SuperAdmin")]
         [HttpGet("{username}")]
         public async Task<ActionResult<FullUserDTO>> GetUser(string username)
         {

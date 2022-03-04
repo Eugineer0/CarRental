@@ -94,8 +94,11 @@ namespace CarRentalApp.Services
 
         private async Task<IQueryable<RentalCenter>> AddCarsInfoAsync(IQueryable<RentalCenter> centers)
         {
-            return centers.Include(center => center.Cars)
-                .ThenInclude(car => car.Type);
+            return centers
+                .Include(center => center.Cars)
+                .ThenInclude(car => car.Type)
+                .ThenInclude(type => type.ServicePrices)
+                .ThenInclude(servicePrice => servicePrice.Service);
         }
 
         private IEnumerable<RentalCenter> FilterByDate(IEnumerable<RentalCenter> rentalCenters, DateTime start, DateTime finish)
@@ -124,7 +127,7 @@ namespace CarRentalApp.Services
         private RentalCenterModel ConvertToModel(RentalCenter rentalCenter)
         {
             var model = rentalCenter.Adapt<RentalCenterModel>();
-            model.Cars = rentalCenter.Cars.Select(_carService.ConvertToModel);
+            model.Cars = rentalCenter.Cars.Select(car => car.Adapt<CarModel>()).ToList();
 
             return model;
         }

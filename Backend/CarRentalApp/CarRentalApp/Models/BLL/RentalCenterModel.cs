@@ -10,5 +10,5 @@ public class RentalCenterModel
 
     public string Address { get; set; }
 
-    public IEnumerable<CarModel> Cars { get; set; }
+    public IReadOnlyCollection<CarModel> Cars { get; set; }
 }

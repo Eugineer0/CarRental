@@ -16,7 +16,7 @@ namespace CarRentalApp.Services
 
         public IEnumerable<CarModel> GetCars(IEnumerable<Car> cars)
         {
-            return cars.Select(ConvertToModel);
+            return cars.Select(car => car.Adapt<CarModel>());
         }
 
         public async Task<IEnumerable<CarModel>> GetAccessibleCars(IEnumerable<Car> cars, DateTime startRent, DateTime finishRent)
@@ -34,22 +34,6 @@ namespace CarRentalApp.Services
                         CheckIfAfter(date.FinishRent, start)
                         && CheckIfAfter(date.StartRent, finish)
                 );
-        }
-
-        public CarModel ConvertToModel(Car car)
-        {
-            var model = car.Type.Adapt<CarModel>();
-            model.RegistrationNumber = car.RegistrationNumber;
-
-            return model;
-        }
-
-        private TypeAdapterConfig GetTypeAdapterConfig()
-        {
-            var config = new TypeAdapterConfig();
-            config.NewConfig<Car, CarModel>();
-
-            return config;
         }
 
         private bool CheckIfBefore(DateTime target, DateTime candidate)

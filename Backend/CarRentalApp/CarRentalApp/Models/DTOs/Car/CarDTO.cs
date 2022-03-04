@@ -27,4 +27,6 @@ public class CarDTO
     public decimal PricePerHour { get; set; }
 
     public decimal PricePerDay { get; set; }
+
+    public IEnumerable<ServiceResponse> AvailableServices { get; set; }
 }

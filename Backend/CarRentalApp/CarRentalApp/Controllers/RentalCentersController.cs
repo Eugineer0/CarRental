@@ -25,13 +25,7 @@ namespace CarRentalApp.Controllers
             var result = await _rentalCenterService.GetCenterModelsAsync();
 
             var response = result.Select(
-                center =>
-                {
-                    var output = center.Adapt<RentalCenterDTO>();
-                    output.AvailableCarsNumber = center.Cars.Count();
-
-                    return output;
-                }
+                center => center.Adapt<RentalCenterDTO>()
             );
 
             return Ok(response);
@@ -42,7 +36,6 @@ namespace CarRentalApp.Controllers
         {
             var result = await _rentalCenterService.GetCenterModelAsync(name);
             var response = result.Adapt<RentalCenterDTO>();
-            response.AvailableCarsNumber = result.Cars.Count();
             return Ok(response);
         }
 
@@ -52,13 +45,7 @@ namespace CarRentalApp.Controllers
             var result = await _rentalCenterService.GetFilteredCenterModelsAsync(request);
 
             var response = result.Select(
-                center =>
-                {
-                    var output = center.Adapt<RentalCenterDTO>();
-                    output.AvailableCarsNumber = center.Cars.Count();
-
-                    return output;
-                }
+                center => center.Adapt<RentalCenterDTO>()
             );
 
             return Ok(response);
@@ -70,12 +57,7 @@ namespace CarRentalApp.Controllers
             var result = await _rentalCenterService.GetCenterCarModelsAsync(name);
 
             var response = result.Select(
-                car =>
-                {
-                    var output = car.Adapt<CarDTO>();
-
-                    return output;
-                }
+                car => car.Adapt<CarDTO>()
             );
 
             return Ok(response);

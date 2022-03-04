@@ -98,7 +98,6 @@ namespace CarRentalApp.Services
         {
             var user = await GetUserAsync(username);
             var userDTO = user.Adapt<User, FullUserDTO>();
-            userDTO.Roles = user.UserRoles.Select(role => role.Role).ToList();
 
             return userDTO;
         }
