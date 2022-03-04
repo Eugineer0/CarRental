@@ -15,7 +15,9 @@ export class RentalCentersComponent implements OnInit {
   public centers: RentalCenter[] = [];
   public cities: string[] = [];
   public countries: string[] = [];
+  public fullDateRequired: boolean = false;
   public filter: FilterRequest = this.initFilter();
+
   public finishRentDate: Date | undefined = undefined;
   public startRentDate: Date | undefined = undefined;
   public startRentTime: Time | undefined = undefined;
@@ -46,7 +48,9 @@ export class RentalCentersComponent implements OnInit {
   }
 
   onSubmit() {
-    this.processDates();
+    if(this.dateIsSpecified()) {
+      this.processDates();
+    }
     this.rentalCenterService.getFilteredRentalCenters(this.filter)
       .subscribe(
         centers => {
@@ -58,6 +62,19 @@ export class RentalCentersComponent implements OnInit {
   private processDates(): void {
     this.filter.startRent = new Date(this.startRentDate + ' ' + this.startRentTime);
     this.filter.finishRent = new Date(this.finishRentDate + ' ' + this.finishRentTime);
+  }
+
+  public dateIsSpecified(): boolean {
+    if (this.startRentDate
+      || this.startRentTime
+      || this.finishRentDate
+      || this.finishRentTime) {
+      this.fullDateRequired = true;
+      return true;
+    }
+
+    this.fullDateRequired = false;
+    return false;
   }
 
   public initFilter(): FilterRequest {
@@ -72,5 +89,9 @@ export class RentalCentersComponent implements OnInit {
 
   public resetFilter(): void {
     this.filter = this.initFilter();
+    this.finishRentDate = undefined;
+    this.startRentDate = undefined;
+    this.startRentTime = undefined;
+    this.finishRentTime = undefined;
   }
 }

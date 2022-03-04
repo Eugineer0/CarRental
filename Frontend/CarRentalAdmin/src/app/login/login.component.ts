@@ -17,10 +17,9 @@ export class LoginComponent implements OnInit {
     password: ''
   };
 
+  public authFailedMessage: string | null = null;
   public authFailed: boolean = false;
-  public authFailedMessage: string = '';
   private isVisiblePassword: boolean = false;
-
 
   constructor(
     private authService: AuthService,

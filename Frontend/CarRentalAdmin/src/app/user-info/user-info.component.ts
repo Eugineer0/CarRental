@@ -14,11 +14,15 @@ import { UserFull, Roles } from "../_models/user/user-full";
 export class UserInfoComponent implements OnInit {
   public user: UserFull | null = null;
   public errorMessage: string | null = null;
-  public allRoles: Roles[] = Object.keys(Roles).filter(value => isNaN(Number(value))).map(key => Roles[key as keyof typeof Roles]);
+  public editRolesFailed: boolean = false;
+  public rolesChanged: boolean = false;
+  public allRoles: Roles[] = Object
+    .keys(Roles)
+    .filter(value => isNaN(Number(value)))
+    .map(key => Roles[key as keyof typeof Roles]);
 
   private roles: Roles[] = [];
   private username: string | null = null;
-  private editRolesFailed: boolean = false;
 
   constructor(
     private location: Location,
@@ -28,7 +32,7 @@ export class UserInfoComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    console.log(Object.values(Roles));
+    this.username = this.route.snapshot.paramMap.get('username');
     this.getUser()
   }
 
@@ -45,8 +49,8 @@ export class UserInfoComponent implements OnInit {
   }
 
   public onSubmit(): void {
-    if (this.username) {
-      this.userService.putRoles(this.username, this.roles)
+    if (this.user && this.rolesChanged && !this.rolesEqual(this.user.roles, this.roles)) {
+      this.userService.putRoles(this.user.username, this.roles)
         .subscribe(
           _ => {
             if (this.user) {
@@ -54,11 +58,12 @@ export class UserInfoComponent implements OnInit {
             }
           },
           error => {
-            this.resetRoles();
             this.editRolesFailed = true;
             this.errorMessage = error.error;
           }
         );
+
+      this.rolesChanged = false;
     }
   }
 
@@ -81,12 +86,18 @@ export class UserInfoComponent implements OnInit {
         }
       }
     }
+
+    this.rolesChanged = true;
+    this.editRolesFailed = false;
   }
 
-  public resetRoles(): void {
+  public resetRolesChanging(): void {
     if (this.user) {
       this.copyRoles(this.user.roles, this.roles);
     }
+
+    this.rolesChanged = false;
+    this.editRolesFailed = false;
   }
 
   public showRole(role: Roles): string {
@@ -94,8 +105,6 @@ export class UserInfoComponent implements OnInit {
   }
 
   private getUser(): void {
-    this.username = this.route.snapshot.paramMap.get('username');
-
     if (this.username) {
       this.userService.getUser(this.username)
         .subscribe(user => {
@@ -106,10 +115,29 @@ export class UserInfoComponent implements OnInit {
     }
   }
 
+  private rolesEqual(target: Roles[], candidate: Roles[]): boolean {
+    const length = target.length;
+    if(length !== candidate.length) {
+      return false;
+    }
+
+    for(let i = 0; i < length; i++) {
+      if(target[i] !== candidate[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   private copyRoles(source: Roles[], dest: Roles[]): void {
     dest.splice(0);
     for (let role of source) {
       dest.push(role);
     }
+  }
+
+  public showDateOfBirth(user: UserFull): string {
+    return new Date(user.dateOfBirth).toDateString().slice(4);
   }
 }

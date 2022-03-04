@@ -1,5 +1,5 @@
 <div class="row align-items-start mx-0">
-  <div class="col-md-2.3">
+  <div class="col-md-3">
     <div class="card mb-0">
       <h5 class="card-header">Filter</h5>
       <button class="btn btn-primary btn-sm" (click)="resetFilter()">Reset</button>
@@ -39,11 +39,11 @@
               name="minimumCarsNumber"
               [(ngModel)]="filter.minimumAvailableCarsNumber"
             >
-            <label class="mb-0 mt-2" for="rentlPeriod">Rent period</label>
-            <span class="form-control" id="rentlPeriod">
+            <label class="mb-0 mt-2" for="rentalPeriod">Rent period</label>
+            <div class="form-control" id="rentalPeriod">
               <label class="mb-0 mt-2" for="startDate">Start</label>
               <input
-                required
+                [required]="dateIsSpecified()"
                 type="date"
                 class="form-control"
                 id="startDate"
@@ -51,7 +51,7 @@
                 [(ngModel)]="startRentDate"
               >
               <input
-                required
+                [required]="dateIsSpecified()"
                 type="time"
                 class="form-control"
                 id="StartTime"
@@ -60,7 +60,7 @@
               >
               <label class="mb-0 mt-2" for="finishDate">Finish</label>
               <input
-                required
+                [required]="dateIsSpecified()"
                 type="date"
                 class="form-control"
                 id="finishDate"
@@ -68,19 +68,22 @@
                 [(ngModel)]="finishRentDate"
               >
               <input
-                required
+                [required]="dateIsSpecified()"
                 type="time"
                 class="form-control"
                 id="finishTime"
                 name="finishRentTime"
                 [(ngModel)]="finishRentTime"
               >
-            </span>
+              <div *ngIf="fullDateRequired" class="my-2 alert alert-warning">
+                Please fill in all date fields
+              </div>
+            </div>
           </div>
           <button
             type="submit"
-            class="btn btn-primary col-12"
-            [disabled]="filterForm.form.invalid"
+            class="btn btn-primary col"
+            [disabled]="filterForm.form.invalid || filterForm.form.pristine"
           >Find
           </button>
         </form>

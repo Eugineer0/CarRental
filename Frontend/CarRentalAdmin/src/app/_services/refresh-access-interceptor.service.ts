@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from "@angular/router";
-import { Observable } from "rxjs";
+import { Observable, of } from "rxjs";
 import { catchError, tap } from "rxjs/operators";
 import {
   HttpErrorResponse,
@@ -58,7 +58,15 @@ export class RefreshAccessInterceptor implements HttpInterceptor {
           this.authService.refresh(refreshTokenRequest)
             .subscribe(
               _ => {
-                handler.handle(request).subscribe();
+                handler.handle(request)
+                  .subscribe(
+                    response => {
+                      return of(response);
+                    },
+                    err => {
+                      error = err;
+                    }
+                  );
               }
             );
         } else {

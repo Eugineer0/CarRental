@@ -1,5 +1,5 @@
 <div class="m-3" *ngIf="user">
-  <div *ngIf="user">
+  <div *ngIf="editRolesFailed && !rolesChanged" class="alert alert-danger">
     {{errorMessage}}
   </div>
   <table class="table table-hover table-sm">
@@ -19,7 +19,7 @@
       <td>{{user.username}}</td>
       <td>{{user.name}}</td>
       <td>{{user.surname}}</td>
-      <td>{{user.dateOfBirth}}</td>
+      <td>{{showDateOfBirth(user)}}</td>
       <td>{{user.passportNumber}}</td>
       <td>{{user.driverLicenseSerialNumber || 'NULL'}}</td>
       <td>{{user.email}}</td>
@@ -29,7 +29,7 @@
   <div class="card col-2 p-0 m-3">
     <h5 class="card-header m-0">User roles</h5>
     <div class="card-body">
-      <form name="form" (ngSubmit)="onSubmit()">
+      <form (ngSubmit)="onSubmit()" novalidate>
         <div
           class="form-check"
           *ngFor="let role of allRoles"
@@ -45,8 +45,8 @@
           {{showRole(role)}}
         </div>
         <div class="d-grid gap-2 d-md-flex mt-3">
-          <button class="btn btn-success mr-1">Submit</button>
-          <button class="btn btn-secondary" type="button" (click)="resetRoles()">Reset</button>
+          <button type="submit" class="btn btn-success mr-1" [disabled]="editRolesFailed || !rolesChanged">Submit</button>
+          <button type="button" class="btn btn-secondary" (click)="resetRolesChanging()">Reset</button>
         </div>
       </form>
     </div>
