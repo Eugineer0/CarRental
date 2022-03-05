@@ -1,4 +1,4 @@
-﻿using CarRentalApp.Exceptions;
+﻿using CarRentalBll.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarRentalApp.Middleware

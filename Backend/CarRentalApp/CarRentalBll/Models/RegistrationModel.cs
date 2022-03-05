@@ -1,4 +1,4 @@
-﻿namespace CarRentalApp.Models.Bll
+﻿namespace CarRentalBll.Models
 {
     public class RegistrationModel
     {

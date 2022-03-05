@@ -1,8 +1,8 @@
-﻿using CarRentalApp.Models.Bll;
-using CarRentalApp.Models.Dal;
+﻿using CarRentalApp.Models.Dal;
+using CarRentalBll.Models;
 using Mapster;
 
-namespace CarRentalApp.Configuration.Mappers
+namespace CarRentalBll.Configuration.Mappers
 {
     public static class MapsterConfig
     {

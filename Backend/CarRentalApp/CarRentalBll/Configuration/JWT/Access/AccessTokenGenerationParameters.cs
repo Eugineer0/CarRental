@@ -1,4 +1,4 @@
-﻿namespace CarRentalApp.Configuration.JWT.Access
+﻿namespace CarRentalBll.Configuration.JWT.Access
 {
     public class AccessTokenGenerationParameters : GenerationParameters
     {

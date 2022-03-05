@@ -1,13 +1,13 @@
-﻿using CarRentalApp.Configuration;
-using CarRentalApp.Contexts;
-using CarRentalApp.Exceptions;
-using CarRentalApp.Models.Bll;
+﻿using CarRentalApp.Contexts;
 using CarRentalApp.Models.Dal;
+using CarRentalBll.Configuration;
+using CarRentalBll.Exceptions;
+using CarRentalBll.Models;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace CarRentalApp.Services
+namespace CarRentalBll.Services
 {
     public class UserService
     {

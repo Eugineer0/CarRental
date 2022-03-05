@@ -1,18 +1,18 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using CarRentalApp.Configuration.JWT;
-using CarRentalApp.Configuration.JWT.Access;
-using CarRentalApp.Configuration.JWT.Refresh;
 using CarRentalApp.Contexts;
-using CarRentalApp.Exceptions;
-using CarRentalApp.Models.Bll;
 using CarRentalApp.Models.Dal;
+using CarRentalBll.Configuration.JWT;
+using CarRentalBll.Configuration.JWT.Access;
+using CarRentalBll.Configuration.JWT.Refresh;
+using CarRentalBll.Exceptions;
+using CarRentalBll.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace CarRentalApp.Services
+namespace CarRentalBll.Services
 {
     public class TokenService
     {

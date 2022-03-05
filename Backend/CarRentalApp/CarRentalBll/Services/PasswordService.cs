@@ -1,8 +1,8 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using CarRentalApp.Exceptions;
+using CarRentalBll.Exceptions;
 
-namespace CarRentalApp.Services
+namespace CarRentalBll.Services
 {
     public class PasswordService
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using CarRentalApp.Services;
+using CarRentalBll.Services;
 
 namespace CarRentalApp.Validation
 {

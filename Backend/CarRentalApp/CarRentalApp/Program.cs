@@ -1,12 +1,12 @@
-using CarRentalApp.Configuration;
-using CarRentalApp.Configuration.JWT.Access;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using CarRentalApp.Contexts;
 using Microsoft.EntityFrameworkCore;
-using CarRentalApp.Configuration.JWT.Refresh;
-using CarRentalApp.Configuration.Mappers;
 using CarRentalApp.Middleware;
-using CarRentalApp.Services;
+using CarRentalBll.Configuration;
+using CarRentalBll.Configuration.JWT.Access;
+using CarRentalBll.Configuration.JWT.Refresh;
+using CarRentalBll.Configuration.Mappers;
+using CarRentalBll.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

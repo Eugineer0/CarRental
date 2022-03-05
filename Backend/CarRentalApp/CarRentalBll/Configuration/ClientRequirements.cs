@@ -1,4 +1,4 @@
-﻿namespace CarRentalApp.Configuration;
+﻿namespace CarRentalBll.Configuration;
 
 public class ClientRequirements
 {
