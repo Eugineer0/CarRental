@@ -1,13 +1,13 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using CarRentalApp.Contexts;
-using CarRentalApp.Models.Dal;
 using CarRentalBll.Configuration.JWT;
 using CarRentalBll.Configuration.JWT.Access;
 using CarRentalBll.Configuration.JWT.Refresh;
 using CarRentalBll.Exceptions;
 using CarRentalBll.Models;
+using CarRentalDal.Contexts;
+using CarRentalDal.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

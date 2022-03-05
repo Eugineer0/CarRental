@@ -1,4 +1,4 @@
-﻿namespace CarRentalApp.Models.Web.Responses
+﻿namespace CarRentalWeb.Models.Responses
 {
     public class AuthenticationResponse
     {

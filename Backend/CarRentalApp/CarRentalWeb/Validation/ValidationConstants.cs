@@ -1,4 +1,4 @@
-﻿namespace CarRentalApp.Validation
+﻿namespace CarRentalWeb.Validation
 {
     public static class ValidationConstants
     {

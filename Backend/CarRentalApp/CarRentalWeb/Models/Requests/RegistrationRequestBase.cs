@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using CarRentalApp.Validation;
+using CarRentalWeb.Validation;
 
-namespace CarRentalApp.Models.Web.Requests
+namespace CarRentalWeb.Models.Requests
 {
     public abstract class RegistrationRequestBase
     {

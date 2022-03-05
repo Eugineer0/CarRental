@@ -1,8 +1,8 @@
-﻿using CarRentalApp.Contexts;
-using CarRentalApp.Models.Dal;
-using CarRentalBll.Configuration;
+﻿using CarRentalBll.Configuration;
 using CarRentalBll.Exceptions;
 using CarRentalBll.Models;
+using CarRentalDal.Contexts;
+using CarRentalDal.Models;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

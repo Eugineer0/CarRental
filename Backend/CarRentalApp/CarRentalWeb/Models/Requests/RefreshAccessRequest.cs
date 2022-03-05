@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CarRentalApp.Models.Web.Requests
+namespace CarRentalWeb.Models.Requests
 {
     public class RefreshAccessRequest
     {

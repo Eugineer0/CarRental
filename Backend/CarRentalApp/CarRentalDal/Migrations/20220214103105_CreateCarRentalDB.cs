@@ -3,25 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace CarRentalApp.Migrations
+namespace CarRentalWeb.Migrations
 {
     public partial class CreateCarRentalDB : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "RefreshTokens",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -43,6 +30,25 @@ namespace CarRentalApp.Migrations
                     table.UniqueConstraint("UC_Email", x => x.Email);
                     table.UniqueConstraint("UC_Username", x => x.Username);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                 {
+                     table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                     table.ForeignKey(
+                         name: "FK_RefreshTokens_Users_UserId",
+                         column: x => x.UserId,
+                         principalTable: "Users",
+                         principalColumn: "Id",
+                         onDelete: ReferentialAction.Cascade);
+                 });
 
             migrationBuilder.CreateTable(
                 name: "UserRoles",

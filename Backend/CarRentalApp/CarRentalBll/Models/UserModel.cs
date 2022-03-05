@@ -1,4 +1,4 @@
-﻿using CarRentalApp.Models.Dal;
+﻿using CarRentalDal.Models;
 
 namespace CarRentalBll.Models
 {

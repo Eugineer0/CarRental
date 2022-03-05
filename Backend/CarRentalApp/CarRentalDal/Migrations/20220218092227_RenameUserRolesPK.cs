@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace CarRentalApp.Migrations
+namespace CarRentalWeb.Migrations
 {
     public partial class RenameUserRolesPK : Migration
     {

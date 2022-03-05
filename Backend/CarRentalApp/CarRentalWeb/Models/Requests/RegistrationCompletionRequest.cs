@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using CarRentalApp.Validation;
+using CarRentalWeb.Validation;
 
-namespace CarRentalApp.Models.Web.Requests
+namespace CarRentalWeb.Models.Requests
 {
-    public class ClientRegistrationRequest : RegistrationRequestBase
+    public class RegistrationCompletionRequest
     {
         [Required]
         [RegularExpression(
@@ -13,7 +13,6 @@ namespace CarRentalApp.Models.Web.Requests
         public string DriverLicenseSerialNumber { get; set; } = null!;
 
         [Required]
-        [MinimumAge(minimumAge: 19, ErrorMessage = "Incorrect input: Client have to reach {1} years")]
-        public DateTime? DateOfBirth { get; set; }
+        public string Token { get; set; } = null!;
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace CarRentalApp.Models.Dal
+﻿namespace CarRentalDal.Models
 {
     public class UserRole
     {

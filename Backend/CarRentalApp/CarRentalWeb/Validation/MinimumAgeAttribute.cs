@@ -2,7 +2,7 @@
 using System.Globalization;
 using CarRentalBll.Services;
 
-namespace CarRentalApp.Validation
+namespace CarRentalWeb.Validation
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class MinimumAgeAttribute : ValidationAttribute

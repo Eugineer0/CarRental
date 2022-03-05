@@ -1,7 +1,7 @@
 ﻿using CarRentalBll.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CarRentalApp.Middleware
+namespace CarRentalWeb.Middleware
 {
     public class ExceptionHandlerMiddleware
     {

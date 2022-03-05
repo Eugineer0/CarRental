@@ -1,7 +1,7 @@
-﻿using CarRentalApp.Models.Dal;
+﻿using CarRentalDal.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace CarRentalApp.Contexts
+namespace CarRentalDal.Contexts
 {
     public class CarRentalDbContext : DbContext
     {

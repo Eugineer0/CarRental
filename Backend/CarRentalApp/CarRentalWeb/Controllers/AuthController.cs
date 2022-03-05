@@ -1,11 +1,11 @@
-using CarRentalApp.Models.Web.Requests;
 using CarRentalBll.Models;
 using CarRentalBll.Services;
+using CarRentalWeb.Models.Requests;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CarRentalApp.Controllers
+namespace CarRentalWeb.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
