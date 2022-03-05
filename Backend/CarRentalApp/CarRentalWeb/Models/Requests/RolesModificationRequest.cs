@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using CarRentalDal.Models;
+using SharedResources;
 
 namespace CarRentalWeb.Models.Requests
 {

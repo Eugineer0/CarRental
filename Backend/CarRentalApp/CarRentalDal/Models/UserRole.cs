@@ -1,4 +1,6 @@
-﻿namespace CarRentalDal.Models
+﻿using SharedResources;
+
+namespace CarRentalDal.Models
 {
     public class UserRole
     {
@@ -7,13 +9,5 @@
         public Roles Role { get; set; }
 
         public Guid UserId { get; set; }
-    }
-
-    public enum Roles : byte
-    {
-        None,
-        Client,
-        Admin,
-        SuperAdmin
     }
 }

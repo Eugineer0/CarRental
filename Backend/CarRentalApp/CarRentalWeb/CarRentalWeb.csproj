@@ -13,6 +13,7 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <ProjectReference Include="..\CarRentalBll\CarRentalBll.csproj" />
+        <ProjectReference Include="..\SharedResources\SharedResources.csproj" />
     </ItemGroup>
 
 </Project>

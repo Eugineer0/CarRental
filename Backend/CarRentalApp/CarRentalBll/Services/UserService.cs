@@ -6,6 +6,7 @@ using CarRentalDal.Models;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using SharedResources;
 
 namespace CarRentalBll.Services
 {
@@ -55,7 +56,7 @@ namespace CarRentalBll.Services
             _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
 
             var userModel = user.Adapt<User, UserModel>();
-            if (ValidateAsClient(user))
+            if (ValidateAsClient(userModel))
             {
                 return userModel;
             }
@@ -78,9 +79,10 @@ namespace CarRentalBll.Services
             var user = await GetByUsernameAsync(loginModel.Username);
             _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
 
-            if (user.Roles.Intersects(RolesInfo.AdminRoles))
+            var userModel = user.Adapt<User, UserModel>();
+            if (userModel.Roles.ContainsAny(RolesConstants.AdminRoles))
             {
-                return user.Adapt<User, UserModel>();
+                return userModel;
             }
 
             throw new SharedException(
@@ -128,15 +130,39 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
+        /// Returns all existing users.
+        /// </summary>
+        /// <returns>Existing user models.</returns>
+        public IQueryable<UserModel> GetAll()
+        {
+            return _carRentalDbContext.Users.Select(user => user.Adapt<UserModel>());
+        }
+
+        /// <summary>
+        /// Returns all orders of user with specified <paramref name="userId"/> .
+        /// </summary>
+        /// <param name="userId">unique credential of user.</param>
+        /// <returns>Existing user orders models.</returns>
+        public IQueryable<OrderModel> GetOrdersBy(Guid userId)
+        {
+            return _carRentalDbContext.Orders
+                .Where(order => order.UserId == userId)
+                .Select(order => order.Adapt<OrderModel>());
+        }
+
+        /// <summary>
         /// Updates user found by passed username with client role.
         /// </summary>
-        /// <param name="username">unique credential of user.</param>
-        /// <exception cref="SharedException">User with such <paramref name="username"/> does not meet requirements.</exception>
-        public async Task ApproveClientAsync(string username)
+        /// <param name="userId">unique credential of user.</param>
+        /// <exception cref="SharedException">User with such <paramref name="userId"/> does not meet requirements.</exception>
+        public async Task ApproveClientAsync(Guid userId)
         {
-            var user = await GetByUsernameAsync(username);
+            var user = await GetByIdAsync(userId);
 
-            if (user.Roles.Intersects(RolesInfo.ClientRoles))
+            if (user.Roles
+                .Select(userRole => userRole.Role)
+                .ContainsAny(RolesConstants.ClientRoles)
+            )
             {
                 return;
             }
@@ -158,17 +184,17 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Validates passed <paramref name="roles"/> and assign them to existing user found by <paramref name="username"/>.
+        /// Validates passed <paramref name="roles"/> and assign them to existing user found by <paramref name="userId"/>.
         /// </summary>
-        /// <param name="username">unique credential of user.</param>
+        /// <param name="userId">unique credential of user.</param>
         /// <param name="roles">object, containing array of roles.</param>
         /// <exception cref="SharedException">Cannot specify client role without additional info.</exception>
-        public async Task ModifyRolesAsync(string username, IReadOnlySet<Roles> roles)
+        public async Task ModifyRolesAsync(Guid userId, IReadOnlySet<Roles> roles)
         {
             ValidateRoles(roles);
-            var user = await GetByUsernameAsync(username);
+            var user = await GetByIdAsync(userId);
 
-            if (roles.Intersects(RolesInfo.ClientRoles))
+            if (roles.ContainsAny(RolesConstants.ClientRoles))
             {
                 ValidateAge(user.DateOfBirth);
 
@@ -246,20 +272,26 @@ namespace CarRentalBll.Services
             return user;
         }
 
+        public bool CheckIfApprovalRequested(UserModel userModel)
+        {
+            return userModel.DriverLicenseSerialNumber != null
+                && !userModel.Roles.ContainsAny(RolesConstants.ClientRoles);
+        }
+
         /// <summary>
-        /// Checks if <paramref name="user"/> can be logged in as client.
+        /// Checks if <paramref name="userModel"/> can be logged in as client.
         /// </summary>
-        /// <param name="user">existing entity.</param>
+        /// <param name="userModel">existing user.</param>
         /// <returns>True - if user is already a client, False - if user cannot be a client.</returns>
         /// <exception cref="SharedException">Client role is not approved.</exception>
-        private bool ValidateAsClient(User user)
+        private bool ValidateAsClient(UserModel userModel)
         {
-            if (user.Roles.Intersects(RolesInfo.ClientRoles))
+            if (userModel.Roles.ContainsAny(RolesConstants.ClientRoles))
             {
                 return true;
             }
 
-            if (user.DriverLicenseSerialNumber == null)
+            if (userModel.DriverLicenseSerialNumber == null)
             {
                 return false;
             }
