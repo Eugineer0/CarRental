@@ -1,5 +1,5 @@
-﻿using CarRentalBll.Exceptions;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using SharedResources;
 
 namespace CarRentalWeb.Middleware
 {

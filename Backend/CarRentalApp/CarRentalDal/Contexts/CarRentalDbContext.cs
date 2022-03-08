@@ -15,11 +15,13 @@ namespace CarRentalDal.Contexts
 
         public DbSet<CarType> CarTypes => Set<CarType>();
 
+        public DbSet<CarServicePrice> CarServicePrices => Set<CarServicePrice>();
+
         public DbSet<Order> Orders => Set<Order>();
 
-        public DbSet<OrderService> OrderServices => Set<OrderService>();
+        public DbSet<CarService> CarServices => Set<CarService>();
 
-        public DbSet<Service> Services => Set<Service>();
+        public DbSet<OrderCarService> OrderCarServices => Set<OrderCarService>();
 
         public DbSet<RentalCenter> RentalCenters => Set<RentalCenter>();
 

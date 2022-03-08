@@ -1,5 +1,4 @@
 ﻿using CarRentalBll.Configuration;
-using CarRentalBll.Exceptions;
 using CarRentalBll.Models;
 using CarRentalDal.Contexts;
 using CarRentalDal.Models;
@@ -139,15 +138,36 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Returns all orders of user with specified <paramref name="userId"/> .
+        /// Updates user found by passed username with client role.
         /// </summary>
-        /// <param name="userId">unique credential of user.</param>
-        /// <returns>Existing user orders models.</returns>
-        public IQueryable<OrderModel> GetOrdersBy(Guid userId)
+        /// <param name="username">unique credential of user.</param>
+        /// <exception cref="SharedException">User with such <paramref name="username"/> does not meet requirements.</exception>
+        public async Task ApproveClientAsync(string username)
         {
-            return _carRentalDbContext.Orders
-                .Where(order => order.UserId == userId)
-                .Select(order => order.Adapt<OrderModel>());
+            var user = await GetByUsernameAsync(username);
+
+            if (user.Roles
+                .Select(userRole => userRole.Role)
+                .ContainsAny(RolesConstants.ClientRoles)
+            )
+            {
+                return;
+            }
+
+            ValidateAge(user.DateOfBirth);
+
+            if (user.DriverLicenseSerialNumber == null)
+            {
+                throw new SharedException(
+                    ErrorTypes.Conflict,
+                    "Client approval failed",
+                    "User cannot become a client without specifying DriverLicenseSerialNumber"
+                );
+            }
+
+            user.Roles.Add(new UserRole() { Role = Roles.Client });
+            user.Roles.RemoveAll(role => role.Role == Roles.None);
+            await _carRentalDbContext.SaveChangesAsync();
         }
 
         /// <summary>
@@ -181,6 +201,34 @@ namespace CarRentalBll.Services
             user.Roles.Add(new UserRole() { Role = Roles.Client });
             user.Roles.RemoveAll(role => role.Role == Roles.None);
             await _carRentalDbContext.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Validates passed <paramref name="roles"/> and assign them to existing user found by <paramref name="username"/>.
+        /// </summary>
+        /// <param name="username">unique credential of user.</param>
+        /// <param name="roles">object, containing array of roles.</param>
+        /// <exception cref="SharedException">Cannot specify client role without additional info.</exception>
+        public async Task ModifyRolesAsync(string username, IReadOnlySet<Roles> roles)
+        {
+            ValidateRoles(roles);
+            var user = await GetByUsernameAsync(username);
+
+            if (roles.ContainsAny(RolesConstants.ClientRoles))
+            {
+                ValidateAge(user.DateOfBirth);
+
+                if (user.DriverLicenseSerialNumber == null)
+                {
+                    throw new SharedException(
+                        ErrorTypes.Conflict,
+                        "Roles modifying failed",
+                        "User cannot become a client without specifying DriverLicenseSerialNumber"
+                    );
+                }
+            }
+
+            await UpdateRolesAsync(user, roles);
         }
 
         /// <summary>

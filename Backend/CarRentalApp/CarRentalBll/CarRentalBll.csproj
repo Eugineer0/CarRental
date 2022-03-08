@@ -8,7 +8,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\CarRentalDal\CarRentalDal.csproj" />
-        <PackageReference Include="Mapster" Version="7.3.0" />
         <ProjectReference Include="..\SharedResources\SharedResources.csproj" />
     </ItemGroup>
 

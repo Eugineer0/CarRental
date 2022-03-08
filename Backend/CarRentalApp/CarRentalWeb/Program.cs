@@ -4,9 +4,10 @@ using CarRentalWeb.Middleware;
 using CarRentalBll.Configuration;
 using CarRentalBll.Configuration.JWT.Access;
 using CarRentalBll.Configuration.JWT.Refresh;
-using CarRentalBll.Configuration.Mappers;
+using CarRentalBll.Configurations;
 using CarRentalBll.Services;
 using CarRentalDal.Contexts;
+using CarRentalWeb.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +29,8 @@ builder.Services.AddDbContext<CarRentalDbContext>(
     options => options.UseSqlServer(configurationString)
 );
 
-MapsterConfig.Configure();
+MapsterWebConfig.Configure();
+MapsterBllConfig.Configure();
 
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();

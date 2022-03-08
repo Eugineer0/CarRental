@@ -1,14 +1,19 @@
-﻿namespace CarRentalDal.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using SharedResources;
+
+namespace CarRentalDal.Models
 {
     public class CarType
     {
         public int Id { get; set; }
 
+        [Column(TypeName="nvarchar(32)")]
         public string Brand { get; set; } = null!;
 
+        [Column(TypeName="nvarchar(64)")]
         public string Model { get; set; } = null!;
 
-        public int SeatPlaces { get; set; }
+        public byte SeatPlaces { get; set; }
 
         public double AverageConsumption { get; set; }
 
@@ -26,13 +31,6 @@
 
         public decimal PricePerDay { get; set; }
 
-        public ICollection<ServicePrices> ServicePrices { get; set; } = null!;
-    }
-
-    public enum GearboxTypes : byte
-    {
-        Mechanical,
-        Automatic,
-        Robotic
+        public ICollection<CarServicePrice> CarServicePrices { get; set; } = null!;
     }
 }

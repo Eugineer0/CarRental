@@ -10,11 +10,14 @@
 
         public DateTime FinishRent { get; set; }
 
-        public ICollection<OrderService> OrderServices { get; set; } = null!;
+        public ICollection<OrderCarService> CarServices { get; set; } = null!;
 
-        public Guid UserId { get; set; }
+        public Guid ClientId { get; set; }
+        public User? Client { get; set; }
 
-        public Car Car { get; set; } = null!;
+        public Guid CarId { get; set; }
+
+        public Car? Car { get; set; }
 
         public RentalCenter RentalCenter { get; set; } = null!;
     }

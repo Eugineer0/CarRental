@@ -2,9 +2,14 @@
 {
     public static class ExtensionMethods
     {
-        public static bool ContainsAny(this IEnumerable<Roles> roles, IEnumerable<Roles> candidate)
+        public static bool ContainsAny<T>(this IEnumerable<T> source, IEnumerable<T> target)
         {
-            return roles.Intersect(candidate).Any();
+            return source.Intersect(target).Any();
+        }
+
+        public static bool ContainsAll<T>(this IEnumerable<T> source, IEnumerable<T> target)
+        {
+            return target.All(source.Contains);
         }
     }
 }

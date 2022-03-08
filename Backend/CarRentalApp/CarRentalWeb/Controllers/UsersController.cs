@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.IdentityModel.Tokens.Jwt;
 using CarRentalBll.Models;
 using CarRentalBll.Services;
 using CarRentalWeb.Models.Requests;
@@ -16,47 +17,72 @@ namespace CarRentalWeb.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserService _userService;
+        private readonly TokenService _tokenService;
+        private readonly OrderService _orderService;
 
-        public UsersController(UserService userService)
+        public UsersController(UserService userService, TokenService tokenService, OrderService orderService)
         {
             _userService = userService;
+            _tokenService = tokenService;
+            _orderService = orderService;
         }
 
         [Authorize(Roles = "SuperAdmin")]
-        [HttpPut("{userId:guid}/roles")]
-        public async Task<IActionResult> ModifyRoles(Guid userId, RolesModificationRequest request)
+        [HttpPut("{username}/roles")]
+        public async Task<IActionResult> ModifyRoles(string username, RolesModificationRequest request)
         {
             var roles = request.Roles.ToImmutableHashSet();
-            await _userService.ModifyRolesAsync(userId, roles);
+            await _userService.ModifyRolesAsync(username, roles);
             return NoContent();
         }
 
         [Authorize(Roles = RolesConstants.AdminRolesString)]
-        [HttpPost("{userId:guid}/approve-client")]
-        public async Task<IActionResult> ApproveClient(Guid userId)
+        [HttpPost("{username}/approve-client")]
+        public async Task<IActionResult> ApproveClient(string username)
         {
-            await _userService.ApproveClientAsync(userId);
+            await _userService.ApproveClientAsync(username);
             return Ok();
         }
 
         [Authorize(Roles = RolesConstants.AdminRolesString)]
-        [HttpGet("{userId:guid}")]
-        public async Task<IActionResult> GetUser(Guid userId)
+        [HttpGet("{username}")]
+        public async Task<IActionResult> GetUser(string username)
         {
-            var userModel = await _userService.GetByAsync(userId);
+            var userModel = await _userService.GetByAsync(username);
             var response = Convert(userModel);
             return Ok(response);
         }
 
-        [Authorize(Roles = "SuperAdmin")]
-        [HttpGet("{userId:guid}/orders")]
-        public async Task<IActionResult> GetUserOrders(Guid userId)
+        [Authorize]
+        [HttpGet("{username}/orders")]
+        public async Task<IActionResult> GetUserOrders(string username)
         {
-            var orderModels = _userService.GetOrdersBy(userId);
-            var response = await orderModels
-                .Select(orderModel => orderModel.Adapt<OrderResponse>())
-                .ToListAsync();
-            return Ok(response);
+            if (IsInRoles(RolesConstants.AdminRoles) || username == GetCurrentUsername())
+            {
+                var orderModels = _orderService.GetOrdersBy(username);
+                var response = await orderModels
+                    .Select(orderModel => orderModel.Adapt<OrderResponse>())
+                    .ToListAsync();
+                return Ok(response);
+            }
+
+            return Forbid();
+        }
+
+        [Authorize(Roles = RolesConstants.ClientRolesString)]
+        [HttpPut("{username}/orders")]
+        public async Task<IActionResult> MakeOrder(string username, OrderRequest orderRequest)
+        {
+            if (username != GetCurrentUsername())
+            {
+                return Forbid();
+            }
+
+            var model = orderRequest.Adapt<OrderModel>();
+            _orderService.ValidateOrder(model);
+            _orderService.CreateOrderAsync(model);
+
+            return Created($"{username}/orders/", model);
         }
 
         [Authorize(Roles = RolesConstants.AdminRolesString)]
@@ -77,6 +103,16 @@ namespace CarRentalWeb.Controllers
             userResponse.ApprovalRequested = _userService.CheckIfApprovalRequested(userModel);
 
             return userResponse;
+        }
+
+        private string GetCurrentUsername()
+        {
+            return _tokenService.GetClaimValue(this.User.Claims, JwtRegisteredClaimNames.UniqueName);
+        }
+
+        private bool IsInRoles(IEnumerable<Roles> roles)
+        {
+            return roles.Any(role => this.User.IsInRole(role.ToString()));
         }
     }
 }

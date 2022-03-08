@@ -54,14 +54,14 @@ namespace CarRentalDal.Migrations
                 name: "UserRoles",
                 columns: table => new
                 {
-                    EntryId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Role = table.Column<byte>(type: "tinyint", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRoles", x => x.EntryId);
+                    table.PrimaryKey("PK_UserRoles", x => x.Id);
                     table.ForeignKey(
                         name: "FK_UserRoles_Users_UserId",
                         column: x => x.UserId,

@@ -11,8 +11,5 @@ namespace CarRentalWeb.Models.Requests
             ErrorMessage = ValidationConstants.DriverLicenseErrorMessage
         )]
         public string DriverLicenseSerialNumber { get; set; } = null!;
-
-        [Required]
-        public string Token { get; set; } = null!;
     }
 }

@@ -1,10 +1,10 @@
 ﻿using SharedResources;
 
-namespace CarRentalWeb.Models.Responses
+namespace CarRentalBll.Models.Cars
 {
-    public class CarResponse
+    public class CarTypeModel
     {
-        public string RegistrationNumber { get; set; } = null!;
+        public int Id { get; set; }
 
         public string Brand { get; set; } = null!;
 

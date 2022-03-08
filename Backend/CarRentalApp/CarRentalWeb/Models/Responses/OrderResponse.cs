@@ -1,18 +1,17 @@
-﻿namespace CarRentalWeb.Models.Responses;
-
-public class OrderResponse
+﻿namespace CarRentalWeb.Models.Responses
 {
-    public decimal OverallPrice { get; set; }
+    public class OrderResponse
+    {
+        public decimal OverallPrice { get; set; }
 
-    public DateTime StartRent { get; set; }
+        public DateTime StartRent { get; set; }
 
-    public DateTime FinishRent { get; set; }
+        public DateTime FinishRent { get; set; }
 
-    public ICollection<OrderServiceResponse> OrderServices { get; set; } = null!;
+        public IEnumerable<CarServiceResponse> OrderCarServices { get; set; } = null!;
 
-    public Guid UserId { get; set; }
+        public CarResponse Car { get; set; } = null!;
 
-    public CarResponse Car { get; set; } = null!;
-
-    public RentalCenterResponse RentalCenter { get; set; } = null!;
+        public RentalCenterResponse RentalCenter { get; set; } = null!;
+    }
 }

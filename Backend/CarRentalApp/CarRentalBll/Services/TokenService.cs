@@ -4,13 +4,13 @@ using System.Text;
 using CarRentalBll.Configuration.JWT;
 using CarRentalBll.Configuration.JWT.Access;
 using CarRentalBll.Configuration.JWT.Refresh;
-using CarRentalBll.Exceptions;
 using CarRentalBll.Models;
 using CarRentalDal.Contexts;
 using CarRentalDal.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SharedResources;
 
 namespace CarRentalBll.Services
 {
@@ -129,39 +129,74 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Gets user id from <paramref name="tokenString"/> and returns it.
+        /// Gets user Id from <paramref name="tokenString"/> and returns it.
         /// </summary>
         /// <param name="tokenString">token to be parsed.</param>
-        /// <returns>User id, stored in 'sub' claim.</returns>
-        /// <exception cref="SharedException">Claim 'sub' of <paramref name="tokenString"/> not found.</exception>
-        /// <exception cref="SharedException">Claim 'sub' value is invalid.</exception>
+        /// <returns>User Id stored in <paramref name="tokenString"/>.</returns>
         public Guid GetUserId(string tokenString)
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtSecurityToken = handler.ReadJwtToken(tokenString);
-            var userIdString = jwtSecurityToken.Claims
-                .FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)
-                ?.Value;
+            return GetUserId(jwtSecurityToken.Claims);
+        }
 
-            if (userIdString == null)
-            {
-                throw new SharedException(
-                    ErrorTypes.NotFound,
-                    "Invalid token",
-                    "Claim 'sub' not found"
-                );
-            }
+        /// <summary>
+        /// Gets user Id from <paramref name="claims"/> and returns it.
+        /// </summary>
+        /// <param name="claims">set of claims.</param>
+        /// <returns>User Id stored in <paramref name="claims"/>.</returns>
+        /// <exception cref="SharedException">Claim 'sub' value is invalid.</exception>
+        public Guid GetUserId(IEnumerable<Claim> claims)
+        {
+            var userIdString = GetClaimValue(claims, JwtRegisteredClaimNames.Sub);
 
             if (!Guid.TryParse(userIdString, out var userId))
             {
                 throw new SharedException(
                     ErrorTypes.Invalid,
                     "Invalid token",
-                    "Invalid 'sub' claim value"
+                    $"Invalid 'sub' claim value"
                 );
             }
 
             return userId;
+        }
+
+        /// <summary>
+        /// Gets username claim value from <paramref name="tokenString"/> and returns it.
+        /// </summary>
+        /// <param name="tokenString">token to be parsed.</param>
+        /// <returns>Username stored in <paramref name="tokenString"/>.</returns>
+        public string GetUsername(string tokenString)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = handler.ReadJwtToken(tokenString);
+            return GetClaimValue(jwtSecurityToken.Claims, JwtRegisteredClaimNames.UniqueName);
+        }
+
+        /// <summary>
+        /// Gets value of specified <paramref name="claimName"/> from <paramref name="claims"/> and returns it.
+        /// </summary>
+        /// <param name="claims">set of claims.</param>
+        /// <param name="claimName">returned value claim.</param>
+        /// <returns>Claim value, stored in <paramref name="claimName"/> of <paramref name="claims"/>.</returns>
+        /// <exception cref="SharedException">Claim <paramref name="claimName"/> of <paramref name="claims"/> not found.</exception>
+        public string GetClaimValue(IEnumerable<Claim> claims, string claimName)
+        {
+            var claimValue = claims
+                .FirstOrDefault(claim => claim.Type == claimName)
+                ?.Value;
+
+            if (claimValue == null)
+            {
+                throw new SharedException(
+                    ErrorTypes.NotFound,
+                    "Invalid token",
+                    $"Claim '{claimName}' not found"
+                );
+            }
+
+            return claimValue;
         }
 
         /// <summary>
