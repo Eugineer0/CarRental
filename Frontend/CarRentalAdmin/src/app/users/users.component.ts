@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
-import { UserMinimal } from "../_models/user/user-minimal";
 import { UserService } from "../_services/user.service";
+import { User } from "../_models/user/user-full";
 
 @Component({
   selector: 'app-users',
@@ -9,7 +9,7 @@ import { UserService } from "../_services/user.service";
   styleUrls: ['./users.component.css']
 })
 export class UsersComponent implements OnInit {
-  public users: UserMinimal[] = [];
+  public users: User[] = [];
 
   constructor(
     private userService: UserService,
@@ -20,6 +20,10 @@ export class UsersComponent implements OnInit {
     this.getUsers()
   }
 
+  public showDateOfBirth(user: User): string {
+    return new Date(user.dateOfBirth).toDateString().slice(4);
+  }
+
   private getUsers(): void {
     this.userService.getUsers()
       .subscribe(
@@ -27,5 +31,9 @@ export class UsersComponent implements OnInit {
           this.users = users;
         }
       )
+  }
+
+  approveClient(username: string) {
+    this.userService.approveClient(username).subscribe();
   }
 }

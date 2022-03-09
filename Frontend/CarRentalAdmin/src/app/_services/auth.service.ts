@@ -40,7 +40,7 @@ export class AuthService {
   }
 
   public completeRegistration(admin: CompleteRegistrationDTO): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/auth/completeRegistration', admin)
+    return this.http.post<AuthResponse>('/api/auth/complete-registration', admin)
       .pipe(
         tap(
           response => {
@@ -51,7 +51,7 @@ export class AuthService {
   }
 
   public login(admin: LoginDTO): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/auth/loginAdmin', admin)
+    return this.http.post<AuthResponse>('/api/auth/login-admin', admin)
       .pipe(
         tap(
           response => {

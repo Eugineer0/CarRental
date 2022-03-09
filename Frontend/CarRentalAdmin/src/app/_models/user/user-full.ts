@@ -1,8 +1,13 @@
-import { UserMinimal } from "./user-minimal";
-
-export interface UserFull extends UserMinimal {
+export interface User {
+  email: string;
+  username: string;
+  name: string;
+  surname: string;
+  dateOfBirth: Date;
+  passportNumber: string;
   driverLicenseSerialNumber?: string;
   roles: Roles[];
+  approvalRequested: boolean;
 }
 
 export enum Roles {

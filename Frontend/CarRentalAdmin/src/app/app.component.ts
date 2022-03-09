@@ -33,7 +33,7 @@ export class AppComponent {
 
     if (refreshToken) {
       const refreshTokenRequest: RefreshTokenRequest = {
-        token: refreshToken
+        refreshToken: refreshToken
       }
 
       this.authService.logout(refreshTokenRequest)

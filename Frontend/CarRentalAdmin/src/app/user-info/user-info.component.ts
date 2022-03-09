@@ -3,8 +3,7 @@ import { ActivatedRoute } from "@angular/router";
 import { Location } from "@angular/common";
 
 import { UserService } from "../_services/user.service";
-
-import { UserFull, Roles } from "../_models/user/user-full";
+import { Roles, User } from "../_models/user/user-full";
 
 @Component({
   selector: 'app-user-info',
@@ -12,7 +11,7 @@ import { UserFull, Roles } from "../_models/user/user-full";
   styleUrls: ['./user-info.component.css']
 })
 export class UserInfoComponent implements OnInit {
-  public user: UserFull | null = null;
+  public user: User | null = null;
   public errorMessage: string | null = null;
   public editRolesFailed: boolean = false;
   public rolesChanged: boolean = false;
@@ -137,7 +136,7 @@ export class UserInfoComponent implements OnInit {
     }
   }
 
-  public showDateOfBirth(user: UserFull): string {
+  public showDateOfBirth(user: User): string {
     return new Date(user.dateOfBirth).toDateString().slice(4);
   }
 }

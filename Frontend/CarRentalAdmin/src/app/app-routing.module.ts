@@ -9,7 +9,7 @@ import { CompleteRegistrationComponent } from "./complete-registration/complete-
 import { UsersComponent } from "./users/users.component";
 import { UserInfoComponent } from "./user-info/user-info.component";
 import { RentalCentersComponent } from "./rental-centers/rental-centers.component";
-//import { RentalCenterInfoComponent } from "./rental-center-info/rental-center-info.component";
+import { RentalCenterInfoComponent } from "./rental-center-info/rental-center-info.component";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: 'welcome'},
@@ -19,7 +19,7 @@ const routes: Routes = [
   {path: 'users', canActivate: [AuthGuard],  component: UsersComponent},
   {path: 'users/:username', canActivate: [AuthGuard], component: UserInfoComponent},
   {path: 'rental-centers',  component: RentalCentersComponent},
-  //{path: 'rental-centers/:name',  component: RentalCenterInfoComponent},
+  {path: 'rental-centers/:name',  component: RentalCenterInfoComponent},
 ];
 
 @NgModule({

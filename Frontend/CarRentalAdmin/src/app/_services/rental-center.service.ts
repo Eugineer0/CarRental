@@ -5,6 +5,7 @@ import { Observable } from "rxjs";
 
 import { RentalCenter } from "../_models/center/rental-center";
 import { FilterRequest } from "../_models/center/filter-request";
+import { Car } from "../_models/car/car";
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +30,12 @@ export class RentalCenterService {
     return this.http.post<RentalCenter[]>(
       `${ this.rentalCentersUrl }/filtered`,
       filter
+    );
+  }
+
+  public getRentalCenterCars(centerName: string): Observable<Car[]> {
+    return this.http.get<Car[]>(
+      `${ this.rentalCentersUrl }/${ centerName }/cars`,
     );
   }
 }
