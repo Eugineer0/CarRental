@@ -43,7 +43,7 @@
             <div class="form-control" id="rentalPeriod">
               <label class="mb-0 mt-2" for="startDate">Start</label>
               <input
-                [required]="dateIsSpecified()"
+                [required]="dateFillInRequired()"
                 type="date"
                 class="form-control"
                 id="startDate"
@@ -51,7 +51,7 @@
                 [(ngModel)]="startRentDate"
               >
               <input
-                [required]="dateIsSpecified()"
+                [required]="dateFillInRequired()"
                 type="time"
                 class="form-control"
                 id="StartTime"
@@ -60,7 +60,7 @@
               >
               <label class="mb-0 mt-2" for="finishDate">Finish</label>
               <input
-                [required]="dateIsSpecified()"
+                [required]="dateFillInRequired()"
                 type="date"
                 class="form-control"
                 id="finishDate"
@@ -68,14 +68,14 @@
                 [(ngModel)]="finishRentDate"
               >
               <input
-                [required]="dateIsSpecified()"
+                [required]="dateFillInRequired()"
                 type="time"
                 class="form-control"
                 id="finishTime"
                 name="finishRentTime"
                 [(ngModel)]="finishRentTime"
               >
-              <div *ngIf="fullDateRequired" class="my-2 alert alert-warning">
+              <div *ngIf="dateFillInRequired() && !dateIsSpecified()" class="my-2 alert alert-warning">
                 Please fill in all date fields
               </div>
             </div>

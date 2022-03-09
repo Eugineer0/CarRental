@@ -15,7 +15,6 @@ export class RentalCentersComponent implements OnInit {
   public centers: RentalCenter[] = [];
   public cities: string[] = [];
   public countries: string[] = [];
-  public fullDateRequired: boolean = false;
   public filter: FilterRequest = this.initFilter();
 
   public finishRentDate: Date | undefined = undefined;
@@ -64,17 +63,11 @@ export class RentalCentersComponent implements OnInit {
     this.filter.finishRent = new Date(this.finishRentDate + ' ' + this.finishRentTime);
   }
 
-  public dateIsSpecified(): boolean {
-    if (this.startRentDate
+  public dateFillInRequired(): boolean {
+    return !!(this.startRentDate
       || this.startRentTime
       || this.finishRentDate
-      || this.finishRentTime) {
-      this.fullDateRequired = true;
-      return true;
-    }
-
-    this.fullDateRequired = false;
-    return false;
+      || this.finishRentTime);
   }
 
   public initFilter(): FilterRequest {
@@ -93,5 +86,12 @@ export class RentalCentersComponent implements OnInit {
     this.startRentDate = undefined;
     this.startRentTime = undefined;
     this.finishRentTime = undefined;
+  }
+
+  public dateIsSpecified(): boolean {
+    return !!(this.startRentDate
+      && this.startRentTime
+      && this.finishRentDate
+      && this.finishRentTime);
   }
 }

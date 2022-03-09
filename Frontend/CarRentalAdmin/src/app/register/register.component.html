@@ -37,8 +37,8 @@
               <div *ngIf="emailField.errors?.['maxlength']">
                 Email must be maximum 256 characters long.
               </div>
-              <div *ngIf="passwordField.errors?.['fieldConstraint']">
-                Incorrect email format
+              <div *ngIf="emailField.errors?.['fieldConstraint']">
+                Incorrect email format.
               </div>
             </div>
             <label class="mb-0 mt-2" for="username">Username</label>
@@ -132,7 +132,7 @@
               <div *ngIf="dateOfBirthField.errors?.['required']">
                 Date of birth is required.
               </div>
-              <div *ngIf="passwordField.errors?.['fieldConstraint']">
+              <div *ngIf="dateOfBirthField.errors?.['fieldConstraint']">
                 Incorrect date of birth format
               </div>
             </div>
