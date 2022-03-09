@@ -1,4 +1,5 @@
 ﻿using CarRentalBll.Configuration;
+using CarRentalBll.Helpers;
 using CarRentalBll.Models;
 using CarRentalDal.Contexts;
 using CarRentalDal.Models;
@@ -134,7 +135,9 @@ namespace CarRentalBll.Services
         /// <returns>Existing user models.</returns>
         public IQueryable<UserModel> GetAll()
         {
-            return _carRentalDbContext.Users.Select(user => user.Adapt<UserModel>());
+            return _carRentalDbContext.Users
+                .Include(user => user.Roles)
+                .Select(user => user.Adapt<UserModel>());
         }
 
         /// <summary>
@@ -260,18 +263,16 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Checks if <paramref name="dateOfBirth"/> was at least <paramref name="minimumAgeYears"/> years ago.
+        /// Checks if <paramref name="userModel"/> has specified driver license but does not have one of clients role.
         /// </summary>
-        /// <param name="dateOfBirth">date to check.</param>
-        /// <param name="minimumAgeYears">years.</param>
+        /// <param name="userModel">user to check.</param>
         /// <returns>
-        /// True - if <paramref name="dateOfBirth"/> was more than <paramref name="minimumAgeYears"/> years ago, else - false.
+        /// True - if <paramref name="userModel"/> is ready to receive clients role, else - false.
         /// </returns>
-        public static bool CheckMinimumAge(DateTime dateOfBirth, int minimumAgeYears)
+        public static bool CheckIfApprovalRequested(UserModel userModel)
         {
-            var criticalDate = dateOfBirth.AddYears(minimumAgeYears);
-
-            return DateTime.Now.CompareTo(criticalDate) > 0;
+            return userModel.DriverLicenseSerialNumber != null
+                && !userModel.Roles.ContainsAny(RolesConstants.ClientRoles);
         }
 
         /// <summary>
@@ -318,12 +319,6 @@ namespace CarRentalBll.Services
             }
 
             return user;
-        }
-
-        public bool CheckIfApprovalRequested(UserModel userModel)
-        {
-            return userModel.DriverLicenseSerialNumber != null
-                && !userModel.Roles.ContainsAny(RolesConstants.ClientRoles);
         }
 
         /// <summary>
@@ -404,14 +399,16 @@ namespace CarRentalBll.Services
         {
             var minimumAge = _clientRequirements.MinimumAge;
 
-            if (CheckMinimumAge(dateOfBirth, minimumAge))
+            if (DateTimeProcessing.CheckMinimumAge(dateOfBirth, minimumAge))
             {
-                throw new SharedException(
-                    ErrorTypes.Conflict,
-                    "Client`s data does not meet requirements",
-                    $"Client`s age must be greater than {minimumAge - 1}"
-                );
+                return;
             }
+
+            throw new SharedException(
+                ErrorTypes.Conflict,
+                "Client`s data does not meet requirements",
+                $"Client`s age must be greater than {minimumAge - 1}"
+            );
         }
 
         /// <summary>

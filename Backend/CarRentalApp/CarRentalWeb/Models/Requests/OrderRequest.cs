@@ -1,14 +1,15 @@
-﻿namespace CarRentalWeb.Models.Requests;
-
-public class OrderRequest
+﻿namespace CarRentalWeb.Models.Requests
 {
-   public DateTime StartRent { get; set; }
+    public class OrderRequest
+    {
+        public DateTime StartRent { get; set; }
 
-    public DateTime FinishRent { get; set; }
+        public DateTime FinishRent { get; set; }
 
-    public IEnumerable<int> OrderCarServicesId { get; set; } = null!;
+        public IEnumerable<int> OrderCarServicesId { get; set; } = null!;
 
-    public string CarRegistrationNumber { get; set; } = null!;
+        public string CarRegistrationNumber { get; set; } = null!;
 
-    public string RentalCenterName { get; set; } = null!;
+        public string RentalCenterName { get; set; } = null!;
+    }
 }

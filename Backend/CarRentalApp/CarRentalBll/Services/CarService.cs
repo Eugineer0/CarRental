@@ -1,4 +1,5 @@
-﻿using CarRentalBll.Models;
+﻿using CarRentalBll.Helpers;
+using CarRentalBll.Models;
 using CarRentalBll.Models.Cars;
 using CarRentalDal.Contexts;
 using CarRentalDal.Models;
@@ -21,6 +22,7 @@ namespace CarRentalBll.Services
         {
             var car = await _carRentalDbContext.Cars
                 .Include(car => car.Orders)
+                .Include(car => car.Type)
                 .FirstOrDefaultAsync(car => car.Id == carId);
             if (car == null)
             {
@@ -63,19 +65,20 @@ namespace CarRentalBll.Services
                 .Select(order => new { order.FinishRent, order.StartRent })
                 .All(
                     date =>
-                        CheckIfAfter(date.FinishRent, start)
-                        && CheckIfAfter(date.StartRent, finish)
+                        DateTimeProcessing.CheckIfAfter(date.FinishRent, start)
+                        && DateTimeProcessing.CheckIfAfter(date.StartRent, finish)
                 );
         }
 
-        private bool CheckIfBefore(DateTime target, DateTime candidate)
+        public async Task<decimal> GetRentalPriceAsync(Guid carId, DateTime startRent, DateTime finishRent)
         {
-            return candidate.Ticks < target.Ticks;
-        }
+            var car = await GetByAsync(carId);
 
-        private bool CheckIfAfter(DateTime target, DateTime candidate)
-        {
-            return target.Ticks < candidate.Ticks;
+            var period = DateTimeProcessing.GetPeriod(startRent, finishRent);
+
+            return period.Days * car.Type.PricePerDay
+                + period.Hours * car.Type.PricePerHour
+                + period.Minutes * car.Type.PricePerMinute;
         }
     }
 }

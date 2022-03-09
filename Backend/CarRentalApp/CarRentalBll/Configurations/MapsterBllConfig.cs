@@ -17,7 +17,7 @@ namespace CarRentalBll.Configurations
                 .NewConfig()
                 .Map(
                     dest => dest.CarServices,
-                    src => src.CarServices.Select(service => service.Adapt<CarServiceModel>())
+                    src => src.OrderCarServices.Select(orderService => orderService.CarService.Adapt<CarServiceModel>())
                 )
                 .Map(
                     dest => dest.Client,
@@ -27,6 +27,21 @@ namespace CarRentalBll.Configurations
                     dest => dest.RentalCenter,
                     src => src.RentalCenter.Adapt<RentalCenterModel>()
                 );
+
+            // TypeAdapterConfig<OrderModel, Order>
+            //     .NewConfig()
+            //     .Map(
+            //         dest => dest.CarServices,
+            //         src => src.CarServices.Select(service => service.Adapt<CarServiceModel>())
+            //     )
+            //     .Map(
+            //         dest => dest.Client,
+            //         src => src.Client.Adapt<UserModel>()
+            //     )
+            //     .Map(
+            //         dest => dest.RentalCenter,
+            //         src => src.RentalCenter.Adapt<RentalCenterModel>()
+            //     );
         }
     }
 }

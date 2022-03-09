@@ -1,6 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 
-namespace CarRentalBll.Configuration.JWT.Refresh
+namespace CarRentalBll.Configurations.JWT.Refresh
 {
     public class RefreshJwtConfig
     {

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using CarRentalBll.Helpers;
 using CarRentalBll.Services;
 
 namespace CarRentalWeb.Validation
@@ -21,7 +22,7 @@ namespace CarRentalWeb.Validation
                 return false;
             }
 
-            return UserService.CheckMinimumAge(valueAsDateTime, _minimumAge);
+            return DateTimeProcessing.CheckMinimumAge(valueAsDateTime, _minimumAge);
         }
 
         public override string FormatErrorMessage(string name)

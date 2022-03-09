@@ -1,10 +1,11 @@
 ﻿using CarRentalBll.Models.Cars;
-using CarRentalBll.Models.RentalCenters;
 
-namespace CarRentalBll.Models
+namespace CarRentalBll.Models.RentalCenters
 {
     public class OrderModel
     {
+        public decimal OverallPrice { get; set; }
+
         public DateTime StartRent { get; set; }
 
         public DateTime FinishRent { get; set; }

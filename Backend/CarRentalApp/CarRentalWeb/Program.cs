@@ -1,10 +1,10 @@
+using CarRentalBll.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using CarRentalWeb.Middleware;
-using CarRentalBll.Configuration;
-using CarRentalBll.Configuration.JWT.Access;
-using CarRentalBll.Configuration.JWT.Refresh;
 using CarRentalBll.Configurations;
+using CarRentalBll.Configurations.JWT.Access;
+using CarRentalBll.Configurations.JWT.Refresh;
 using CarRentalBll.Services;
 using CarRentalDal.Contexts;
 using CarRentalWeb.Configurations;
@@ -34,8 +34,9 @@ MapsterBllConfig.Configure();
 
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
-
 builder.Services.AddScoped<PasswordService>();
+builder.Services.AddScoped<CarService>();
+builder.Services.AddScoped<OrderService>();
 
 var accessJwtConfig = new AccessJwtConfig();
 builder.Configuration.Bind(AccessJwtConfig.Section, accessJwtConfig);
