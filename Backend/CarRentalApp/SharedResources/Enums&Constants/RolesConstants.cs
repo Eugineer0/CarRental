@@ -1,4 +1,4 @@
-﻿namespace SharedResources
+﻿namespace SharedResources.Enums_Constants
 {
     public static class RolesConstants
     {

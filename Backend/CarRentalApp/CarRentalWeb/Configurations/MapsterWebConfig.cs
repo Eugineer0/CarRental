@@ -1,5 +1,4 @@
-﻿using CarRentalBll.Models;
-using CarRentalBll.Models.RentalCenters;
+﻿using CarRentalBll.Models.RentalCenters;
 using CarRentalWeb.Models.Responses;
 using Mapster;
 

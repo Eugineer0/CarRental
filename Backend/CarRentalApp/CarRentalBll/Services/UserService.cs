@@ -7,6 +7,7 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SharedResources;
+using SharedResources.Enums_Constants;
 
 namespace CarRentalBll.Services
 {

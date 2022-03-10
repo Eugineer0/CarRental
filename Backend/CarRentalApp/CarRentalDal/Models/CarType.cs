@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using SharedResources;
+using SharedResources.Enums_Constants;
 
 namespace CarRentalDal.Models
 {

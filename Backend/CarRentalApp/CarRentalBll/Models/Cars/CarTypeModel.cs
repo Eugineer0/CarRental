@@ -1,4 +1,5 @@
 ﻿using SharedResources;
+using SharedResources.Enums_Constants;
 
 namespace CarRentalBll.Models.Cars
 {

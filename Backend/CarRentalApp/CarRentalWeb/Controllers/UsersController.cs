@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SharedResources;
+using SharedResources.Enums_Constants;
 
 namespace CarRentalWeb.Controllers
 {
