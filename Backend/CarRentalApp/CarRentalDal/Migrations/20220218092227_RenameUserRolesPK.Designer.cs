@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace CarRentalWeb.Migrations
+namespace CarRentalDal.Migrations
 {
     [DbContext(typeof(CarRentalDbContext))]
     [Migration("20220218092227_RenameUserRolesPK")]

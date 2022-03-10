@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace CarRentalWeb.Migrations
+namespace CarRentalDal.Migrations
 {
     [DbContext(typeof(CarRentalDbContext))]
     partial class CarRentalDbContextModelSnapshot : ModelSnapshot
@@ -22,7 +22,7 @@ namespace CarRentalWeb.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("CarRentalWeb.Models.Entities.User", b =>
+            modelBuilder.Entity("CarRentalDal.Models.Entities.User", b =>
                  {
                      b.Property<Guid>("Id")
                          .ValueGeneratedOnAdd()
@@ -67,7 +67,7 @@ namespace CarRentalWeb.Migrations
                      b.ToTable("Users");
                  });
 
-            modelBuilder.Entity("CarRentalWeb.Models.Entities.RefreshToken", b =>
+            modelBuilder.Entity("CarRentalDal.Models.Entities.RefreshToken", b =>
                  {
                      b.Property<Guid>("Id")
                          .ValueGeneratedOnAdd()
@@ -85,16 +85,16 @@ namespace CarRentalWeb.Migrations
                      b.ToTable("RefreshTokens");
                  });
 
-            modelBuilder.Entity("CarRentalWeb.Models.Entities.RefreshToken", b =>
+            modelBuilder.Entity("CarRentalDal.Models.Entities.RefreshToken", b =>
                  {
-                     b.HasOne("CarRentalWeb.Models.Entities.User", null)
+                     b.HasOne("CarRentalDal.Models.Entities.User", null)
                          .WithMany(null)
                          .HasForeignKey("UserId")
                          .OnDelete(DeleteBehavior.Cascade)
                          .IsRequired();
                  });
 
-            modelBuilder.Entity("CarRentalWeb.Models.Entities.UserRole", b =>
+            modelBuilder.Entity("CarRentalDal.Models.Entities.UserRole", b =>
                 {
                     b.Property<int>("EntryId")
                         .ValueGeneratedOnAdd()
@@ -115,16 +115,16 @@ namespace CarRentalWeb.Migrations
                     b.ToTable("UserRoles");
                 });
 
-            modelBuilder.Entity("CarRentalWeb.Models.Entities.UserRole", b =>
+            modelBuilder.Entity("CarRentalDal.Models.Entities.UserRole", b =>
                 {
-                    b.HasOne("CarRentalWeb.Models.Entities.User", null)
+                    b.HasOne("CarRentalDal.Models.Entities.User", null)
                         .WithMany("Roles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CarRentalWeb.Models.Entities.User", b =>
+            modelBuilder.Entity("CarRentalDal.Models.Entities.User", b =>
                 {
                     b.Navigation("Roles");
                 });

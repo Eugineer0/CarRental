@@ -1,8 +1,9 @@
-﻿namespace CarRentalBll.Configuration;
-
-public class ClientRequirements
+﻿namespace CarRentalBll.Configuration
 {
-    public const string Section = "ClientRequirements";
+    public class ClientRequirements
+    {
+        public const string Section = "ClientRequirements";
 
-    public int MinimumAge { get; set; }
+        public int MinimumAge { get; set; }
+    }
 }

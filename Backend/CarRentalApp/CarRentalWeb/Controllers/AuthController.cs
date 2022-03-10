@@ -1,6 +1,7 @@
 using CarRentalBll.Models;
 using CarRentalBll.Services;
 using CarRentalWeb.Models.Requests;
+using CarRentalWeb.Models.Responses;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -87,7 +88,7 @@ namespace CarRentalWeb.Controllers
         private async Task<IActionResult> AuthenticateAsync(UserModel user)
         {
             var response = await _tokenService.GetAccessAsync(user);
-            return Ok(response);
+            return Ok(response.Adapt<AuthenticationResponse>());
         }
     }
 }
