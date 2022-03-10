@@ -1,15 +1,24 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
-namespace CarRentalDal.Contexts;
-
-public class CarRentalDbContextDesignFactory : IDesignTimeDbContextFactory<CarRentalDbContext>
+namespace CarRentalDal.Contexts
 {
-    public CarRentalDbContext CreateDbContext(string[] args)
+    public class CarRentalDbContextDesignFactory : IDesignTimeDbContextFactory<CarRentalDbContext>
     {
-        var optionsBuilder = new DbContextOptionsBuilder<CarRentalDbContext>();
-        optionsBuilder.UseSqlServer("Server=WSB-084-74\\MSSQSERVER1;Database=CarRentalDB;Trusted_Connection=True;");
+        public CarRentalDbContext CreateDbContext(string[] args)
+        {
+            IConfiguration config = new ConfigurationBuilder()
+                .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../CarRentalWeb"))
+                .AddJsonFile("appsettings.json")
+                .Build();
 
-        return new CarRentalDbContext(optionsBuilder.Options);
+            var configString = config.GetConnectionString("CarRentalDB");
+
+            var optionsBuilder = new DbContextOptionsBuilder<CarRentalDbContext>();
+            optionsBuilder.UseSqlServer(configString);
+
+            return new CarRentalDbContext(optionsBuilder.Options);
+        }
     }
 }
