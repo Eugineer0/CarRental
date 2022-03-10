@@ -75,7 +75,7 @@
                 name="finishRentTime"
                 [(ngModel)]="finishRentTime"
               >
-              <div *ngIf="dateFillInRequired() && !dateIsSpecified()" class="my-2 alert alert-warning">
+              <div *ngIf="filterForm.form.invalid" class="my-2 alert alert-warning">
                 Please fill in all date fields
               </div>
             </div>
@@ -107,6 +107,7 @@
           <button
             class="btn btn-primary"
             routerLink="/rental-centers/{{center.name}}"
+            [queryParams]="{start: filter.startRent, finish: filter.finishRent}"
             data-bs-toggle="tooltip"
             data-bs-placement="left"
             title="Click to to view detail info"

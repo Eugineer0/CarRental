@@ -4,7 +4,6 @@ import { RentalCenterService } from "../_services/rental-center.service";
 
 import { RentalCenter } from "../_models/center/rental-center";
 import { FilterRequest } from "../_models/center/filter-request";
-import { Time } from "@angular/common";
 
 @Component({
   selector: 'app-rental-centers',
@@ -17,10 +16,10 @@ export class RentalCentersComponent implements OnInit {
   public countries: string[] = [];
   public filter: FilterRequest = this.initFilter();
 
-  public finishRentDate: Date | undefined = undefined;
-  public startRentDate: Date | undefined = undefined;
-  public startRentTime: Time | undefined = undefined;
-  public finishRentTime: Time | undefined = undefined;
+  public startRentDate: string | undefined = undefined;
+  public finishRentDate: string | undefined = undefined;
+  public startRentTime: string | undefined = undefined;
+  public finishRentTime: string | undefined = undefined;
 
   constructor(
     private rentalCenterService: RentalCenterService,
@@ -47,8 +46,8 @@ export class RentalCentersComponent implements OnInit {
   }
 
   onSubmit() {
-    if(this.dateIsSpecified()) {
-      this.processDates();
+    if(this.dateFillInRequired()) {
+      this.setFilterDates();
     }
     this.rentalCenterService.getFilteredRentalCenters(this.filter)
       .subscribe(
@@ -58,7 +57,7 @@ export class RentalCentersComponent implements OnInit {
       );
   }
 
-  private processDates(): void {
+  private setFilterDates(): void {
     this.filter.startRent = new Date(this.startRentDate + ' ' + this.startRentTime);
     this.filter.finishRent = new Date(this.finishRentDate + ' ' + this.finishRentTime);
   }
@@ -86,12 +85,5 @@ export class RentalCentersComponent implements OnInit {
     this.startRentDate = undefined;
     this.startRentTime = undefined;
     this.finishRentTime = undefined;
-  }
-
-  public dateIsSpecified(): boolean {
-    return !!(this.startRentDate
-      && this.startRentTime
-      && this.finishRentDate
-      && this.finishRentTime);
   }
 }

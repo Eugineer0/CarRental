@@ -1,3 +1,5 @@
+import { CarService } from "./car-service";
+
 export interface Car {
   registrationNumber: string;
   brand: string;
@@ -11,6 +13,7 @@ export interface Car {
   pricePerMinute: number;
   pricePerHour: number;
   pricePerDay: number;
+  services: CarService[];
 }
 
 export enum GearBoxTypes {

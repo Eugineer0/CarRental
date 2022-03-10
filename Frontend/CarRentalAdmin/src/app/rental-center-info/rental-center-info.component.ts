@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { Location, Time } from "@angular/common";
+import { formatDate, Location } from "@angular/common";
 import { ActivatedRoute } from "@angular/router";
 
 import { RentalCenterService } from "../_services/rental-center.service";
 import { RentalCenter } from "../_models/center/rental-center";
 import { Car, GearBoxTypes } from "../_models/car/car";
+import { CarFilter } from "../_models/car/car-filter";
 
 @Component({
   selector: 'app-rental-center-info',
@@ -17,11 +18,15 @@ export class RentalCenterInfoComponent implements OnInit {
 
   public centerName: string | null = null;
 
-  public finishRentDate: Date | undefined = undefined;
-  public startRentDate: Date | undefined = undefined;
-  public startRentTime: Time | undefined = undefined;
-  public finishRentTime: Time | undefined = undefined;
-  private filter: any;
+  public startRentDate: string | undefined = undefined;
+  public finishRentDate: string | undefined = undefined;
+  public startRentTime: string | undefined = undefined;
+  public finishRentTime: string | undefined = undefined;
+
+  private filter: CarFilter = {
+    startRent: undefined,
+    finishRent: undefined
+  }
 
 
   constructor(
@@ -33,17 +38,24 @@ export class RentalCenterInfoComponent implements OnInit {
 
   ngOnInit(): void {
     this.centerName = this.route.snapshot.paramMap.get('name');
+
+    const startDateString = this.route.snapshot.queryParamMap.get('start');
+    const finishDateString = this.route.snapshot.queryParamMap.get('finish');
+
+    if(startDateString && finishDateString) {
+      this.startRentDate = formatDate(startDateString, 'yyyy-MM-dd', 'en-us');
+      this.startRentTime = formatDate(startDateString, 'HH:mm', 'en-us');
+
+      this.finishRentDate = formatDate(finishDateString, 'yyyy-MM-dd', 'en-us');
+      this.finishRentTime = formatDate(finishDateString, 'HH:mm', 'en-us');
+    }
+
     this.getCenter()
     this.getCars();
   }
 
   goBack(): void {
     this.location.back();
-  }
-
-  private processDates(): void {
-    this.filter.startRent = new Date(this.startRentDate + ' ' + this.startRentTime);
-    this.filter.finishRent = new Date(this.finishRentDate + ' ' + this.finishRentTime);
   }
 
   public dateFillInRequired(): boolean {
@@ -80,11 +92,16 @@ export class RentalCenterInfoComponent implements OnInit {
     }
   }
 
-  onSubmit() {
-
+  public onSubmit(): void {
+    console.log(new Date(this.startRentDate + ' ' + this.startRentTime));
   }
 
-  showGearboxType(car: Car) {
+  public showGearboxType(car: Car): string {
     return GearBoxTypes[car.gearboxType];
+  }
+
+  private processDates(): void {
+    this.filter.startRent = new Date(this.startRentDate + ' ' + this.startRentTime);
+    this.filter.finishRent = new Date(this.finishRentDate + ' ' + this.finishRentTime);
   }
 }
