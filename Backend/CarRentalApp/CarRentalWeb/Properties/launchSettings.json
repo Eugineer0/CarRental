@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "CarRentalApp": {
+    "CarRentalWeb": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
