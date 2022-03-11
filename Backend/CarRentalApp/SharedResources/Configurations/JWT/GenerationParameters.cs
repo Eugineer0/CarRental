@@ -1,4 +1,4 @@
-﻿namespace CarRentalBll.Configuration.JWT
+﻿namespace SharedResources.Configurations.JWT
 {
     public abstract class GenerationParameters
     {

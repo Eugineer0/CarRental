@@ -2,9 +2,9 @@
 using CarRentalDal.Models;
 using Mapster;
 
-namespace CarRentalBll.Configuration.Mappers
+namespace CarRentalBll.Configurations
 {
-    public static class MapsterConfig
+    public static class MapsterBllConfig
     {
         public static void Configure()
         {

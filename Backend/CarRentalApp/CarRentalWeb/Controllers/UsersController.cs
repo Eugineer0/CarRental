@@ -4,6 +4,7 @@ using CarRentalBll.Services;
 using CarRentalWeb.Models.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedResources.EnumsAndConstants;
 
 namespace CarRentalWeb.Controllers
 {
@@ -27,7 +28,7 @@ namespace CarRentalWeb.Controllers
             return NoContent();
         }
 
-        [Authorize(Roles = RolesInfo.AdminRolesString)]
+        [Authorize(Roles = RolesConstants.AdminRolesString)]
         [HttpPost("{username}/approve-client")]
         public async Task<IActionResult> ApproveClient(string username)
         {

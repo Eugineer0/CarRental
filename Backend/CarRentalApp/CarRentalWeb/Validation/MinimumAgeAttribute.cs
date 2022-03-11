@@ -1,27 +1,24 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using CarRentalBll.Configurations;
 using CarRentalBll.Services;
+using Microsoft.Extensions.Options;
 
 namespace CarRentalWeb.Validation
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class MinimumAgeAttribute : ValidationAttribute
     {
-        private readonly int _minimumAge;
-
-        public MinimumAgeAttribute(int minimumAge)
+        protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
         {
-            _minimumAge = minimumAge;
-        }
+            var minimumAge = ((IOptions<UserRequirements>) validationContext.GetService(typeof(IOptions<UserRequirements>))).Value.AdminMinimumAge;
 
-        public override bool IsValid(object? value)
-        {
             if (value is not DateTime valueAsDateTime)
             {
-                return false;
+                return new ValidationResult(ErrorMessage);
             }
 
-            return UserService.CheckMinimumAge(valueAsDateTime, _minimumAge);
+            return UserService.CheckIfHasAge(valueAsDateTime, minimumAge) ? ValidationResult.Success : new ValidationResult(ErrorMessage);
         }
 
         public override string FormatErrorMessage(string name)
@@ -29,8 +26,7 @@ namespace CarRentalWeb.Validation
             return String.Format(
                 CultureInfo.CurrentCulture,
                 ErrorMessageString,
-                name,
-                _minimumAge
+                name
             );
         }
     }

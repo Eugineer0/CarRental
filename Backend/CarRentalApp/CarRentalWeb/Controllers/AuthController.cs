@@ -2,6 +2,7 @@ using CarRentalBll.Models;
 using CarRentalBll.Services;
 using CarRentalWeb.Models.Requests;
 using CarRentalWeb.Models.Responses;
+using CarRentalWeb.Validation;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -63,6 +64,7 @@ namespace CarRentalWeb.Controllers
             return RegisterUserAsync(model);
         }
 
+        //[ServiceFilter(typeof(AdminMinimumAgeFilter))]
         [HttpPost("register-admin")]
         public Task<IActionResult> RegisterAdmin(AdminRegistrationRequest request)
         {

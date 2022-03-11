@@ -7,11 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CarRentalDal\CarRentalDal.csproj" />
+      <Folder Include="Configurations" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Configurations\Mappers" />
+      <PackageReference Include="Mapster" Version="7.3.0" />
+      <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.16.0" />
     </ItemGroup>
 
 </Project>

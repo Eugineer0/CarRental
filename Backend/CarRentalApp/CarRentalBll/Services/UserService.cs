@@ -1,4 +1,4 @@
-﻿using CarRentalBll.Configuration;
+﻿using CarRentalBll.Configurations;
 using CarRentalBll.Exceptions;
 using CarRentalBll.Models;
 using CarRentalDal.Contexts;
@@ -6,6 +6,8 @@ using CarRentalDal.Models;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using SharedResources.EnumsAndConstants;
+using SharedResources.Helpers;
 
 namespace CarRentalBll.Services
 {
@@ -13,12 +15,12 @@ namespace CarRentalBll.Services
     {
         private readonly PasswordService _passwordService;
         private readonly TokenService _tokenService;
-        private readonly ClientRequirements _clientRequirements;
+        private readonly UserRequirements _userRequirements;
         private readonly CarRentalDbContext _carRentalDbContext;
 
         public UserService(
             PasswordService passwordService,
-            IOptions<ClientRequirements> clientRequirements,
+            IOptions<UserRequirements> userRequirements,
             CarRentalDbContext carRentalDbContext,
             TokenService tokenService
         )
@@ -26,7 +28,7 @@ namespace CarRentalBll.Services
             _passwordService = passwordService;
             _carRentalDbContext = carRentalDbContext;
             _tokenService = tokenService;
-            _clientRequirements = clientRequirements.Value;
+            _userRequirements = userRequirements.Value;
         }
 
         /// <summary>
@@ -55,7 +57,7 @@ namespace CarRentalBll.Services
             _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
 
             var userModel = user.Adapt<User, UserModel>();
-            if (ValidateAsClient(user))
+            if (ValidateAsClient(userModel))
             {
                 return userModel;
             }
@@ -78,9 +80,10 @@ namespace CarRentalBll.Services
             var user = await GetByUsernameAsync(loginModel.Username);
             _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
 
-            if (user.Roles.Intersects(RolesInfo.AdminRoles))
+            var userModel = user.Adapt<User, UserModel>();
+            if (userModel.Roles.ContainsAny(RolesConstants.AdminRoles))
             {
-                return user.Adapt<User, UserModel>();
+                return userModel;
             }
 
             throw new SharedException(
@@ -136,12 +139,14 @@ namespace CarRentalBll.Services
         {
             var user = await GetByUsernameAsync(username);
 
-            if (user.Roles.Intersects(RolesInfo.ClientRoles))
+            if (user.Roles
+                .Select(userRole => userRole.Role)
+                .ContainsAny(RolesConstants.ClientRoles))
             {
                 return;
             }
 
-            ValidateAge(user.DateOfBirth);
+            ValidateClientAge(user.DateOfBirth);
 
             if (user.DriverLicenseSerialNumber == null)
             {
@@ -168,9 +173,9 @@ namespace CarRentalBll.Services
             ValidateRoles(roles);
             var user = await GetByUsernameAsync(username);
 
-            if (roles.Intersects(RolesInfo.ClientRoles))
+            if (roles.ContainsAny(RolesConstants.ClientRoles))
             {
-                ValidateAge(user.DateOfBirth);
+                ValidateClientAge(user.DateOfBirth);
 
                 if (user.DriverLicenseSerialNumber == null)
                 {
@@ -180,6 +185,11 @@ namespace CarRentalBll.Services
                         "User cannot become a client without specifying DriverLicenseSerialNumber"
                     );
                 }
+            }
+
+            if (roles.ContainsAny(RolesConstants.AdminRoles))
+            {
+                ValidateAdminAge(user.DateOfBirth);
             }
 
             await UpdateRolesAsync(user, roles);
@@ -193,7 +203,7 @@ namespace CarRentalBll.Services
         /// <returns>
         /// True - if <paramref name="dateOfBirth"/> was more than <paramref name="minimumAgeYears"/> years ago, else - false.
         /// </returns>
-        public static bool CheckMinimumAge(DateTime dateOfBirth, int minimumAgeYears)
+        public static bool CheckIfHasAge(DateTime dateOfBirth, int minimumAgeYears)
         {
             var criticalDate = dateOfBirth.AddYears(minimumAgeYears);
 
@@ -247,19 +257,19 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Checks if <paramref name="user"/> can be logged in as client.
+        /// Checks if <paramref name="userModel"/> can be logged in as client.
         /// </summary>
-        /// <param name="user">existing entity.</param>
+        /// <param name="userModel">existing entity model.</param>
         /// <returns>True - if user is already a client, False - if user cannot be a client.</returns>
         /// <exception cref="SharedException">Client role is not approved.</exception>
-        private bool ValidateAsClient(User user)
+        private bool ValidateAsClient(UserModel userModel)
         {
-            if (user.Roles.Intersects(RolesInfo.ClientRoles))
+            if (userModel.Roles.ContainsAny(RolesConstants.ClientRoles))
             {
                 return true;
             }
 
-            if (user.DriverLicenseSerialNumber == null)
+            if (userModel.DriverLicenseSerialNumber == null)
             {
                 return false;
             }
@@ -316,22 +326,45 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Validates <paramref name="dateOfBirth"/> with minimum age from app config.
+        /// Validates client`s <paramref name="dateOfBirth"/> with required minimum age from app config.
         /// </summary>
         /// <param name="dateOfBirth">date to check.</param>
         /// <exception cref="SharedException">Invalid user age.</exception>
-        private void ValidateAge(DateTime dateOfBirth)
+        private void ValidateClientAge(DateTime dateOfBirth)
         {
-            var minimumAge = _clientRequirements.MinimumAge;
+            var minimumAge = _userRequirements.ClientMinimumAge;
 
-            if (CheckMinimumAge(dateOfBirth, minimumAge))
+            if (CheckIfHasAge(dateOfBirth, minimumAge))
             {
-                throw new SharedException(
-                    ErrorTypes.Conflict,
-                    "Client`s data does not meet requirements",
-                    $"Client`s age must be greater than {minimumAge - 1}"
-                );
+                return;
             }
+
+            throw new SharedException(
+                ErrorTypes.Conflict,
+                "User`s data does not meet requirements",
+                $"Client`s age must be greater than {minimumAge}"
+            );
+        }
+
+        /// <summary>
+        /// Validates admin`s <paramref name="dateOfBirth"/> with required minimum age from app config.
+        /// </summary>
+        /// <param name="dateOfBirth">date to check.</param>
+        /// <exception cref="SharedException">Invalid user age.</exception>
+        private void ValidateAdminAge(DateTime dateOfBirth)
+        {
+            var minimumAge = _userRequirements.AdminMinimumAge;
+
+            if (CheckIfHasAge(dateOfBirth, minimumAge))
+            {
+                return;
+            }
+
+            throw new SharedException(
+                ErrorTypes.Conflict,
+                "User`s data does not meet requirements",
+                $"Admin`s age must be greater than {minimumAge}"
+            );
         }
 
         /// <summary>

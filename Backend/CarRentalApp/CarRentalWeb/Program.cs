@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using CarRentalWeb.Middleware;
-using CarRentalBll.Configuration;
-using CarRentalBll.Configuration.JWT.Access;
-using CarRentalBll.Configuration.JWT.Refresh;
-using CarRentalBll.Configuration.Mappers;
+using CarRentalBll.Configurations;
 using CarRentalBll.Services;
 using CarRentalDal.Contexts;
+using CarRentalWeb.Validation;
+using SharedResources.Configurations.JWT.Access;
+using SharedResources.Configurations.JWT.Refresh;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,9 +18,11 @@ builder.Services.Configure<AccessJwtConfig>(
 builder.Services.Configure<RefreshJwtConfig>(
     builder.Configuration.GetSection(RefreshJwtConfig.Section)
 );
-builder.Services.Configure<ClientRequirements>(
-    builder.Configuration.GetSection(ClientRequirements.Section)
+builder.Services.Configure<UserRequirements>(
+    builder.Configuration.GetSection(UserRequirements.Section)
 );
+
+builder.Services.AddScoped<AdminMinimumAgeFilter>();
 
 var configurationString = builder.Configuration.GetConnectionString("CarRentalDB");
 
@@ -28,7 +30,7 @@ builder.Services.AddDbContext<CarRentalDbContext>(
     options => options.UseSqlServer(configurationString)
 );
 
-MapsterConfig.Configure();
+MapsterBllConfig.Configure();
 
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();

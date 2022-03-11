@@ -1,9 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using CarRentalBll.Configuration.JWT;
-using CarRentalBll.Configuration.JWT.Access;
-using CarRentalBll.Configuration.JWT.Refresh;
 using CarRentalBll.Exceptions;
 using CarRentalBll.Models;
 using CarRentalDal.Contexts;
@@ -11,6 +8,9 @@ using CarRentalDal.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SharedResources.Configurations.JWT;
+using SharedResources.Configurations.JWT.Access;
+using SharedResources.Configurations.JWT.Refresh;
 
 namespace CarRentalBll.Services
 {
