@@ -5,7 +5,7 @@ import { tap } from 'rxjs/operators';
 
 import { LoginDTO } from '../_models/auth/login';
 import { RegisterDTO } from "../_models/auth/register";
-import { CompleteRegistrationDTO } from "../_models/auth/complete-registration";
+import { CompleteRegistrationRequest } from "../_models/auth/complete-registration";
 import { AuthResponse } from '../_models/auth/auth-responce';
 import { RefreshTokenRequest } from "../_models/auth/refresh-token-request";
 
@@ -39,8 +39,11 @@ export class AuthService {
       )
   }
 
-  public completeRegistration(admin: CompleteRegistrationDTO): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/auth/complete-registration', admin)
+  public completeRegistration(admin: CompleteRegistrationRequest, token: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      '/api/auth/complete-registration',
+      admin,
+      {headers: {'Authorization': `Bearer ${token}`}})
       .pipe(
         tap(
           response => {
@@ -51,7 +54,7 @@ export class AuthService {
   }
 
   public login(admin: LoginDTO): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/auth/login-admin', admin)
+    return this.http.post<AuthResponse>('/api/auth/login', admin)
       .pipe(
         tap(
           response => {

@@ -1,4 +1,3 @@
-export interface CompleteRegistrationDTO {
+export interface CompleteRegistrationRequest {
   driverLicenseSerialNumber: string;
-  token: string;
 }

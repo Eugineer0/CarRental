@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from "@angular/common/http";
 import { ActivatedRoute, Router } from "@angular/router";
 
-import { CompleteRegistrationDTO } from '../_models/auth/complete-registration'
+import { CompleteRegistrationRequest } from '../_models/auth/complete-registration'
 
 import { AuthService } from "../_services/auth.service";
 
@@ -12,9 +12,8 @@ import { AuthService } from "../_services/auth.service";
   styleUrls: ['./complete-registration.component.css']
 })
 export class CompleteRegistrationComponent implements OnInit {
-  public userInfo: CompleteRegistrationDTO = {
-    driverLicenseSerialNumber: '',
-    token: ''
+  public userInfo: CompleteRegistrationRequest = {
+    driverLicenseSerialNumber: ''
   };
 
   public completionFailed: boolean = false;
@@ -36,9 +35,9 @@ export class CompleteRegistrationComponent implements OnInit {
   }
 
   public onSubmit(): void {
-    this.userInfo.token = this.route.snapshot.queryParams['token'];
+    const token = this.route.snapshot.queryParams['token'];
 
-    this.authService.completeRegistration(this.userInfo)
+    this.authService.completeRegistration(this.userInfo, token)
       .subscribe(
         _ => {
           this.router.navigateByUrl('secret');
