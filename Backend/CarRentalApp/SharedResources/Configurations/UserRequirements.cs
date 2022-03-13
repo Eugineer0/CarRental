@@ -1,4 +1,4 @@
-﻿namespace CarRentalBll.Configurations
+﻿namespace SharedResources.Configurations
 {
     public class UserRequirements
     {

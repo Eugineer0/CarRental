@@ -10,8 +10,4 @@
         <ProjectReference Include="..\CarRentalDal\CarRentalDal.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Configurations\Mappers" />
-    </ItemGroup>
-
 </Project>

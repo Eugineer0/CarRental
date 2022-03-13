@@ -6,6 +6,7 @@ using CarRentalWeb.Validation;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace CarRentalWeb.Controllers
 {
@@ -64,10 +65,10 @@ namespace CarRentalWeb.Controllers
             return RegisterUserAsync(model);
         }
 
-        //[ServiceFilter(typeof(AdminMinimumAgeFilter))]
         [HttpPost("register-admin")]
         public Task<IActionResult> RegisterAdmin(AdminRegistrationRequest request)
         {
+            Console.WriteLine(ModelState["DateOfBirth"]?.RawValue);
             var model = request.Adapt<RegistrationModel>();
             return RegisterUserAsync(model);
         }

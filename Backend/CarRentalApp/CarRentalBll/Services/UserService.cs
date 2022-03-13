@@ -6,6 +6,7 @@ using CarRentalDal.Models;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using SharedResources.Configurations;
 using SharedResources.EnumsAndConstants;
 using SharedResources.Helpers;
 
@@ -196,21 +197,6 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Checks if <paramref name="dateOfBirth"/> was at least <paramref name="minimumAgeYears"/> years ago.
-        /// </summary>
-        /// <param name="dateOfBirth">date to check.</param>
-        /// <param name="minimumAgeYears">years.</param>
-        /// <returns>
-        /// True - if <paramref name="dateOfBirth"/> was more than <paramref name="minimumAgeYears"/> years ago, else - false.
-        /// </returns>
-        public static bool CheckIfHasAge(DateTime dateOfBirth, int minimumAgeYears)
-        {
-            var criticalDate = dateOfBirth.AddYears(minimumAgeYears);
-
-            return DateTime.Now.CompareTo(criticalDate) > 0;
-        }
-
-        /// <summary>
         /// Finds user with specified <paramref name="username"/> and returns it.
         /// </summary>
         /// <param name="username">unique credential of user.</param>
@@ -334,7 +320,7 @@ namespace CarRentalBll.Services
         {
             var minimumAge = _userRequirements.ClientMinimumAge;
 
-            if (CheckIfHasAge(dateOfBirth, minimumAge))
+            if (DateOperations.CheckMinimumAge(dateOfBirth, minimumAge))
             {
                 return;
             }
@@ -355,7 +341,7 @@ namespace CarRentalBll.Services
         {
             var minimumAge = _userRequirements.AdminMinimumAge;
 
-            if (CheckIfHasAge(dateOfBirth, minimumAge))
+            if (DateOperations.CheckMinimumAge(dateOfBirth, minimumAge))
             {
                 return;
             }

@@ -13,7 +13,6 @@ namespace CarRentalWeb.Models.Requests
         public string DriverLicenseSerialNumber { get; set; } = null!;
 
         [Required]
-        [MinimumAge(ErrorMessage = "Incorrect input: Client have to reach {1} years")]
         public DateTime? DateOfBirth { get; set; }
     }
 }

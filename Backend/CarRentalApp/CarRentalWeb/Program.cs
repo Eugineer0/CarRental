@@ -5,12 +5,22 @@ using CarRentalBll.Configurations;
 using CarRentalBll.Services;
 using CarRentalDal.Contexts;
 using CarRentalWeb.Validation;
+using FluentValidation.AspNetCore;
+using SharedResources.Configurations;
 using SharedResources.Configurations.JWT.Access;
 using SharedResources.Configurations.JWT.Refresh;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddFluentValidation(
+        fv =>
+        {
+            fv.RegisterValidatorsFromAssemblyContaining<AdminRegistrationRequestValidator>();
+            fv.RegisterValidatorsFromAssemblyContaining<ClientRegistrationRequestValidator>();
+        }
+    );
 
 builder.Services.Configure<AccessJwtConfig>(
     builder.Configuration.GetSection(AccessJwtConfig.Section)
@@ -21,8 +31,6 @@ builder.Services.Configure<RefreshJwtConfig>(
 builder.Services.Configure<UserRequirements>(
     builder.Configuration.GetSection(UserRequirements.Section)
 );
-
-builder.Services.AddScoped<AdminMinimumAgeFilter>();
 
 var configurationString = builder.Configuration.GetConnectionString("CarRentalDB");
 
@@ -46,7 +54,7 @@ accessJwtValidationParams.IssuerSigningKey = TokenService.GetKey(accessJwtConfig
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(
-        options => { options.TokenValidationParameters = accessJwtValidationParams; }
+        options => options.TokenValidationParameters = accessJwtValidationParams
     );
 
 builder.Services.AddCors(
