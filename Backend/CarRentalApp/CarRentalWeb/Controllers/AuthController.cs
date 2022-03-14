@@ -74,8 +74,8 @@ namespace CarRentalWeb.Controllers
         [HttpPost("complete-registration")]
         public async Task<IActionResult> CompleteRegistration(RegistrationCompletionRequest request)
         {
-            var userId = _tokenService.GetUserId(this.User.Claims);
-            await _userService.AddDriverLicenseByAsync(userId, request.DriverLicenseSerialNumber);
+            var username = _tokenService.GetUsername(this.User.Claims);
+            await _userService.AddDriverLicenseByAsync(username, request.DriverLicenseSerialNumber);
             return Ok();
         }
 

@@ -46,6 +46,20 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
+        /// Adds <paramref name="driverLicenseSerialNumber"/> to existing user with specified <paramref name="username"/>.
+        /// </summary>
+        /// <param name="username">unique credential of user to be updated</param>
+        /// <param name="driverLicenseSerialNumber">value to fill in user field</param>
+        public async Task AddDriverLicenseByAsync(string username, string driverLicenseSerialNumber)
+        {
+            var user = await GetByUsernameAsync(username);
+
+            user.DriverLicenseSerialNumber = driverLicenseSerialNumber;
+
+            await _carRentalDbContext.SaveChangesAsync();
+        }
+
+        /// <summary>
         /// Validates passed user prototype as client and returns existing user model.
         /// </summary>
         /// <param name="loginModel">user prototype to login.</param>
@@ -62,7 +76,7 @@ namespace CarRentalBll.Services
                 return userModel;
             }
 
-            var token = _tokenService.GenerateRefreshToken(userModel);
+            var token = _tokenService.GenerateAccessToken(userModel);
             throw new SharedException(
                 ErrorTypes.AdditionalDataRequired,
                 token,

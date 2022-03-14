@@ -18,12 +18,12 @@
 
         public static bool CheckIfBefore(DateTime target, DateTime candidate)
         {
-            return candidate.Ticks < target.Ticks;
+            return candidate < target;
         }
 
         public static bool CheckIfAfter(DateTime target, DateTime candidate)
         {
-            return target.Ticks < candidate.Ticks;
+            return target < candidate;
         }
 
         public static TimeSpan GetPeriod(DateTime startRent, DateTime finishRent)

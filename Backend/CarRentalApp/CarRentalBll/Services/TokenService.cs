@@ -163,15 +163,13 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Gets username claim value from <paramref name="tokenString"/> and returns it.
+        /// Gets username claim value from <paramref name="claims"/> and returns it.
         /// </summary>
-        /// <param name="tokenString">token to be parsed.</param>
-        /// <returns>Username stored in <paramref name="tokenString"/>.</returns>
-        public string GetUsername(string tokenString)
+        /// <param name="claims">set of claims.</param>
+        /// <returns>Username stored in <paramref name="claims"/>.</returns>
+        public string GetUsername(IEnumerable<Claim> claims)
         {
-            var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = handler.ReadJwtToken(tokenString);
-            return GetClaimValue(jwtSecurityToken.Claims, JwtRegisteredClaimNames.UniqueName);
+            return GetClaimValue(claims, JwtRegisteredClaimNames.UniqueName);
         }
 
         /// <summary>
@@ -227,13 +225,13 @@ namespace CarRentalBll.Services
         /// </summary>
         /// <param name="user">token owner.</param>
         /// <returns>Generated access token.</returns>
-        private string GenerateAccessToken(UserModel user)
+        public string GenerateAccessToken(UserModel user)
         {
             var accessJwtGenerationParams = _accessJwtConfig.GenerationParameters;
 
             var jwtClaims = new List<Claim>()
             {
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
+                new Claim(JwtRegisteredClaimNames.Name, user.Username),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
             };
 
