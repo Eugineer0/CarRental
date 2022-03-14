@@ -13,9 +13,7 @@ namespace CarRentalWeb.Validation
             var adminMinimumAge = userRequirementsOptions.Value.AdminMinimumAge;
 
             RuleFor(x => x.DateOfBirth)
-                .Must(
-                    dateOfBirth => ((DateTime) dateOfBirth).WasAgo(adminMinimumAge)
-                )
+                .Must(dateOfBirth => ((DateTime) dateOfBirth).HasDurationYears(DateTime.Now, adminMinimumAge))
                 .WithMessage(String.Format(ValidationConstants.InvalidAgeErrorMessage, adminMinimumAge));
         }
     }

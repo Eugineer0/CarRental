@@ -50,7 +50,10 @@ namespace CarRentalWeb.Middleware
                 }
                 case ErrorTypes.AccessDenied:
                 {
-                    result = new ObjectResult(exception.Message) { StatusCode = StatusCodes.Status403Forbidden };
+                    result = new ObjectResult(exception.Message)
+                    {
+                        StatusCode = StatusCodes.Status403Forbidden
+                    };
                     break;
                 }
                 case ErrorTypes.Invalid:

@@ -1,7 +1,6 @@
 ﻿using CarRentalDal.Contexts;
 using CarRentalDal.Models;
 using Microsoft.EntityFrameworkCore;
-using SharedResources.Exceptions;
 
 namespace CarRentalBll.Services
 {
@@ -19,7 +18,6 @@ namespace CarRentalBll.Services
         /// </summary>
         /// <param name="refreshTokenString">ejected token string.</param>
         /// <returns>token model, removed from database.</returns>
-        /// <exception cref="SharedException">Token not found by <paramref name="refreshTokenString"/>. For safety reasons all related tokens will be revoked</exception>
         public async Task<RefreshToken?> PopTokenAsync(string refreshTokenString)
         {
             var token = await _carRentalDbContext.RefreshTokens

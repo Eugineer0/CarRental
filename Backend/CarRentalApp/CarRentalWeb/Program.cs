@@ -23,21 +23,13 @@ builder.Services
         }
     );
 
-builder.Services.Configure<AccessJwtConfig>(
-    builder.Configuration.GetSection(AccessJwtConfig.Section)
-);
-builder.Services.Configure<RefreshJwtConfig>(
-    builder.Configuration.GetSection(RefreshJwtConfig.Section)
-);
-builder.Services.Configure<UserRequirements>(
-    builder.Configuration.GetSection(UserRequirements.Section)
-);
+builder.Services.Configure<AccessJwtConfig>(builder.Configuration.GetSection(AccessJwtConfig.Section));
+builder.Services.Configure<RefreshJwtConfig>(builder.Configuration.GetSection(RefreshJwtConfig.Section));
+builder.Services.Configure<UserRequirements>(builder.Configuration.GetSection(UserRequirements.Section));
 
 var configurationString = builder.Configuration.GetConnectionString("CarRentalDB");
 
-builder.Services.AddDbContext<CarRentalDbContext>(
-    options => options.UseSqlServer(configurationString)
-);
+builder.Services.AddDbContext<CarRentalDbContext>(options => options.UseSqlServer(configurationString));
 
 MapsterBllConfig.Configure();
 
@@ -55,9 +47,7 @@ accessJwtValidationParams.IssuerSigningKey = JwtService.GetKey(accessJwtConfig.G
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(
-        options => options.TokenValidationParameters = accessJwtValidationParams
-    );
+    .AddJwtBearer(options => options.TokenValidationParameters = accessJwtValidationParams);
 
 builder.Services.AddCors(
     options =>

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using CarRentalBll.Models;
 using CarRentalBll.Services;
 using CarRentalWeb.Models.Requests;
@@ -33,18 +34,18 @@ namespace CarRentalWeb.Controllers
         public async Task<IActionResult> Login(UserLoginRequest request)
         {
             var model = request.Adapt<LoginModel>();
-            var user = await _userService.GetValidClientAsync(model);
-            if (user == null)
+            var possiblyClient = await _userService.GetValidatedClientAsync(model);
+            if (possiblyClient.IsClient)
             {
-                var token = _jwtService.GenerateToken(request);
-                throw new SharedException(
-                    ErrorTypes.AdditionalDataRequired,
-                    token,
-                    "Registration completion required"
-                );
+                return await AuthenticateAsync(possiblyClient.User);
             }
 
-            return await AuthenticateAsync(user);
+            var token = _jwtService.GenerateToken(possiblyClient.User.Id);
+            throw new SharedException(
+                ErrorTypes.AdditionalDataRequired,
+                token,
+                "Registration completion required"
+            );
         }
 
         [HttpPost("login-admin")]
@@ -93,7 +94,6 @@ namespace CarRentalWeb.Controllers
         [HttpPost("register-admin")]
         public Task<IActionResult> RegisterAdmin(AdminRegistrationRequest request)
         {
-            Console.WriteLine(ModelState["DateOfBirth"]?.RawValue);
             var model = request.Adapt<RegistrationModel>();
             return RegisterUserAsync(model);
         }
@@ -102,8 +102,8 @@ namespace CarRentalWeb.Controllers
         [HttpPost("complete-registration")]
         public async Task<IActionResult> CompleteRegistration(RegistrationCompletionRequest request)
         {
-            var username = _jwtService.GetUsername(this.User.Claims);
-            await _userService.AddDriverLicenseByAsync(username, request.DriverLicenseSerialNumber);
+            var userId = GetUserId(this.User.Claims);
+            await _userService.AddDriverLicenseByAsync(userId, request.DriverLicenseSerialNumber);
             return Ok();
         }
 
@@ -115,9 +115,30 @@ namespace CarRentalWeb.Controllers
 
         private async Task<IActionResult> AuthenticateAsync(UserModel user)
         {
-            var response = _jwtService.GetAccess(user);
+            var response = new AuthenticationResponse()
+            {
+                AccessToken = _jwtService.GenerateAccessToken(user),
+                RefreshToken = _jwtService.GenerateRefreshToken(user),
+            };
+
             await _tokenService.StoreTokenAsync(response.RefreshToken, user.Id);
             return Ok(response.Adapt<AuthenticationResponse>());
+        }
+
+        private Guid GetUserId(IEnumerable<Claim> claims)
+        {
+            var userIdString = _jwtService.GetClaimValue(claims, ClaimTypes.NameIdentifier);
+
+            if (!Guid.TryParse(userIdString, out var userId))
+            {
+                throw new SharedException(
+                    ErrorTypes.Invalid,
+                    "Invalid token",
+                    $"Invalid 'sub' claim value"
+                );
+            }
+
+            return userId;
         }
     }
 }
