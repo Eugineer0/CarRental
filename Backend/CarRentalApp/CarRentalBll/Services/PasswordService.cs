@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using CarRentalBll.Exceptions;
+using SharedResources.Exceptions;
 
 namespace CarRentalBll.Services
 {

@@ -1,6 +1,4 @@
-﻿using CarRentalBll.Configurations;
-using CarRentalBll.Exceptions;
-using CarRentalBll.Models;
+﻿using CarRentalBll.Models;
 using CarRentalDal.Contexts;
 using CarRentalDal.Models;
 using Mapster;
@@ -8,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SharedResources.Configurations;
 using SharedResources.EnumsAndConstants;
+using SharedResources.Exceptions;
 using SharedResources.Helpers;
 
 namespace CarRentalBll.Services
@@ -15,20 +14,17 @@ namespace CarRentalBll.Services
     public class UserService
     {
         private readonly PasswordService _passwordService;
-        private readonly TokenService _tokenService;
         private readonly UserRequirements _userRequirements;
         private readonly CarRentalDbContext _carRentalDbContext;
 
         public UserService(
             PasswordService passwordService,
             IOptions<UserRequirements> userRequirements,
-            CarRentalDbContext carRentalDbContext,
-            TokenService tokenService
+            CarRentalDbContext carRentalDbContext
         )
         {
             _passwordService = passwordService;
             _carRentalDbContext = carRentalDbContext;
-            _tokenService = tokenService;
             _userRequirements = userRequirements.Value;
         }
 
@@ -39,10 +35,20 @@ namespace CarRentalBll.Services
         /// <param name="driverLicenseSerialNumber">value to fill in user field</param>
         public async Task AddDriverLicenseByAsync(Guid userId, string driverLicenseSerialNumber)
         {
-            var user = await GetByIdAsync(userId);
-
+            var user = await GetEntityByAsync(userId);
             user.DriverLicenseSerialNumber = driverLicenseSerialNumber;
+            await _carRentalDbContext.SaveChangesAsync();
+        }
 
+        /// <summary>
+        /// Adds <paramref name="driverLicenseSerialNumber"/> to existing user with specified <paramref name="username"/>.
+        /// </summary>
+        /// <param name="username">unique credential of user to be updated</param>
+        /// <param name="driverLicenseSerialNumber">value to fill in user field</param>
+        public async Task AddDriverLicenseByAsync(string username, string driverLicenseSerialNumber)
+        {
+            var user = await GetEntityByAsync(username);
+            user.DriverLicenseSerialNumber = driverLicenseSerialNumber;
             await _carRentalDbContext.SaveChangesAsync();
         }
 
@@ -52,9 +58,9 @@ namespace CarRentalBll.Services
         /// <param name="loginModel">user prototype to login.</param>
         /// <returns>Existing user model.</returns>
         /// <exception cref="SharedException">User must specify driver license field</exception>
-        public async Task<UserModel> GetValidClientAsync(LoginModel loginModel)
+        public async Task<UserModel?> GetValidClientAsync(LoginModel loginModel)
         {
-            var user = await GetByUsernameAsync(loginModel.Username);
+            var user = await GetEntityByAsync(loginModel.Username);
             _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
 
             var userModel = user.Adapt<User, UserModel>();
@@ -63,12 +69,7 @@ namespace CarRentalBll.Services
                 return userModel;
             }
 
-            var token = _tokenService.GenerateRefreshToken(userModel);
-            throw new SharedException(
-                ErrorTypes.AdditionalDataRequired,
-                token,
-                "Registration completion required"
-            );
+            return null;
         }
 
         /// <summary>
@@ -78,7 +79,7 @@ namespace CarRentalBll.Services
         /// <returns>Existing user model.</returns>
         public async Task<UserModel> GetValidAdminAsync(LoginModel loginModel)
         {
-            var user = await GetByUsernameAsync(loginModel.Username);
+            var user = await GetEntityByAsync(loginModel.Username);
             _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
 
             var userModel = user.Adapt<User, UserModel>();
@@ -116,7 +117,7 @@ namespace CarRentalBll.Services
         /// <returns>Model of existing user.</returns>
         public async Task<UserModel> GetByAsync(Guid userId)
         {
-            var user = await GetByIdAsync(userId);
+            var user = await GetEntityByAsync(userId);
             return user.Adapt<UserModel>();
         }
 
@@ -127,7 +128,7 @@ namespace CarRentalBll.Services
         /// <returns>Model of existing user.</returns>
         public async Task<UserModel> GetByAsync(string username)
         {
-            var user = await GetByUsernameAsync(username);
+            var user = await GetEntityByAsync(username);
             return user.Adapt<UserModel>();
         }
 
@@ -138,16 +139,17 @@ namespace CarRentalBll.Services
         /// <exception cref="SharedException">User with such <paramref name="username"/> does not meet requirements.</exception>
         public async Task ApproveClientAsync(string username)
         {
-            var user = await GetByUsernameAsync(username);
+            var user = await GetEntityByAsync(username);
 
             if (user.Roles
                 .Select(userRole => userRole.Role)
-                .ContainsAny(RolesConstants.ClientRoles))
+                .ContainsAny(RolesConstants.ClientRoles)
+            )
             {
                 return;
             }
 
-            ValidateClientAge(user.DateOfBirth);
+            ValidateAge(user.DateOfBirth, "Client");
 
             if (user.DriverLicenseSerialNumber == null)
             {
@@ -172,11 +174,11 @@ namespace CarRentalBll.Services
         public async Task ModifyRolesAsync(string username, IReadOnlySet<Roles> roles)
         {
             ValidateRoles(roles);
-            var user = await GetByUsernameAsync(username);
+            var user = await GetEntityByAsync(username);
 
             if (roles.ContainsAny(RolesConstants.ClientRoles))
             {
-                ValidateClientAge(user.DateOfBirth);
+                ValidateAge(user.DateOfBirth, "Client");
 
                 if (user.DriverLicenseSerialNumber == null)
                 {
@@ -190,7 +192,7 @@ namespace CarRentalBll.Services
 
             if (roles.ContainsAny(RolesConstants.AdminRoles))
             {
-                ValidateAdminAge(user.DateOfBirth);
+                ValidateAge(user.DateOfBirth, "Admin");
             }
 
             await UpdateRolesAsync(user, roles);
@@ -202,7 +204,7 @@ namespace CarRentalBll.Services
         /// <param name="username">unique credential of user.</param>
         /// <returns> Existing user with <paramref name="username"/>.</returns>
         /// <exception cref="SharedException">User not found by <paramref name="username"/>.</exception>
-        private async Task<User> GetByUsernameAsync(string username)
+        private async Task<User> GetEntityByAsync(string username)
         {
             var user = await _carRentalDbContext.Users
                 .Include(user => user.Roles)
@@ -225,7 +227,7 @@ namespace CarRentalBll.Services
         /// <param name="userId">unique credential of user.</param>
         /// <returns>Existing user with <paramref name="userId"/>.</returns>
         /// <exception cref="SharedException">User not found by <paramref name="userId"/>.</exception>
-        private async Task<User> GetByIdAsync(Guid userId)
+        private async Task<User> GetEntityByAsync(Guid userId)
         {
             var user = await _carRentalDbContext.Users
                 .Include(user => user.Roles)
@@ -312,15 +314,21 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Validates client`s <paramref name="dateOfBirth"/> with required minimum age from app config.
+        /// Validates users`s <paramref name="dateOfBirth"/> with required minimum age for specified <paramref name="userType"/>.
         /// </summary>
         /// <param name="dateOfBirth">date to check.</param>
+        /// <param name="userType">determines requirement and error message.</param>
         /// <exception cref="SharedException">Invalid user age.</exception>
-        private void ValidateClientAge(DateTime dateOfBirth)
+        private void ValidateAge(DateTime dateOfBirth, string userType)
         {
-            var minimumAge = _userRequirements.ClientMinimumAge;
+            var minimumAge = userType switch
+            {
+                "Admin" => _userRequirements.AdminMinimumAge,
+                "Client" => _userRequirements.ClientMinimumAge,
+                _ => 0
+            };
 
-            if (DateOperations.CheckMinimumAge(dateOfBirth, minimumAge))
+            if (dateOfBirth.WasAgo(minimumAge))
             {
                 return;
             }
@@ -328,28 +336,7 @@ namespace CarRentalBll.Services
             throw new SharedException(
                 ErrorTypes.Conflict,
                 "User`s data does not meet requirements",
-                $"Client`s age must be greater than {minimumAge}"
-            );
-        }
-
-        /// <summary>
-        /// Validates admin`s <paramref name="dateOfBirth"/> with required minimum age from app config.
-        /// </summary>
-        /// <param name="dateOfBirth">date to check.</param>
-        /// <exception cref="SharedException">Invalid user age.</exception>
-        private void ValidateAdminAge(DateTime dateOfBirth)
-        {
-            var minimumAge = _userRequirements.AdminMinimumAge;
-
-            if (DateOperations.CheckMinimumAge(dateOfBirth, minimumAge))
-            {
-                return;
-            }
-
-            throw new SharedException(
-                ErrorTypes.Conflict,
-                "User`s data does not meet requirements",
-                $"Admin`s age must be greater than {minimumAge}"
+                $"{userType}`s age must be greater than {minimumAge}"
             );
         }
 

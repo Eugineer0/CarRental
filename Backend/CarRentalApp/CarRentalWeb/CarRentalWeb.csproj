@@ -9,7 +9,12 @@
     <ItemGroup>
         <PackageReference Include="FluentValidation.AspNetCore" Version="10.4.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.1" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.0" />
         <ProjectReference Include="..\CarRentalBll\CarRentalBll.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Configurations" />
     </ItemGroup>
 
 </Project>

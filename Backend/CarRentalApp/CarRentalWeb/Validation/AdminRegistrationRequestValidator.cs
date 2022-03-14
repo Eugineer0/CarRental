@@ -10,16 +10,13 @@ namespace CarRentalWeb.Validation
     {
         public AdminRegistrationRequestValidator(IOptions<UserRequirements> userRequirementsOptions)
         {
-            var adminMinimimAge = userRequirementsOptions.Value.AdminMinimumAge;
+            var adminMinimumAge = userRequirementsOptions.Value.AdminMinimumAge;
 
             RuleFor(x => x.DateOfBirth)
                 .Must(
-                    dateOfBirth =>
-                    {
-                        return DateOperations.CheckMinimumAge((DateTime) dateOfBirth, adminMinimimAge);
-                    }
+                    dateOfBirth => ((DateTime) dateOfBirth).WasAgo(adminMinimumAge)
                 )
-                .WithMessage(String.Format(ValidationConstants.InvalidAgeErrorMessage, adminMinimimAge));
+                .WithMessage(String.Format(ValidationConstants.InvalidAgeErrorMessage, adminMinimumAge));
         }
     }
 }

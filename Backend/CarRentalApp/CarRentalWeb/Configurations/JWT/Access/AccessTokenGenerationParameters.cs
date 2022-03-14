@@ -1,4 +1,4 @@
-﻿namespace SharedResources.Configurations.JWT.Access
+﻿namespace CarRentalWeb.Configurations.JWT.Access
 {
     public class AccessTokenGenerationParameters : GenerationParameters
     {

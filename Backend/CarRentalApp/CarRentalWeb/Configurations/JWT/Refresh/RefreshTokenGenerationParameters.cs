@@ -1,4 +1,4 @@
-﻿namespace SharedResources.Configurations.JWT.Refresh
+﻿namespace CarRentalWeb.Configurations.JWT.Refresh
 {
     public class RefreshTokenGenerationParameters : GenerationParameters
     {

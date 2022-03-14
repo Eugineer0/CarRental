@@ -1,17 +1,11 @@
 ﻿namespace SharedResources.Helpers
 {
-    public class DateOperations
+    public static class DateOperations
     {
-        public static bool CheckMinimumAge(DateTime dateOfBirth, int years)
+        public static bool WasAgo(this DateTime source, int years)
         {
-            var criticalDate = dateOfBirth.AddYears(years);
-
-            return CheckIfBefore(DateTime.Now, criticalDate);
-        }
-
-        public static bool CheckIfBefore(DateTime target, DateTime candidate)
-        {
-            return target.Ticks > candidate.Ticks;
+            var criticalDate = source.AddYears(years);
+            return criticalDate < DateTime.Now;
         }
     }
 }

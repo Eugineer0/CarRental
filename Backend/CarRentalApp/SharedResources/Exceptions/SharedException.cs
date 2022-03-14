@@ -1,4 +1,4 @@
-﻿namespace CarRentalBll.Exceptions
+﻿namespace SharedResources.Exceptions
 {
     public class SharedException : Exception
     {

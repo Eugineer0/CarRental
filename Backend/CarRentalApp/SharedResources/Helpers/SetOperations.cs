@@ -1,10 +1,12 @@
-﻿namespace SharedResources.Helpers
+﻿using SharedResources.EnumsAndConstants;
+
+namespace SharedResources.Helpers
 {
     public static class SetOperations
     {
-        public static bool ContainsAny<T>(this IEnumerable<T> candidate, IEnumerable<T> target)
+        public static bool ContainsAny(this IEnumerable<Roles> candidate, IEnumerable<Roles> target)
         {
-            return target.FirstOrDefault(candidate.Contains) == null;
+            return target.FirstOrDefault(candidate.Contains) == default;
         }
     }
 }

@@ -4,11 +4,12 @@ using CarRentalWeb.Middleware;
 using CarRentalBll.Configurations;
 using CarRentalBll.Services;
 using CarRentalDal.Contexts;
+using CarRentalWeb.Configurations.JWT.Access;
+using CarRentalWeb.Configurations.JWT.Refresh;
+using CarRentalWeb.Services;
 using CarRentalWeb.Validation;
 using FluentValidation.AspNetCore;
 using SharedResources.Configurations;
-using SharedResources.Configurations.JWT.Access;
-using SharedResources.Configurations.JWT.Refresh;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,7 @@ builder.Services.AddDbContext<CarRentalDbContext>(
 
 MapsterBllConfig.Configure();
 
+builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
 
@@ -49,7 +51,7 @@ var accessJwtConfig = new AccessJwtConfig();
 builder.Configuration.Bind(AccessJwtConfig.Section, accessJwtConfig);
 
 var accessJwtValidationParams = accessJwtConfig.ValidationParameters;
-accessJwtValidationParams.IssuerSigningKey = TokenService.GetKey(accessJwtConfig.GenerationParameters);
+accessJwtValidationParams.IssuerSigningKey = JwtService.GetKey(accessJwtConfig.GenerationParameters);
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

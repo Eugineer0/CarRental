@@ -1,6 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 
-namespace SharedResources.Configurations.JWT.Access
+namespace CarRentalWeb.Configurations.JWT.Access
 {
     public class AccessJwtConfig
     {

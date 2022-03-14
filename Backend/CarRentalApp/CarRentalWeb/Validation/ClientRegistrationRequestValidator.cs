@@ -14,10 +14,7 @@ namespace CarRentalWeb.Validation
 
             RuleFor(x => x.DateOfBirth)
                 .Must(
-                    dateOfBirth =>
-                    {
-                        return DateOperations.CheckMinimumAge((DateTime) dateOfBirth, clientMinimimAge);
-                    }
+                    dateOfBirth => ((DateTime) dateOfBirth).WasAgo(clientMinimimAge)
                 )
                 .WithMessage(String.Format(ValidationConstants.InvalidAgeErrorMessage, clientMinimimAge));
         }

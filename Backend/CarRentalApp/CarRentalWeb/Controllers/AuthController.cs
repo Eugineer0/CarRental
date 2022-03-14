@@ -2,11 +2,11 @@ using CarRentalBll.Models;
 using CarRentalBll.Services;
 using CarRentalWeb.Models.Requests;
 using CarRentalWeb.Models.Responses;
-using CarRentalWeb.Validation;
+using CarRentalWeb.Services;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using SharedResources.Exceptions;
 
 namespace CarRentalWeb.Controllers
 {
@@ -16,14 +16,17 @@ namespace CarRentalWeb.Controllers
     {
         private readonly UserService _userService;
         private readonly TokenService _tokenService;
+        private readonly JwtService _jwtService;
 
         public AuthController(
             UserService userService,
-            TokenService tokenService
+            TokenService tokenService,
+            JwtService jwtService
         )
         {
             _userService = userService;
             _tokenService = tokenService;
+            _jwtService = jwtService;
         }
 
         [HttpPost("[action]")]
@@ -31,6 +34,16 @@ namespace CarRentalWeb.Controllers
         {
             var model = request.Adapt<LoginModel>();
             var user = await _userService.GetValidClientAsync(model);
+            if (user == null)
+            {
+                var token = _jwtService.GenerateToken(request);
+                throw new SharedException(
+                    ErrorTypes.AdditionalDataRequired,
+                    token,
+                    "Registration completion required"
+                );
+            }
+
             return await AuthenticateAsync(user);
         }
 
@@ -46,7 +59,19 @@ namespace CarRentalWeb.Controllers
         public async Task<IActionResult> Refresh(RefreshAccessRequest request)
         {
             var token = await _tokenService.PopTokenAsync(request.RefreshToken);
-            _tokenService.ValidateTokenLifetime(token.Token);
+            if (token == null)
+            {
+                var userId = _jwtService.GetUserId(request.RefreshToken);
+                await _tokenService.RevokeTokensByAsync(userId);
+
+                throw new SharedException(
+                    ErrorTypes.AuthFailed,
+                    "Invalid refresh token",
+                    "Refresh token not found, all related sessions will be closed"
+                );
+            }
+
+            _jwtService.ValidateTokenLifetime(token.Token);
             var user = await _userService.GetByAsync(token.UserId);
             return await AuthenticateAsync(user);
         }
@@ -77,8 +102,8 @@ namespace CarRentalWeb.Controllers
         [HttpPost("complete-registration")]
         public async Task<IActionResult> CompleteRegistration(RegistrationCompletionRequest request)
         {
-            var userId = _tokenService.GetUserId(request.Token);
-            await _userService.AddDriverLicenseByAsync(userId, request.DriverLicenseSerialNumber);
+            var username = _jwtService.GetUsername(this.User.Claims);
+            await _userService.AddDriverLicenseByAsync(username, request.DriverLicenseSerialNumber);
             return Ok();
         }
 
@@ -90,7 +115,8 @@ namespace CarRentalWeb.Controllers
 
         private async Task<IActionResult> AuthenticateAsync(UserModel user)
         {
-            var response = await _tokenService.GetAccessAsync(user);
+            var response = _jwtService.GetAccess(user);
+            await _tokenService.StoreTokenAsync(response.RefreshToken, user.Id);
             return Ok(response.Adapt<AuthenticationResponse>());
         }
     }
