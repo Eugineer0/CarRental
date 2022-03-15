@@ -17,6 +17,14 @@ export class TokenService {
     return localStorage.getItem('refresh_token');
   }
 
+  public hasAccessToken(): boolean {
+    return localStorage.hasOwnProperty('access_token');
+  }
+
+  public hasRefreshToken(): boolean {
+    return localStorage.hasOwnProperty('refresh_token');
+  }
+
   public setTokens(tokenPair: AuthResponse): void {
     localStorage.setItem('access_token', tokenPair.accessToken);
     localStorage.setItem('refresh_token', tokenPair.refreshToken);

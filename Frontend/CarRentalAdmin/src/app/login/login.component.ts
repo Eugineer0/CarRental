@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from "@angular/common/http";
 
-import { LoginDTO } from '../_models/auth/login';
+import { LoginRequest } from '../_models/auth/login';
 
 import { AuthService } from '../_services/auth.service';
 
@@ -12,7 +12,7 @@ import { AuthService } from '../_services/auth.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  public admin: LoginDTO = {
+  public admin: LoginRequest = {
     username: '',
     password: ''
   };

@@ -4,7 +4,7 @@ import { Router } from "@angular/router";
 
 import { AuthService } from "../_services/auth.service";
 
-import { RegisterDTO } from "../_models/auth/register";
+import { RegisterRequest } from "../_models/auth/register";
 
 @Component({
   selector: 'app-register',
@@ -12,7 +12,7 @@ import { RegisterDTO } from "../_models/auth/register";
   styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
-  public admin: RegisterDTO = {
+  public admin: RegisterRequest = {
     email: '',
     username: '',
     password: '',

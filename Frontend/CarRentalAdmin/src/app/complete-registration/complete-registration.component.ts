@@ -40,7 +40,7 @@ export class CompleteRegistrationComponent implements OnInit {
     this.authService.completeRegistration(this.userInfo, token)
       .subscribe(
         _ => {
-          this.router.navigateByUrl('secret');
+          this.router.navigateByUrl('users');
         },
         error => {
           this.handleError(error);
