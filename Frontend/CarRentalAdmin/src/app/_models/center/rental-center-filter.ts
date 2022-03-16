@@ -1,4 +1,4 @@
-export interface FilterRequest {
+export interface RentalCenterFilter {
   country: string | undefined;
   city: string  | undefined;
   minimumAvailableCarsNumber: number | undefined;

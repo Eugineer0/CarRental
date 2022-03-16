@@ -2,13 +2,13 @@
   <div class="col-md-2">
     <div class="card mb-0">
       <h5 class="card-header">Filter</h5>
-      <button class="btn btn-secondary btn-sm" (click)="resetFilter()">Reset</button>
+      <button class="btn btn-secondary btn-sm" (click)="resetFilter(); filterForm.form.markAsPristine()">Reset</button>
       <div class="card-body">
-        <form name="form" (ngSubmit)="onSubmit()" #filterForm="ngForm">
+        <form name="filterForm" (ngSubmit)="onSubmit()" #filterForm="ngForm">
           <div class="form-group">
             <label class="mb-0 mt-2" for="country">Country</label>
             <select
-              class="form-control"
+              class="form-select"
               id="country"
               name="country"
               [(ngModel)]="filter.country"
@@ -20,7 +20,7 @@
             </select>
             <label class="mb-0 mt-2" for="city">City</label>
             <select
-              class="form-control"
+              class="form-select"
               id="city"
               name="city"
               [(ngModel)]="filter.city"
@@ -30,60 +30,75 @@
                 [value]="city"
               >{{city}}</option>
             </select>
-            <label class="mb-0 mt-2" for="minimumCarsNumber">Minimum cars accessible</label>
+            <label class="mb-0 mt-2" for="minimumCarsAvailableNumber">Minimum cars available</label>
             <input
-              min="0"
+              min=0
+              [max]="maxAvailableCarsNumber"
               type="number"
               class="form-control"
-              id="minimumCarsNumber"
+              id="minimumCarsAvailableNumber"
               name="minimumCarsNumber"
+              #carsNumberField="ngModel"
               [(ngModel)]="filter.minimumAvailableCarsNumber"
             >
-            <label class="mb-0 mt-2" for="rentalPeriod">Rent period</label>
-            <div class="form-control" id="rentalPeriod">
-              <label class="mb-0 mt-2" for="startDate">Start</label>
-              <input
-                [required]="dateFillInRequired()"
-                type="date"
-                class="form-control"
-                id="startDate"
-                name="startRent"
-                [(ngModel)]="startRentDate"
-              >
-              <input
-                [required]="dateFillInRequired()"
-                type="time"
-                class="form-control"
-                id="StartTime"
-                name="startRentTime"
-                [(ngModel)]="startRentTime"
-              >
-              <label class="mb-0 mt-2" for="finishDate">Finish</label>
-              <input
-                [required]="dateFillInRequired()"
-                type="date"
-                class="form-control"
-                id="finishDate"
-                name="finishRent"
-                [(ngModel)]="finishRentDate"
-              >
-              <input
-                [required]="dateFillInRequired()"
-                type="time"
-                class="form-control"
-                id="finishTime"
-                name="finishRentTime"
-                [(ngModel)]="finishRentTime"
-              >
-              <div *ngIf="filterForm.form.invalid" class="my-2 alert alert-warning">
-                Please fill in all date fields
+            <div *ngIf="carsNumberField.invalid" class="alert alert-warning">
+              <div *ngIf="carsNumberField.errors?.['max']">
+                Upper bound exceeded.
               </div>
             </div>
+            <form class="my-2" name="dateForm" (ngSubmit)="onSubmit()" #dateForm="ngForm">
+              <div class="form-group">
+                <label class="mb-0" for="rentalPeriod">Rent period</label>
+                <div class="form-control" id="rentalPeriod">
+                  <label class="mb-0 mt-2" for="startDate">Start</label>
+                  <input
+                    [required]="dateFillInRequired()"
+                    type="date"
+                    class="form-control"
+                    id="startDate"
+                    name="startRent"
+                    [min]="getCurrentDate()"
+                    [(ngModel)]="startRentDate"
+                  >
+                  <input
+                    [required]="dateFillInRequired()"
+                    type="time"
+                    class="form-control"
+                    id="StartTime"
+                    name="startRentTime"
+                    [min]="getCurrentDateD() | date:'shortTime'"
+                    max="21:00"
+                    [(ngModel)]="startRentTime"
+                  >{{getCurrentDateD() | date:'shortTime'}}
+                  <label class="mb-0 mt-2" for="finishDate">Finish</label>
+                  <input
+                    [required]="dateFillInRequired()"
+                    type="date"
+                    class="form-control"
+                    id="finishDate"
+                    name="finishRent"
+                    [min]="getCurrentDate()"
+                    [(ngModel)]="finishRentDate"
+                  >
+                  <input
+                    [required]="dateFillInRequired()"
+                    type="time"
+                    class="form-control"
+                    id="finishTime"
+                    name="finishRentTime"
+                    [(ngModel)]="finishRentTime"
+                  >
+                </div>
+                <div *ngIf="dateForm.form.invalid" class="my-2 alert alert-warning">
+                  Please fill in all date fields
+                </div>
+              </div>
+            </form>
           </div>
           <button
             type="submit"
-            class="btn btn-primary col"
-            [disabled]="filterForm.form.invalid || filterForm.form.pristine"
+            class="btn btn-primary w-100"
+            [disabled]="filterForm.form.invalid || dateForm.form.invalid || (filterForm.form.pristine && dateForm.form.pristine)"
           >Find
           </button>
         </form>
@@ -98,7 +113,7 @@
         <th scope="col">Country</th>
         <th scope="col">City</th>
         <th scope="col">Address</th>
-        <th scope="col">Accessible cars</th>
+        <th scope="col">Available cars</th>
       </tr>
       </thead>
       <tbody>

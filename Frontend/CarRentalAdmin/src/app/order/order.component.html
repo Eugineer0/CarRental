@@ -1,0 +1,16 @@
+<form (ngSubmit)="onSubmit()">
+  <div
+    class="form-check"
+    *ngFor="let service of car.availableServices"
+    id="roles"
+  >
+    <input
+      type="checkbox"
+      class="form-check-input"
+    >
+    {{service.name}}: {{service.price}}$
+  </div>
+  <div class="d-grid gap-2 d-md-flex mt-3">
+    <button type="submit" class="btn btn-success">Proceed</button>
+  </div>
+</form>

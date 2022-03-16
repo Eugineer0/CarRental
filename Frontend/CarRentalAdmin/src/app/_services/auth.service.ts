@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { LoginRequest } from '../_models/auth/login';
+import { LoginRequest } from '../_models/auth/login-request';
 import { RegisterRequest } from "../_models/auth/register";
 import { CompleteRegistrationRequest } from "../_models/auth/complete-registration";
 import { RefreshTokenRequest } from "../_models/auth/refresh-token-request";
@@ -48,7 +48,7 @@ export class AuthService {
   }
 
   public login(admin: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/auth/login', admin)
+    return this.http.post<AuthResponse>('/api/auth/login-admin', admin)
       .pipe(
         tap(
           response => {

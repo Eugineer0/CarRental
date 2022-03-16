@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { RentalCenterService } from "../_services/rental-center.service";
 
 import { RentalCenter } from "../_models/center/rental-center";
-import { FilterRequest } from "../_models/center/filter-request";
+import { RentalCenterFilter } from "../_models/center/rental-center-filter";
 
 @Component({
   selector: 'app-rental-centers',
@@ -14,7 +14,8 @@ export class RentalCentersComponent implements OnInit {
   public centers: RentalCenter[] = [];
   public cities: string[] = [];
   public countries: string[] = [];
-  public filter: FilterRequest = this.initFilter();
+  public maxAvailableCarsNumber: number = 0;
+  public filter: RentalCenterFilter = this.initFilter();
 
   public startRentDate: string | undefined = undefined;
   public finishRentDate: string | undefined = undefined;
@@ -35,6 +36,7 @@ export class RentalCentersComponent implements OnInit {
       .subscribe(
         centers => {
           this.centers = centers;
+          this.maxAvailableCarsNumber = Math.max(...(centers.map(center => center.availableCarsNumber)));
           this.cities = centers.map(center => center.city);
           for (let country of centers.map(center => center.country)) {
             if (!this.countries.includes(country)) {
@@ -46,7 +48,7 @@ export class RentalCentersComponent implements OnInit {
   }
 
   onSubmit() {
-    if(this.dateFillInRequired()) {
+    if (this.dateFillInRequired()) {
       this.setFilterDates();
     }
     this.rentalCenterService.getFilteredRentalCenters(this.filter)
@@ -69,7 +71,7 @@ export class RentalCentersComponent implements OnInit {
       || this.finishRentTime);
   }
 
-  public initFilter(): FilterRequest {
+  public initFilter(): RentalCenterFilter {
     return {
       country: undefined,
       city: undefined,
@@ -85,5 +87,25 @@ export class RentalCentersComponent implements OnInit {
     this.startRentDate = undefined;
     this.startRentTime = undefined;
     this.finishRentTime = undefined;
+
+    this.getRentalCenters();
+  }
+
+  public getCurrentDate(): string {
+    return new Date(Date.now()).toISOString().slice(0, 10);
+  }
+
+  public getCurrentDateD(): Date {
+    return new Date(Date.now());
+  }
+
+  getMinTime() {
+    if (this.startRentDate) {
+      if (this.getCurrentDate() === this.startRentDate) {
+        return new Date(Date.now()).toISOString().slice(11, 16);
+      }
+    }
+
+    return '00-00';
   }
 }

@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorResponse } from '@angular/common/http';
 
-import { LoginRequest } from '../_models/auth/login';
+import { LoginRequest } from '../_models/auth/login-request';
 
 import { AuthService } from '../_services/auth.service';
 
@@ -12,23 +12,26 @@ import { AuthService } from '../_services/auth.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  public admin: LoginRequest = {
+  public adminCredentials: LoginRequest = {
     username: '',
     password: ''
   };
 
-  public authFailedMessage: string | null = null;
   public authFailed: boolean = false;
+  public authFailedMessage: string = '';
   private isVisiblePassword: boolean = false;
+  private returnUrl: string = '';
+
 
   constructor(
-    private authService: AuthService,
-    private route: ActivatedRoute,
-    private router: Router
+      private authService: AuthService,
+      private route: ActivatedRoute,
+      private router: Router
   ) {
   }
 
   public ngOnInit(): void {
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '';
   }
 
   public resetAuthStatus(): void {
@@ -49,28 +52,36 @@ export class LoginComponent implements OnInit {
   }
 
   public onSubmit(): void {
-    const returnUrl: string = this.route.snapshot.queryParams['returnUrl'];
-
-    this.authService.login(this.admin)
-      .subscribe(
-        _ => {
-          this.router.navigateByUrl(returnUrl);
-        },
-        error => {
-          this.handleError(error);
-        }
-      );
+    this.authService.login(this.adminCredentials)
+        .subscribe(
+            _ => {
+              this.router.navigateByUrl(this.returnUrl);
+            },
+            error => {
+              this.handleError(error);
+              this.authFailed = true;
+            }
+        );
   }
 
   private handleError(error: HttpErrorResponse): void {
-    if (error.status === 308) {
-      this.router.navigate(['completeRegistration'], {queryParams: {token: error.error}});
-    } else if (error.status > 499) {
-      this.authFailedMessage = 'Something went wrong';
-    } else {
-      this.authFailedMessage = error.error || error.message;
+    this.authFailedMessage = `Something went wrong: {${ error.statusText } - ${ error.status }}`;
+
+    if (error.status >= 500) {
+      this.authFailedMessage = `Server error: {${ error.statusText } - ${ error.status }}`;
+    } else if (error.status > 400) {
+      this.authFailedMessage = error.error;
+    } else if (error.status === 400) {
+      this.authFailedMessage = LoginComponent.getBadRequestDetails(error);
+    }
+  }
+
+  private static getBadRequestDetails(error: HttpErrorResponse): string {
+    let errorMessage: string = '';
+    for (let message of Object.values(error.error.errors)) {
+      errorMessage += message + '\n';
     }
 
-    this.authFailed = true;
+    return errorMessage;
   }
 }

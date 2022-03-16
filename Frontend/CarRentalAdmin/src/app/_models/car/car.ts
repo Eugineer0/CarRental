@@ -13,7 +13,7 @@ export interface Car {
   pricePerMinute: number;
   pricePerHour: number;
   pricePerDay: number;
-  services: CarService[];
+  availableServices: CarService[];
 }
 
 export enum GearBoxTypes {

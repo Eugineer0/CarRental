@@ -4,7 +4,7 @@ import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 
 import { RentalCenter } from "../_models/center/rental-center";
-import { FilterRequest } from "../_models/center/filter-request";
+import { RentalCenterFilter } from "../_models/center/rental-center-filter";
 import { Car } from "../_models/car/car";
 
 @Injectable({
@@ -26,10 +26,16 @@ export class RentalCenterService {
     return this.http.get<RentalCenter[]>(this.rentalCentersUrl);
   }
 
-  public getFilteredRentalCenters(filter: FilterRequest): Observable<RentalCenter[]> {
+  public getFilteredRentalCenters(filter: RentalCenterFilter): Observable<RentalCenter[]> {
     return this.http.post<RentalCenter[]>(
       `${ this.rentalCentersUrl }/filtered`,
       filter
+    );
+  }
+
+  public getCar(centerName: string, registrationNumber: string): Observable<Car> {
+    return this.http.get<Car>(
+      `${ this.rentalCentersUrl }/${ centerName }/cars/${ registrationNumber }`,
     );
   }
 
