@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { LoginDTO } from '../_models/loginDTO';
+import { LoginRequest } from '../_models/login-request';
 import { AuthResponse } from '../_models/auth-responce';
 import { RefreshTokenRequest } from "../_models/refresh-token-request";
 
@@ -27,8 +27,8 @@ export class AuthService {
     return !this.loggedIn;
   }
 
-  public login(admin: LoginDTO): Observable<any> {
-    return this.http.post<AuthResponse>('/api/login', admin)
+  public login(admin: LoginRequest): Observable<any> {
+    return this.http.post<AuthResponse>('/api/auth/login-admin', admin)
       .pipe(
         tap(
           response => {
@@ -39,7 +39,7 @@ export class AuthService {
   }
 
   public logout(refreshToken: RefreshTokenRequest): Observable<any> {
-    return this.http.post<RefreshTokenRequest>('/api/logout', refreshToken)
+    return this.http.post<RefreshTokenRequest>('/api/auth/logout', refreshToken)
       .pipe(
         tap(
           _ => {

@@ -1,33 +1,27 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand" href="">Car rental Admin®</a>
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/welcome" routerLinkActive="active">Welcome</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/secret" routerLinkActive="active">Secret</a>
-      </li>
-    </ul>
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a
-          *ngIf="isLoggedOut()"
-          routerLink="/login"
-          routerLinkActive="active"
-          class="nav-link"
-        >Login</a>
-      </li>
-      <li class="nav-item">
-        <a
-          *ngIf="isLoggedIn()"
-          class="nav-link"
-          (click)="logout()"
-        >Logout</a>
-      </li>
-    </ul>
-  </div>
-</nav>
+<div class="navbar navbar-dark bg-dark">
+  <h1 class="navbar-brand p-1">Car rental Admin®</h1>
+  <ul class="nav nav-tabs justify-content-end">
+    <li
+      class="nav-item"
+      *ngIf="isLoggedOut()"
+    >
+      <a
+        routerLink="/login"
+        routerLinkActive="active"
+        class="nav-link"
+      >Login</a>
+    </li>
+    <li
+      class="nav-item"
+      *ngIf="isLoggedIn()"
+    >
+      <a
+        class="nav-link"
+        (click)="logout()"
+      >Logout</a>
+    </li>
+  </ul>
+</div>
 <div class="container">
   <router-outlet></router-outlet>
 </div>

@@ -52,7 +52,7 @@ export class RefreshAccessInterceptor implements HttpInterceptor {
 
         if (refreshToken) {
           const refreshTokenRequest: RefreshTokenRequest = {
-            token: refreshToken
+            refreshToken: refreshToken
           }
 
           this.authService.refresh(refreshTokenRequest)
