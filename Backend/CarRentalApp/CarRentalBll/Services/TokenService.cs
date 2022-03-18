@@ -14,14 +14,14 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Removes token model found by <paramref name="refreshTokenString"/> and returns it.
+        /// Removes token model found by <paramref name="refreshToken"/> and returns it.
         /// </summary>
-        /// <param name="refreshTokenString">ejected token string.</param>
+        /// <param name="refreshToken">ejected token string.</param>
         /// <returns>token model, removed from database.</returns>
-        public async Task<RefreshToken?> PopTokenAsync(string refreshTokenString)
+        public async Task<RefreshToken?> PopTokenAsync(string refreshToken)
         {
             var token = await _carRentalDbContext.RefreshTokens
-                .FirstOrDefaultAsync(t => t.Token == refreshTokenString);
+                .FirstOrDefaultAsync(t => t.Token == refreshToken);
             if (token == null)
             {
                 return null;
@@ -34,15 +34,15 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Saves refresh token model based on <paramref name="refreshTokenString"/> and <paramref name="userId"/>.
+        /// Saves refresh token model based on <paramref name="token"/> and <paramref name="userId"/>.
         /// </summary>
-        /// <param name="refreshTokenString">token prototype to be saved.</param>
+        /// <param name="token">token prototype to be saved.</param>
         /// <param name="userId">token model field.</param>
-        public Task StoreTokenAsync(string refreshTokenString, Guid userId)
+        public Task StoreTokenAsync(string token, Guid userId)
         {
             var refreshToken = new RefreshToken()
             {
-                Token = refreshTokenString,
+                Token = token,
                 UserId = userId
             };
 

@@ -2,6 +2,7 @@
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using SharedResources.Configurations;
+using SharedResources.EnumsAndConstants;
 using SharedResources.Helpers;
 
 namespace CarRentalWeb.Validation
@@ -13,7 +14,7 @@ namespace CarRentalWeb.Validation
             var clientMinimimAge = userRequirementsOptions.Value.ClientMinimumAge;
 
             RuleFor(x => x.DateOfBirth)
-                .Must(dateOfBirth => ((DateTime) dateOfBirth).HasDurationYears(DateTime.Now, clientMinimimAge))
+                .Must(dateOfBirth => dateOfBirth?.WasYearsAgo(clientMinimimAge) ?? false)
                 .WithMessage(String.Format(ValidationConstants.InvalidAgeErrorMessage, clientMinimimAge));
         }
     }

@@ -2,10 +2,10 @@
 {
     public static class DateExtensions
     {
-        public static bool HasDurationYears(this DateTime start, DateTime finish, int years)
+        public static bool WasYearsAgo(this DateTime start, int years)
         {
             var criticalDate = start.AddYears(years);
-            return criticalDate < finish;
+            return criticalDate < DateTime.Now;
         }
     }
 }

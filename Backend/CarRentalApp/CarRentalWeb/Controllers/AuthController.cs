@@ -34,26 +34,73 @@ namespace CarRentalWeb.Controllers
         public async Task<IActionResult> Login(UserLoginRequest request)
         {
             var model = request.Adapt<LoginModel>();
-            var possiblyClient = await _userService.GetValidatedClientAsync(model);
-            if (possiblyClient.IsClient)
+            var possiblyClient = await _userService.ValidateAsClientAsync(model);
+            switch (possiblyClient.ValidationState)
             {
-                return await AuthenticateAsync(possiblyClient.User);
+                case ValidationStates.Ok:
+                {
+                    return await AuthenticateAsync(possiblyClient.User);
+                }
+                case ValidationStates.InvalidPassword:
+                {
+                    throw new SharedException(
+                        ErrorTypes.AuthFailed,
+                        "Incorrect username or password",
+                        "Incorrect password"
+                    );
+                }
+                case ValidationStates.NotEnoughInfo:
+                {
+                    var token = _jwtService.GenerateToken(possiblyClient.User.Id);
+                    throw new SharedException(
+                        ErrorTypes.AdditionalDataRequired,
+                        token,
+                        "Registration completion required"
+                    );
+                }
+                case ValidationStates.Unapproved:
+                {
+                    throw new SharedException(
+                        ErrorTypes.AccessDenied,
+                        "Wait for your account to be approved",
+                        "User does not have client role"
+                    );
+                }
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-
-            var token = _jwtService.GenerateToken(possiblyClient.User.Id);
-            throw new SharedException(
-                ErrorTypes.AdditionalDataRequired,
-                token,
-                "Registration completion required"
-            );
         }
 
         [HttpPost("login-admin")]
         public async Task<IActionResult> LoginAdmin(UserLoginRequest request)
         {
             var model = request.Adapt<LoginModel>();
-            var user = await _userService.GetValidAdminAsync(model);
-            return await AuthenticateAsync(user);
+            var possiblyClient = await _userService.ValidateAsAdminAsync(model);
+            switch (possiblyClient.ValidationState)
+            {
+                case ValidationStates.Ok:
+                {
+                    return await AuthenticateAsync(possiblyClient.User);
+                }
+                case ValidationStates.InvalidPassword:
+                {
+                    throw new SharedException(
+                        ErrorTypes.AuthFailed,
+                        "Incorrect username or password",
+                        "Incorrect password"
+                    );
+                }
+                case ValidationStates.Unapproved:
+                {
+                    throw new SharedException(
+                        ErrorTypes.AccessDenied,
+                        "You do not have permission",
+                        "User does not have admin role"
+                    );
+                }
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         [HttpPost("[action]")]

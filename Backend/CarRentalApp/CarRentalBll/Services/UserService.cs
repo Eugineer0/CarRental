@@ -41,50 +41,74 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Validates passed user prototype as client and returns existing user model.
+        /// Validates passed user prototype as client and returns existing user model representation.
         /// </summary>
         /// <param name="loginModel">user prototype to login.</param>
         /// <returns>Existing user model.</returns>
-        public async Task<PossiblyClient> GetValidatedClientAsync(LoginModel loginModel)
+        public async Task<ValidatedUser> ValidateAsClientAsync(LoginModel loginModel)
         {
             var user = await GetUserByAsync(loginModel.Username);
-            _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
-
             var userModel = user.Adapt<User, UserModel>();
-
-            return new PossiblyClient()
+            var validatedAsClient = new ValidatedUser()
             {
                 User = userModel,
-                IsClient = ValidateAsClient(userModel)
+                ValidationState = ValidationStates.Ok
             };
+
+            if (!_passwordService.CheckIfPasswordValid(user.HashedPassword, user.Salt, loginModel.Password))
+            {
+                validatedAsClient.ValidationState = ValidationStates.InvalidPassword;
+                return validatedAsClient;
+            }
+
+            if (userModel.Roles.ContainsAny(RolesConstants.ClientRoles))
+            {
+                validatedAsClient.ValidationState = ValidationStates.Ok;
+                return validatedAsClient;
+            }
+
+            if (userModel.DriverLicenseSerialNumber == null)
+            {
+                validatedAsClient.ValidationState = ValidationStates.NotEnoughInfo;
+                return validatedAsClient;
+            }
+
+            validatedAsClient.ValidationState = ValidationStates.Unapproved;
+            return validatedAsClient;
         }
 
         /// <summary>
-        /// Validates passed user prototype as admin and returns existing user model.
+        /// Validates passed user prototype as admin and returns existing user model representation.
         /// </summary>
         /// <param name="loginModel">user prototype to validate.</param>
         /// <returns>Existing user model.</returns>
-        /// <exception cref="SharedException">User does not have at least one of admins role</exception>
-        public async Task<UserModel> GetValidAdminAsync(LoginModel loginModel)
+        public async Task<ValidatedUser> ValidateAsAdminAsync(LoginModel loginModel)
         {
             var user = await GetUserByAsync(loginModel.Username);
-            _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
 
             var userModel = user.Adapt<User, UserModel>();
-            if (userModel.Roles.ContainsAny(RolesConstants.AdminRoles))
+            var validatedAsAdmin = new ValidatedUser()
             {
-                return userModel;
+                User = userModel,
+                ValidationState = ValidationStates.Ok
+            };
+
+            if (!_passwordService.CheckIfPasswordValid(user.HashedPassword, user.Salt, loginModel.Password))
+            {
+                validatedAsAdmin.ValidationState = ValidationStates.InvalidPassword;
+                return validatedAsAdmin;
             }
 
-            throw new SharedException(
-                ErrorTypes.AccessDenied,
-                "You do not have permission",
-                "User does not have admin role"
-            );
+            if (userModel.Roles.ContainsAny(RolesConstants.AdminRoles))
+            {
+                validatedAsAdmin.ValidationState = ValidationStates.Unapproved;
+            }
+
+            return validatedAsAdmin;
         }
 
         /// <summary>
-        /// Checks uniqueness of credentials, saves created user and returns its model.
+        /// Checks uniqueness of credentials, saves created user and returns its model representation.
         /// </summary>
         /// <param name="registrationModel">user prototype to register.</param>
         /// <returns>Model of saved user.</returns>
@@ -128,7 +152,7 @@ namespace CarRentalBll.Services
             }
 
             var minimumAge = _userRequirements.ClientMinimumAge;
-            ValidateAge(user.DateOfBirth, minimumAge, "Client");
+            ValidateAge(user.DateOfBirth, minimumAge);
 
             if (user.DriverLicenseSerialNumber == null)
             {
@@ -158,7 +182,7 @@ namespace CarRentalBll.Services
             if (roles.ContainsAny(RolesConstants.ClientRoles))
             {
                 var minimumAge = _userRequirements.ClientMinimumAge;
-                ValidateAge(user.DateOfBirth, minimumAge, "Client");
+                ValidateAge(user.DateOfBirth, minimumAge);
 
                 if (user.DriverLicenseSerialNumber == null)
                 {
@@ -173,7 +197,7 @@ namespace CarRentalBll.Services
             if (roles.ContainsAny(RolesConstants.AdminRoles))
             {
                 var minimumAge = _userRequirements.AdminMinimumAge;
-                ValidateAge(user.DateOfBirth, minimumAge, "Admin");
+                ValidateAge(user.DateOfBirth, minimumAge);
             }
 
             await UpdateRolesAsync(user, roles);
@@ -226,31 +250,6 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
-        /// Checks if <paramref name="userModel"/> can be logged in as client.
-        /// </summary>
-        /// <param name="userModel">existing entity model.</param>
-        /// <returns>True - if user is already a client, False - if user cannot be a client.</returns>
-        /// <exception cref="SharedException">Client role is not approved.</exception>
-        private bool ValidateAsClient(UserModel userModel)
-        {
-            if (userModel.Roles.ContainsAny(RolesConstants.ClientRoles))
-            {
-                return true;
-            }
-
-            if (userModel.DriverLicenseSerialNumber == null)
-            {
-                return false;
-            }
-
-            throw new SharedException(
-                ErrorTypes.AccessDenied,
-                "Wait for your account to be approved",
-                "User does not have client role"
-            );
-        }
-
-        /// <summary>
         /// Checks if <paramref name="roles"/> are valid and can be assigned to user.
         /// </summary>
         /// <param name="roles">set of roles to validate.</param>
@@ -299,11 +298,10 @@ namespace CarRentalBll.Services
         /// </summary>
         /// <param name="dateOfBirth">date to check.</param>
         /// <param name="minimumAge">required age.</param>
-        /// <param name="userType">determines error message.</param>
         /// <exception cref="SharedException">Invalid user age.</exception>
-        private void ValidateAge(DateTime dateOfBirth, int minimumAge, string userType)
+        private void ValidateAge(DateTime dateOfBirth, int minimumAge)
         {
-            if (dateOfBirth.HasDurationYears(DateTime.Now, minimumAge))
+            if (dateOfBirth.WasYearsAgo(minimumAge))
             {
                 return;
             }
@@ -311,7 +309,7 @@ namespace CarRentalBll.Services
             throw new SharedException(
                 ErrorTypes.Conflict,
                 "User`s data does not meet requirements",
-                $"{userType}`s age must be greater than {minimumAge}"
+                String.Format(ValidationConstants.InvalidAgeErrorMessage, minimumAge)
             );
         }
 

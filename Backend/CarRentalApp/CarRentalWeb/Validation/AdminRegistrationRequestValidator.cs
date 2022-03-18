@@ -2,6 +2,7 @@
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using SharedResources.Configurations;
+using SharedResources.EnumsAndConstants;
 using SharedResources.Helpers;
 
 namespace CarRentalWeb.Validation
@@ -13,7 +14,7 @@ namespace CarRentalWeb.Validation
             var adminMinimumAge = userRequirementsOptions.Value.AdminMinimumAge;
 
             RuleFor(x => x.DateOfBirth)
-                .Must(dateOfBirth => ((DateTime) dateOfBirth).HasDurationYears(DateTime.Now, adminMinimumAge))
+                .Must(dateOfBirth => dateOfBirth?.WasYearsAgo(adminMinimumAge) ?? false)
                 .WithMessage(String.Format(ValidationConstants.InvalidAgeErrorMessage, adminMinimumAge));
         }
     }

@@ -38,12 +38,12 @@ namespace CarRentalWeb.Services
         /// <summary>
         /// Validates token 'expiration' claim.
         /// </summary>
-        /// <param name="tokenString">token to be validated.</param>
-        /// <exception cref="SharedException"><paramref name="tokenString"/> is expired.</exception>
-        public void ValidateTokenLifetime(string tokenString)
+        /// <param name="token">token to be validated.</param>
+        /// <exception cref="SharedException"><paramref name="token"/> is expired.</exception>
+        public void ValidateTokenLifetime(string token)
         {
             var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = handler.ReadJwtToken(tokenString);
+            var jwtSecurityToken = handler.ReadJwtToken(token);
             var expires = jwtSecurityToken.ValidTo;
 
             var refreshJwtValidationParams = GetRefreshValidationParams();
@@ -64,15 +64,15 @@ namespace CarRentalWeb.Services
         }
 
         /// <summary>
-        /// Gets user Id from <paramref name="tokenString"/> and returns it.
+        /// Gets user Id from <paramref name="token"/> and returns it.
         /// </summary>
-        /// <param name="tokenString">token to be parsed.</param>
-        /// <returns>User Id stored in <paramref name="tokenString"/>.</returns>
+        /// <param name="token">token to be parsed.</param>
+        /// <returns>User Id stored in <paramref name="token"/>.</returns>
         /// <exception cref="SharedException">Claim 'sub' value is invalid.</exception>
-        public Guid GetUserId(string tokenString)
+        public Guid GetUserId(string token)
         {
             var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = handler.ReadJwtToken(tokenString);
+            var jwtSecurityToken = handler.ReadJwtToken(token);
             var userIdString = GetClaimValue(jwtSecurityToken.Claims, JwtRegisteredClaimNames.Sub);
 
             if (!Guid.TryParse(userIdString, out var userId))

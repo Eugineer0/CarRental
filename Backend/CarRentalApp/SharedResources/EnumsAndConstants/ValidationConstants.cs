@@ -1,4 +1,4 @@
-﻿namespace CarRentalWeb.Validation
+﻿namespace SharedResources.EnumsAndConstants
 {
     public static class ValidationConstants
     {

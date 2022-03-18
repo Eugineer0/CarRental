@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using CarRentalWeb.Validation;
+using SharedResources.EnumsAndConstants;
 
 namespace CarRentalWeb.Models.Requests
 {
