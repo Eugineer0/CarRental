@@ -5,8 +5,6 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 
-import { FieldConstraintDirective } from './field-constraint.directive';
-
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 
@@ -17,8 +15,7 @@ import { RefreshAccessInterceptor } from './_services/refresh-access-interceptor
 @NgModule({
     declarations: [
         AppComponent,
-        LoginComponent,
-        FieldConstraintDirective
+        LoginComponent
     ],
     imports: [
         AppRoutingModule,
@@ -28,8 +25,8 @@ import { RefreshAccessInterceptor } from './_services/refresh-access-interceptor
     ],
     providers: [
         AuthService,
-        {provide: HTTP_INTERCEPTORS, useClass: RefreshAccessInterceptor, multi: true},
-        {provide: HTTP_INTERCEPTORS, useClass: AuthorizationInterceptor, multi: true}
+        { provide: HTTP_INTERCEPTORS, useClass: RefreshAccessInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: AuthorizationInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]
 })
