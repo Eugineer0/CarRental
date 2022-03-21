@@ -4,13 +4,12 @@
     {
         public UserModel User { get; set; } = null!;
 
-        public ValidationStates ValidationState { get; set; }
+        public UserStatuses Status { get; set; }
     }
 
-    public enum ValidationStates
+    public enum UserStatuses
     {
         Ok,
-        InvalidPassword,
         NotEnoughInfo,
         Unapproved
     }

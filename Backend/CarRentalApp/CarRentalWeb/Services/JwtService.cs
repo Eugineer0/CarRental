@@ -75,16 +75,16 @@ namespace CarRentalWeb.Services
             var jwtSecurityToken = handler.ReadJwtToken(token);
             var userIdString = GetClaimValue(jwtSecurityToken.Claims, JwtRegisteredClaimNames.Sub);
 
-            if (!Guid.TryParse(userIdString, out var userId))
+            if (Guid.TryParse(userIdString, out var userId))
             {
-                throw new SharedException(
-                    ErrorTypes.Invalid,
-                    "Invalid token",
-                    $"Invalid 'sub' claim value"
-                );
+                return userId;
             }
 
-            return userId;
+            throw new SharedException(
+                ErrorTypes.Invalid,
+                "Invalid token",
+                $"Invalid '{JwtRegisteredClaimNames.Sub}' claim value"
+            );
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using SharedResources.Exceptions;
 
 namespace CarRentalBll.Services
 {
@@ -38,14 +39,22 @@ namespace CarRentalBll.Services
         /// <param name="validPassword">valid hashed password.</param>
         /// <param name="salt">byte array used in password hashing.</param>
         /// <param name="password">string representation to validate.</param>
-        public bool CheckIfPasswordValid(
+        /// <exception cref="SharedException">Incorrect username or password.</exception>
+        public void ValidatePassword(
             byte[] validPassword,
             byte[] salt,
             string password
         )
         {
             var hashedPassword = DigestPassword(password, salt);
-            return validPassword.SequenceEqual(hashedPassword);
+            if (!validPassword.SequenceEqual(hashedPassword))
+            {
+                throw new SharedException(
+                    ErrorTypes.AuthFailed,
+                    "Incorrect username or password",
+                    "Incorrect password"
+                );
+            }
         }
     }
 }

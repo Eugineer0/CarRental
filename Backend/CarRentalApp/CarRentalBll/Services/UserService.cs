@@ -48,32 +48,29 @@ namespace CarRentalBll.Services
         public async Task<ValidatedUser> ValidateAsClientAsync(LoginModel loginModel)
         {
             var user = await GetUserByAsync(loginModel.Username);
+
+            _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
+
             var userModel = user.Adapt<User, UserModel>();
             var validatedAsClient = new ValidatedUser()
             {
                 User = userModel,
-                ValidationState = ValidationStates.Ok
+                Status = UserStatuses.Ok
             };
-
-            if (!_passwordService.CheckIfPasswordValid(user.HashedPassword, user.Salt, loginModel.Password))
-            {
-                validatedAsClient.ValidationState = ValidationStates.InvalidPassword;
-                return validatedAsClient;
-            }
 
             if (userModel.Roles.ContainsAny(RolesConstants.ClientRoles))
             {
-                validatedAsClient.ValidationState = ValidationStates.Ok;
+                validatedAsClient.Status = UserStatuses.Ok;
                 return validatedAsClient;
             }
 
             if (userModel.DriverLicenseSerialNumber == null)
             {
-                validatedAsClient.ValidationState = ValidationStates.NotEnoughInfo;
+                validatedAsClient.Status = UserStatuses.NotEnoughInfo;
                 return validatedAsClient;
             }
 
-            validatedAsClient.ValidationState = ValidationStates.Unapproved;
+            validatedAsClient.Status = UserStatuses.Unapproved;
             return validatedAsClient;
         }
 
@@ -86,22 +83,18 @@ namespace CarRentalBll.Services
         {
             var user = await GetUserByAsync(loginModel.Username);
 
+            _passwordService.ValidatePassword(user.HashedPassword, user.Salt, loginModel.Password);
+
             var userModel = user.Adapt<User, UserModel>();
             var validatedAsAdmin = new ValidatedUser()
             {
                 User = userModel,
-                ValidationState = ValidationStates.Ok
+                Status = UserStatuses.Ok
             };
-
-            if (!_passwordService.CheckIfPasswordValid(user.HashedPassword, user.Salt, loginModel.Password))
-            {
-                validatedAsAdmin.ValidationState = ValidationStates.InvalidPassword;
-                return validatedAsAdmin;
-            }
 
             if (userModel.Roles.ContainsAny(RolesConstants.AdminRoles))
             {
-                validatedAsAdmin.ValidationState = ValidationStates.Unapproved;
+                validatedAsAdmin.Status = UserStatuses.Unapproved;
             }
 
             return validatedAsAdmin;

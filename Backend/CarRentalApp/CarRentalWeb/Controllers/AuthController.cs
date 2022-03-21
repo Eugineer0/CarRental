@@ -35,21 +35,13 @@ namespace CarRentalWeb.Controllers
         {
             var model = request.Adapt<LoginModel>();
             var possiblyClient = await _userService.ValidateAsClientAsync(model);
-            switch (possiblyClient.ValidationState)
+            switch (possiblyClient.Status)
             {
-                case ValidationStates.Ok:
+                case UserStatuses.Ok:
                 {
                     return await AuthenticateAsync(possiblyClient.User);
                 }
-                case ValidationStates.InvalidPassword:
-                {
-                    throw new SharedException(
-                        ErrorTypes.AuthFailed,
-                        "Incorrect username or password",
-                        "Incorrect password"
-                    );
-                }
-                case ValidationStates.NotEnoughInfo:
+                case UserStatuses.NotEnoughInfo:
                 {
                     var token = _jwtService.GenerateToken(possiblyClient.User.Id);
                     throw new SharedException(
@@ -58,7 +50,7 @@ namespace CarRentalWeb.Controllers
                         "Registration completion required"
                     );
                 }
-                case ValidationStates.Unapproved:
+                case UserStatuses.Unapproved:
                 {
                     throw new SharedException(
                         ErrorTypes.AccessDenied,
@@ -75,22 +67,14 @@ namespace CarRentalWeb.Controllers
         public async Task<IActionResult> LoginAdmin(UserLoginRequest request)
         {
             var model = request.Adapt<LoginModel>();
-            var possiblyClient = await _userService.ValidateAsAdminAsync(model);
-            switch (possiblyClient.ValidationState)
+            var possiblyAdmin = await _userService.ValidateAsAdminAsync(model);
+            switch (possiblyAdmin.Status)
             {
-                case ValidationStates.Ok:
+                case UserStatuses.Ok:
                 {
-                    return await AuthenticateAsync(possiblyClient.User);
+                    return await AuthenticateAsync(possiblyAdmin.User);
                 }
-                case ValidationStates.InvalidPassword:
-                {
-                    throw new SharedException(
-                        ErrorTypes.AuthFailed,
-                        "Incorrect username or password",
-                        "Incorrect password"
-                    );
-                }
-                case ValidationStates.Unapproved:
+                case UserStatuses.Unapproved:
                 {
                     throw new SharedException(
                         ErrorTypes.AccessDenied,
@@ -176,16 +160,16 @@ namespace CarRentalWeb.Controllers
         {
             var userIdString = _jwtService.GetClaimValue(claims, ClaimTypes.NameIdentifier);
 
-            if (!Guid.TryParse(userIdString, out var userId))
+            if (Guid.TryParse(userIdString, out var userId))
             {
-                throw new SharedException(
-                    ErrorTypes.Invalid,
-                    "Invalid token",
-                    $"Invalid 'sub' claim value"
-                );
+                return userId;
             }
 
-            return userId;
+            throw new SharedException(
+                ErrorTypes.Invalid,
+                "Invalid token",
+                $"Invalid '{ClaimTypes.NameIdentifier}' claim value"
+            );
         }
     }
 }
