@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 
-import { TokenService } from './token.service';
+import { LocalStorageService } from '../services/local-storage.service';
 
 @Injectable()
 export class AuthorizationInterceptor implements HttpInterceptor {
 
-    constructor(private tokenService: TokenService) {
+    constructor(private localStorageService: LocalStorageService) {
     }
 
     public intercept(
@@ -19,15 +19,20 @@ export class AuthorizationInterceptor implements HttpInterceptor {
     }
 
     private Authorize(request: HttpRequest<any>): HttpRequest<any> {
-        const accessToken = this.tokenService.getAccessToken();
+        const accessToken = this.localStorageService.getAccessToken();
 
         if (!accessToken) {
             return request;
         }
 
-        return request.clone({
-            headers: request.headers.set('Authorization',
-                'Bearer ' + accessToken)
-        });
+        return request.clone(
+            {
+                headers:
+                    request.headers.set(
+                        'Authorization',
+                        'Bearer ' + accessToken
+                    )
+            }
+        );
     }
 }

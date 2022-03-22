@@ -10,10 +10,10 @@ import {
     HttpEvent
 } from '@angular/common/http';
 
-import { AuthService } from './auth.service';
-import { TokenService } from './token.service';
+import { AuthService } from '../services/auth.service';
+import { LocalStorageService } from '../services/local-storage.service';
 
-import { RefreshTokenRequest } from '../_models/refresh-token-request';
+import { RefreshTokenRequest } from '../models/refresh-token-request';
 
 @Injectable({
     providedIn: 'root'
@@ -23,7 +23,7 @@ export class RefreshAccessInterceptor implements HttpInterceptor {
     constructor(
         private authService: AuthService,
         private router: Router,
-        private tokenService: TokenService
+        private localStorageService: LocalStorageService
     ) {
     }
 
@@ -47,7 +47,7 @@ export class RefreshAccessInterceptor implements HttpInterceptor {
             console.error(`${ request.method } ${ request.url } failed: ${ error.error }`);
 
             if (error.status === 401) {
-                const refreshToken = this.tokenService.getRefreshToken();
+                const refreshToken = this.localStorageService.getRefreshToken();
                 this.authService.closeSession();
 
                 if (refreshToken) {
@@ -58,13 +58,13 @@ export class RefreshAccessInterceptor implements HttpInterceptor {
                     this.authService.refresh(refreshTokenRequest)
                         .subscribe(
                             _ => {
-                                handler.handle(request).subscribe();
+                                handler.handle(request);
                             }
                         );
                 } else {
                     this.router.navigate(
                         ['login'],
-                        {queryParams: {returnUrl: this.router.routerState.snapshot.url}}
+                        { queryParams: { returnUrl: this.router.routerState.snapshot.url } }
                     );
                 }
             }

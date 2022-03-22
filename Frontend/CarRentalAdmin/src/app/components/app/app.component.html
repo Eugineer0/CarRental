@@ -5,7 +5,7 @@
             <div class="collapse navbar-collapse">
                 <ul class="nav justify-content-end ms-auto">
                     <li
-                        *ngIf="isLoggedOut()"
+                        *ngIf="!loggedIn"
                         class="nav-item"
                     >
                         <a
@@ -17,7 +17,7 @@
                         </a>
                     </li>
                     <li
-                        *ngIf="isLoggedIn()"
+                        *ngIf="loggedIn"
                         class="nav-item"
                     >
                         <a

@@ -1,35 +1,36 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { RefreshTokenRequest } from './_models/refresh-token-request';
+import { RefreshTokenRequest } from '../../models/refresh-token-request';
 
-import { AuthService } from './_services/auth.service';
-import { TokenService } from './_services/token.service';
+import { AuthService } from '../../services/auth.service';
+import { LocalStorageService } from '../../services/local-storage.service';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+    public loggedIn: boolean = false;
 
     constructor(
         private authService: AuthService,
         private router: Router,
-        private tokenService: TokenService
+        private localStorageService: LocalStorageService
     ) {
     }
 
-    public isLoggedIn(): boolean {
-        return this.authService.isLoggedIn();
-    }
-
-    public isLoggedOut(): boolean {
-        return this.authService.isLoggedOut();
+    public ngOnInit(): void {
+        this.authService.getLoggedInStatus().subscribe(
+            next => {
+                this.loggedIn = next
+            }
+        )
     }
 
     public logout(): void {
-        const refreshToken = this.tokenService.getRefreshToken();
+        const refreshToken = this.localStorageService.getRefreshToken();
 
         if (refreshToken) {
             const refreshTokenRequest: RefreshTokenRequest = {

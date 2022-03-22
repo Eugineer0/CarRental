@@ -5,12 +5,12 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 
-import { AppComponent } from './app.component';
-import { LoginComponent } from './login/login.component';
+import { AppComponent } from './components/app/app.component';
+import { LoginComponent } from './components/login/login.component';
 
-import { AuthService } from './_services/auth.service';
-import { AuthorizationInterceptor } from './_services/authorization-interceptor.service';
-import { RefreshAccessInterceptor } from './_services/refresh-access-interceptor.service';
+import { AuthService } from './services/auth.service';
+import { AuthorizationInterceptor } from './interceptors/authorization-interceptor.service';
+import { RefreshAccessInterceptor } from './interceptors/refresh-access-interceptor.service';
 
 @NgModule({
     declarations: [

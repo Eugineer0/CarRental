@@ -37,16 +37,16 @@
                             name="password"
                             class="form-control"
                             id="password"
-                            [type]="getPasswordType()"
+                            [type]="isVisiblePassword ? 'text' : 'password'"
                             (ngModelChange)="resetAuthStatus()"
                             [(ngModel)]="adminCredentials.password"
                         >
                         <button
-                                type="button"
-                                class="btn btn-light"
-                                (click)="changePasswordType()"
+                            type="button"
+                            class="btn btn-light"
+                            (click)="changePasswordType()"
                         >
-                            {{getButtonText()}}
+                            {{isVisiblePassword ? 'Hide' : 'Show'}}
                         </button>
                     </div>
                     <div

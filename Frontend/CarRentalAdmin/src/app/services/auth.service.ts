@@ -1,34 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { LoginRequest } from '../_models/login-request';
-import { AuthResponse } from '../_models/auth-responce';
-import { RefreshTokenRequest } from '../_models/refresh-token-request';
+import { LoginRequest } from '../models/login-request';
+import { AuthResponse } from '../models/auth-responce';
+import { RefreshTokenRequest } from '../models/refresh-token-request';
 
-import { TokenService } from './token.service';
+import { LocalStorageService } from './local-storage.service';
 
 @Injectable()
 export class AuthService {
-    private loggedIn: boolean = false;
+    private readonly baseUrl: string = '/api/auth';
+    private loggedIn = new BehaviorSubject(false);
 
     constructor(
         private http: HttpClient,
-        private tokenService: TokenService
+        private tokenService: LocalStorageService
     ) {
     }
 
-    public isLoggedIn(): boolean {
+    public getLoggedInStatus(): BehaviorSubject<boolean> {
         return this.loggedIn;
     }
 
-    public isLoggedOut(): boolean {
-        return !this.loggedIn;
-    }
-
-    public login(admin: LoginRequest): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>('/api/auth/login-admin', admin)
+    public login(loginRequest: LoginRequest): Observable<AuthResponse> {
+        return this.http.post<AuthResponse>(`${ this.baseUrl }/login-admin`, loginRequest)
             .pipe(
                 tap(
                     response => {
@@ -39,7 +36,7 @@ export class AuthService {
     }
 
     public logout(refreshToken: RefreshTokenRequest): Observable<RefreshTokenRequest> {
-        return this.http.post<RefreshTokenRequest>('/api/auth/logout', refreshToken)
+        return this.http.post<RefreshTokenRequest>(`${ this.baseUrl }/logout`, refreshToken)
             .pipe(
                 tap(
                     _ => {
@@ -50,7 +47,7 @@ export class AuthService {
     }
 
     public refresh(refreshToken: RefreshTokenRequest): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>('/api/refresh', refreshToken)
+        return this.http.post<AuthResponse>(`${ this.baseUrl }/refresh`, refreshToken)
             .pipe(
                 tap(
                     response => {
@@ -62,11 +59,11 @@ export class AuthService {
 
     public closeSession(): void {
         this.tokenService.removeTokens();
-        this.loggedIn = false;
+        this.loggedIn.next(false);
     }
 
     private setSession(authResult: AuthResponse): void {
         this.tokenService.setTokens(authResult);
-        this.loggedIn = true;
+        this.loggedIn.next(true);
     }
 }
