@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
-import { LoginRequest } from '../../models/login-request';
 
 import { AuthService } from '../../services/auth.service';
 
@@ -11,10 +10,22 @@ import { AuthService } from '../../services/auth.service';
     styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-    public adminCredentials: LoginRequest = {
-        username: '',
-        password: ''
-    };
+    public loginForm = new FormGroup({
+        username: new FormControl(
+            '',
+            [
+                Validators.required,
+                Validators.maxLength(25)
+            ]
+        ),
+        password: new FormControl(
+            '',
+            [
+                Validators.required,
+                Validators.maxLength(25)
+            ]
+        )
+    });
 
     public authFailed: boolean = false;
     public isVisiblePassword: boolean = false;
@@ -43,7 +54,9 @@ export class LoginComponent implements OnInit {
     }
 
     public onSubmit(): void {
-        this.authService.login(this.adminCredentials)
+        this.loginForm.markAsPristine();
+
+        this.authService.login(this.loginForm.value)
             .subscribe(
                 _ => {
                     this.router.navigateByUrl(this.returnUrl);
@@ -53,5 +66,9 @@ export class LoginComponent implements OnInit {
                     this.authFailedMessage = 'Something went wrong'
                 }
             );
+    }
+
+    public checkIfErrorsOccurred(formControl: AbstractControl): boolean {
+        return formControl.invalid && (formControl.dirty || formControl.touched)
     }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { AuthResponse } from '../../../../../../../../Project/CarRentalForFrontendDevelopment/Frontend/CarRentalAdmin/src/app/_models/auth-responce';
+import { AuthResponse } from '../models/auth-responce';
 
 @Injectable({
     providedIn: 'root'

@@ -7,39 +7,37 @@
             <div *ngIf="authFailed" class="alert alert-danger">
                 {{authFailedMessage}}
             </div>
-            <form (ngSubmit)="onSubmit(); loginForm.form.markAsPristine()" #loginForm="ngForm">
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input
-                        #usernameField="ngModel"
                         required
-                        maxlength="25"
-                        name="username"
                         class="form-control"
                         id="username"
                         type="text"
-                        (ngModelChange)="resetAuthStatus()"
-                        [(ngModel)]="adminCredentials.username"
+                        formControlName="username"
+                        (change)="resetAuthStatus()"
                     >
                     <div
-                        *ngIf="usernameField.invalid && (usernameField.dirty || usernameField.touched)"
+                        *ngIf="checkIfErrorsOccurred(loginForm.controls.username)"
                         class="alert alert-danger"
                     >
-                        <div *ngIf="usernameField.errors?.['required']">
+                        <div *ngIf="loginForm.controls.username.errors?.['required']">
                             Username is required.
+                        </div>
+                        <div *ngIf="loginForm.controls.username.errors?.['maxlength']">
+                            Username must be shorter.
                         </div>
                     </div>
                     <label class="mt-2" for="password">Password</label>
                     <div class="input-group">
                         <input
-                            #passwordField="ngModel"
                             required
-                            name="password"
                             class="form-control"
                             id="password"
+                            formControlName="password"
                             [type]="isVisiblePassword ? 'text' : 'password'"
-                            (ngModelChange)="resetAuthStatus()"
-                            [(ngModel)]="adminCredentials.password"
+                            (change)="resetAuthStatus()"
                         >
                         <button
                             type="button"
@@ -50,18 +48,21 @@
                         </button>
                     </div>
                     <div
-                        *ngIf="passwordField.invalid && (passwordField.dirty || passwordField.touched)"
+                        *ngIf="checkIfErrorsOccurred(loginForm.controls.password)"
                         class="alert alert-danger"
                     >
-                        <div *ngIf="passwordField.errors?.['required']">
+                        <div *ngIf="loginForm.controls.password.errors?.['required']">
                             Password is required.
+                        </div>
+                        <div *ngIf="loginForm.controls.password.errors?.['maxlength']">
+                            Password must be shorter.
                         </div>
                     </div>
                 </div>
                 <button
                     type="submit"
                     class="btn btn-success mt-2"
-                    [disabled]="loginForm.form.invalid || loginForm.form.pristine"
+                    [disabled]="loginForm.invalid || loginForm.pristine"
                 >
                     Login
                 </button>
