@@ -23,7 +23,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-2 m-3">
+        <div class="col-xl-2 m-3">
             <form name="form" (ngSubmit)="onSubmit()" #rentalPeriodForm="ngForm">
                 <label class="mb-0 mt-2" for="rentalPeriod">Rent period</label>
                 <div class="form-control" id="rentalPeriod">
@@ -61,17 +61,15 @@
                         name="finishRentTime"
                         [(ngModel)]="finishRentTime"
                     >
-                    <div *ngIf="dateFillInRequired() && !dateIsSpecified()" class="my-2 alert alert-warning">
-                        Please fill in all date fields
-                    </div>
-                    <div *ngIf="rentalPeriodForm.form.invalid" class="my-2 alert alert-danger">
+                    <div *ngIf="rentalPeriodForm.form.invalid" class="my-2 alert alert-warning">
                         Please fill in all date fields
                     </div>
                     <button
-                            type="submit"
-                            class="btn btn-primary col mt-3"
-                            [disabled]="rentalPeriodForm.form.invalid || !dateIsSpecified()"
-                    >Find
+                        type="submit"
+                        class="btn btn-primary col mt-3"
+                        [disabled]="rentalPeriodForm.form.invalid || !dateIsSpecified()"
+                    >
+                        Find
                     </button>
                 </div>
             </form>
