@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -22,6 +22,7 @@ import { RentalCentersComponent } from './rental-centers/rental-centers.componen
 import { RentalCenterInfoComponent } from './rental-center-info/rental-center-info.component';
 import { OrderComponent } from './order/order.component';
 import { CarComponent } from './car/car.component';
+import { DateTimeRangeFormComponent } from './date-time-range-form/date-time-range-form.component';
 
 @NgModule({
   declarations: [
@@ -36,13 +37,15 @@ import { CarComponent } from './car/car.component';
     RentalCenterInfoComponent,
     OrderComponent,
     CarComponent,
+    DateTimeRangeFormComponent,
   ],
   imports: [
     AppRoutingModule,
     HttpClientModule,
     BrowserModule,
     FormsModule,
-    NoopAnimationsModule
+    NoopAnimationsModule,
+    ReactiveFormsModule
   ],
   providers: [
     AuthService,

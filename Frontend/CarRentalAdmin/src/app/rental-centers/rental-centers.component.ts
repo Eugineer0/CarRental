@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 
 import { RentalCenterService } from "../_services/rental-center.service";
 
 import { RentalCenter } from "../_models/center/rental-center";
 import { RentalCenterFilter } from "../_models/center/rental-center-filter";
+import { dateConsistencyValidator } from '../date-consistency.directive';
 
 @Component({
   selector: 'app-rental-centers',
@@ -11,6 +13,15 @@ import { RentalCenterFilter } from "../_models/center/rental-center-filter";
   styleUrls: ['./rental-centers.component.css']
 })
 export class RentalCentersComponent implements OnInit {
+  public dateForm: FormGroup = new FormGroup({
+        startDate: new FormControl(''),
+        startTime: new FormControl(''),
+        finishDate: new FormControl(''),
+        finishTime: new FormControl('')
+      },
+      { validators: dateConsistencyValidator }
+  );
+
   public centers: RentalCenter[] = [];
   public cities: string[] = [];
   public countries: string[] = [];
@@ -89,23 +100,5 @@ export class RentalCentersComponent implements OnInit {
     this.finishRentTime = undefined;
 
     this.getRentalCenters();
-  }
-
-  public getCurrentDate(): string {
-    return new Date(Date.now()).toISOString().slice(0, 10);
-  }
-
-  public getCurrentDateD(): Date {
-    return new Date(Date.now());
-  }
-
-  getMinTime() {
-    if (this.startRentDate) {
-      if (this.getCurrentDate() === this.startRentDate) {
-        return new Date(Date.now()).toISOString().slice(11, 16);
-      }
-    }
-
-    return '00-00';
   }
 }

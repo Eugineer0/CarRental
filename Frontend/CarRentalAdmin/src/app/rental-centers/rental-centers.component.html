@@ -59,51 +59,78 @@
                                 Upper bound exceeded.
                             </div>
                         </div>
-                        <form class="my-2" name="dateForm" (ngSubmit)="onSubmit()" #dateForm="ngForm">
+                        <form class="my-2" [formGroup]="dateForm">
                             <div class="form-group">
                                 <label class="mb-0" for="rentalPeriod">Rent period</label>
                                 <div class="form-control" id="rentalPeriod">
-                                    <label class="mb-0 mt-2" for="startDate">Start</label>
+                                    <label for="start-date">Start: </label>
                                     <input
-                                        [required]="dateFillInRequired()"
+                                        [required]="dateForm.valueChanges | async"
+                                        id="start-date"
                                         type="date"
                                         class="form-control"
-                                        id="startDate"
-                                        name="startRent"
-                                        [min]="getCurrentDate()"
-                                        [(ngModel)]="startRentDate"
+                                        formControlName="startDate"
                                     >
+                                    <div
+                                        *ngIf="dateForm.controls.startDate.invalid"
+                                        class="alert alert-warning"
+                                    >
+                                        <div *ngIf="dateForm.controls.startDate.errors?.['required']">
+                                            Start date is required.
+                                        </div>
+                                    </div>
                                     <input
-                                        [required]="dateFillInRequired()"
+                                        [required]="dateForm.valueChanges | async"
+                                        id="start-time"
                                         type="time"
                                         class="form-control"
-                                        id="StartTime"
-                                        name="startRentTime"
-                                        [min]="getCurrentDateD() | date:'shortTime'"
-                                        max="21:00"
-                                        [(ngModel)]="startRentTime"
-                                    >{{getCurrentDateD() | date:'shortTime'}}
-                                    <label class="mb-0 mt-2" for="finishDate">Finish</label>
+                                        formControlName="startTime"
+                                    >
+                                    <div
+                                        *ngIf="dateForm.controls.startTime.invalid"
+                                        class="alert alert-warning"
+                                    >
+                                        <div *ngIf="dateForm.controls.startTime.errors?.['required']">
+                                            Start time is required.
+                                        </div>
+                                    </div>
+                                    <label for="finish-date">Finish: </label>
                                     <input
-                                        [required]="dateFillInRequired()"
+                                        [required]="dateForm.valueChanges | async"
+                                        id="finish-date"
                                         type="date"
                                         class="form-control"
-                                        id="finishDate"
-                                        name="finishRent"
-                                        [min]="getCurrentDate()"
-                                        [(ngModel)]="finishRentDate"
+                                        formControlName="finishDate"
                                     >
+                                    <div
+                                        *ngIf="dateForm.controls.finishDate.invalid"
+                                        class="alert alert-warning"
+                                    >
+                                        <div *ngIf="dateForm.controls.finishDate.errors?.['required']">
+                                            Finish date is required.
+                                        </div>
+                                    </div>
                                     <input
-                                        [required]="dateFillInRequired()"
+                                        [required]="dateForm.valueChanges | async"
+                                        id="finish-time"
                                         type="time"
                                         class="form-control"
-                                        id="finishTime"
-                                        name="finishRentTime"
-                                        [(ngModel)]="finishRentTime"
+                                        formControlName="finishTime"
                                     >
-                                </div>
-                                <div *ngIf="dateForm.form.invalid" class="my-2 alert alert-warning">
-                                    Please fill in all date fields
+                                    <div
+                                        *ngIf="dateForm.controls.finishTime.invalid"
+                                        class="alert alert-warning"
+                                    >
+                                        <div *ngIf="dateForm.controls.finishTime.errors?.['required']">
+                                            Finish time is required.
+                                        </div>
+                                    </div>
+                                    <div
+                                        *ngIf="dateForm.errors?.['dateInconsistent']"
+                                        class="alert alert-danger"
+                                    >
+                                        Finish date must be later than start date.
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -111,7 +138,7 @@
                     <button
                         type="submit"
                         class="btn btn-primary w-100"
-                        [disabled]="filterForm.form.invalid || dateForm.form.invalid || (filterForm.form.pristine && dateForm.form.pristine)"
+                        [disabled]="filterForm.form.invalid || dateForm.invalid || (filterForm.form.pristine && dateForm.pristine)"
                     >Find
                     </button>
                 </form>
