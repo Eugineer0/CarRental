@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
 import { formatDate, Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { RentalCenterService } from '../_services/rental-center.service';
 import { RentalCenter } from '../_models/center/rental-center';
 import { Car } from '../_models/car/car';
-import { CarFilter } from '../_models/car/car-filter';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { dateConsistencyValidator } from '../date-consistency.directive';
 
 @Component({
     selector: 'app-rental-center-info',
@@ -13,40 +16,51 @@ import { CarFilter } from '../_models/car/car-filter';
     styleUrls: ['./rental-center-info.component.css']
 })
 export class RentalCenterInfoComponent implements OnInit {
+    public dateForm: FormGroup = new FormGroup({
+            startDate: new FormControl(
+                formatDate(Date.now(), 'yyyy-MM-dd', 'en-us'),
+                Validators.required
+            ),
+            startTime: new FormControl(
+                formatDate(Date.now(), 'HH:mm', 'en-us'),
+                Validators.required
+            ),
+            finishDate: new FormControl(
+                formatDate(Date.now(), 'yyyy-MM-dd', 'en-us'),
+                Validators.required
+            ),
+            finishTime: new FormControl(
+                formatDate(Date.now(), 'HH:mm', 'en-us'),
+                Validators.required
+            )
+        },
+        { validators: dateConsistencyValidator }
+    );
+
     public cars: Car[] = [];
     public center: RentalCenter | undefined;
-
     public centerName: string | null = null;
 
-    public startRentDate: string | undefined = undefined;
-    public finishRentDate: string | undefined = undefined;
-    public startRentTime: string | undefined = undefined;
-    public finishRentTime: string | undefined = undefined;
-
-    private filter: CarFilter = {
-        startRent: undefined,
-        finishRent: undefined
-    };
-
     constructor(
-        private location: Location,
         private rentalCenterService: RentalCenterService,
-        private route: ActivatedRoute
+        private location: Location,
+        private route: ActivatedRoute,
+        private modalService: NgbModal
     ) {
     }
 
     ngOnInit(): void {
         this.centerName = this.route.snapshot.paramMap.get('name');
 
-        const startDateString = this.route.snapshot.queryParamMap.get('start');
-        const finishDateString = this.route.snapshot.queryParamMap.get('finish');
+        const startDate = this.route.snapshot.queryParamMap.get('startRent');
+        const finishDate = this.route.snapshot.queryParamMap.get('finishRent');
 
-        if (startDateString && finishDateString) {
-            this.startRentDate = formatDate(startDateString, 'yyyy-MM-dd', 'en-us');
-            this.startRentTime = formatDate(startDateString, 'HH:mm', 'en-us');
+        if (startDate && finishDate) {
+            this.dateForm.controls.startDate.setValue(formatDate(startDate, 'yyyy-MM-dd', 'en-us'));
+            this.dateForm.controls.startTime.setValue(formatDate(startDate, 'HH:mm', 'en-us'));
 
-            this.finishRentDate = formatDate(finishDateString, 'yyyy-MM-dd', 'en-us');
-            this.finishRentTime = formatDate(finishDateString, 'HH:mm', 'en-us');
+            this.dateForm.controls.finishDate.setValue(formatDate(finishDate, 'yyyy-MM-dd', 'en-us'));
+            this.dateForm.controls.finishTime.setValue(formatDate(finishDate, 'HH:mm', 'en-us'));
         }
 
         this.getCenter();
@@ -57,18 +71,10 @@ export class RentalCenterInfoComponent implements OnInit {
         this.location.back();
     }
 
-    public dateFillInRequired(): boolean {
-        return !!(this.startRentDate
-            || this.startRentTime
-            || this.finishRentDate
-            || this.finishRentTime);
-    }
-
-    public dateIsSpecified(): boolean {
-        return !!(this.startRentDate
-            && this.startRentTime
-            && this.finishRentDate
-            && this.finishRentTime);
+    public open(content: TemplateRef<any>): void {
+        if(this.dateForm.valid) {
+            this.modalService.open(content);
+        }
     }
 
     private getCenter(): void {
@@ -92,11 +98,13 @@ export class RentalCenterInfoComponent implements OnInit {
     }
 
     public onSubmit(): void {
-        console.log(new Date(this.startRentDate + ' ' + this.startRentTime));
     }
 
-    private processDates(): void {
-        this.filter.startRent = new Date(this.startRentDate + ' ' + this.startRentTime);
-        this.filter.finishRent = new Date(this.finishRentDate + ' ' + this.finishRentTime);
+    public getWidth(): string {
+        return "width: 15%";
+    }
+
+    public getStartWidth(car: Car): string {
+        return "width: 15%";
     }
 }

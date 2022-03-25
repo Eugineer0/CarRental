@@ -1,26 +1,24 @@
 <div class="row align-items-start mx-0">
     <div class="col-md-2">
         <div class="card mb-0">
-            <h5 class="card-header">Filter</h5>
+            <h5 class="card-header text-center">Filter</h5>
             <button
                 class="btn btn-secondary btn-sm"
-                (click)="resetFilter(); filterForm.form.markAsPristine()"
+                (click)="resetFiltration()"
             >
                 Reset
             </button>
             <div class="card-body">
                 <form
-                    name="filterForm"
+                    [formGroup]="filterForm"
                     (ngSubmit)="onSubmit()"
-                    #filterForm="ngForm"
                 >
                     <div class="form-group">
-                        <label class="mb-0 mt-2" for="country">Country</label>
+                        <label class="mt-2" for="country">Country</label>
                         <select
                             class="form-select"
                             id="country"
-                            name="country"
-                            [(ngModel)]="filter.country"
+                            formControlName="country"
                         >
                             <option
                                 *ngFor="let country of countries"
@@ -29,12 +27,11 @@
                                 {{country}}
                             </option>
                         </select>
-                        <label class="mb-0 mt-2" for="city">City</label>
+                        <label class="mt-2" for="city">City</label>
                         <select
                             class="form-select"
                             id="city"
-                            name="city"
-                            [(ngModel)]="filter.city"
+                            formControlName="city"
                         >
                             <option
                                 *ngFor="let city of cities"
@@ -43,29 +40,43 @@
                                 {{city}}
                             </option>
                         </select>
-                        <label class="mb-0 mt-2" for="minimumCarsAvailableNumber">Minimum cars available</label>
+                        <label class="mt-3">Minimum cars available</label>
+                        <div class="row">
+                            <div class="col text-start">0</div>
+                            <div class="col text-end">{{maxAvailableCarsNumber}}</div>
+                        </div>
+                        <input
+                            min=0
+                            [max]="maxAvailableCarsNumber"
+                            step=1
+                            type="range"
+                            id="minimumCarsAvailableRange"
+                            class="form-range"
+                            formControlName="minimumCarsAvailable"
+                            [value]="filterForm.controls.minimumCarsAvailable.value"
+                        >
+
                         <input
                             min=0
                             [max]="maxAvailableCarsNumber"
                             type="number"
                             class="form-control"
                             id="minimumCarsAvailableNumber"
-                            name="minimumCarsNumber"
-                            #carsNumberField="ngModel"
-                            [(ngModel)]="filter.minimumAvailableCarsNumber"
+                            formControlName="minimumCarsAvailable"
+                            [value]="filterForm.controls.minimumCarsAvailable.value"
                         >
-                        <div *ngIf="carsNumberField.invalid" class="alert alert-warning">
-                            <div *ngIf="carsNumberField.errors?.['max']">
+                        <div *ngIf="filterForm.controls.minimumCarsAvailable.invalid" class="alert alert-warning">
+                            <div *ngIf="filterForm.controls.minimumCarsAvailable.errors?.['max']">
                                 Upper bound exceeded.
                             </div>
                         </div>
-                        <form class="my-2" [formGroup]="dateForm">
+                        <form class="my-3" [formGroup]="dateForm">
                             <div class="form-group">
                                 <label class="mb-0" for="rentalPeriod">Rent period</label>
                                 <div class="form-control" id="rentalPeriod">
                                     <label for="start-date">Start: </label>
                                     <input
-                                        [required]="dateForm.valueChanges | async"
+                                        [required]="dateForm.dirty"
                                         id="start-date"
                                         type="date"
                                         class="form-control"
@@ -80,7 +91,7 @@
                                         </div>
                                     </div>
                                     <input
-                                        [required]="dateForm.valueChanges | async"
+                                        [required]="dateForm.dirty"
                                         id="start-time"
                                         type="time"
                                         class="form-control"
@@ -96,7 +107,7 @@
                                     </div>
                                     <label for="finish-date">Finish: </label>
                                     <input
-                                        [required]="dateForm.valueChanges | async"
+                                        [required]="dateForm.dirty"
                                         id="finish-date"
                                         type="date"
                                         class="form-control"
@@ -111,7 +122,7 @@
                                         </div>
                                     </div>
                                     <input
-                                        [required]="dateForm.valueChanges | async"
+                                        [required]="dateForm.dirty"
                                         id="finish-time"
                                         type="time"
                                         class="form-control"
@@ -138,8 +149,9 @@
                     <button
                         type="submit"
                         class="btn btn-primary w-100"
-                        [disabled]="filterForm.form.invalid || dateForm.invalid || (filterForm.form.pristine && dateForm.pristine)"
-                    >Find
+                        [disabled]="filterForm.invalid || dateForm.invalid || (filterForm.pristine && dateForm.pristine)"
+                    >
+                        Find
                     </button>
                 </form>
             </div>
@@ -162,7 +174,7 @@
                     <button
                         class="btn btn-primary"
                         routerLink="/rental-centers/{{center.name}}"
-                        [queryParams]="{start: filter.startRent, finish: filter.finishRent}"
+                        [queryParams]="getRentPeriodFilter()"
                         data-bs-toggle="tooltip"
                         data-bs-placement="left"
                         title="Click to to view detail info"

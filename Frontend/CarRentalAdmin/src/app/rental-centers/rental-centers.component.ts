@@ -6,6 +6,7 @@ import { RentalCenterService } from "../_services/rental-center.service";
 import { RentalCenter } from "../_models/center/rental-center";
 import { RentalCenterFilter } from "../_models/center/rental-center-filter";
 import { dateConsistencyValidator } from '../date-consistency.directive';
+import { RentPeriodFilter } from "../_models/center/rent-period-filter";
 
 @Component({
   selector: 'app-rental-centers',
@@ -14,27 +15,28 @@ import { dateConsistencyValidator } from '../date-consistency.directive';
 })
 export class RentalCentersComponent implements OnInit {
   public dateForm: FormGroup = new FormGroup({
-        startDate: new FormControl(''),
-        startTime: new FormControl(''),
-        finishDate: new FormControl(''),
-        finishTime: new FormControl('')
-      },
-      { validators: dateConsistencyValidator }
+      startDate: new FormControl(undefined),
+      startTime: new FormControl(undefined),
+      finishDate: new FormControl(undefined),
+      finishTime: new FormControl(undefined)
+    },
+    { validators: dateConsistencyValidator }
   );
+
+  public filterForm: FormGroup = new FormGroup({
+      country: new FormControl(undefined),
+      city: new FormControl(undefined),
+      minimumCarsAvailable: new FormControl(0)
+    }
+  )
 
   public centers: RentalCenter[] = [];
   public cities: string[] = [];
   public countries: string[] = [];
   public maxAvailableCarsNumber: number = 0;
-  public filter: RentalCenterFilter = this.initFilter();
-
-  public startRentDate: string | undefined = undefined;
-  public finishRentDate: string | undefined = undefined;
-  public startRentTime: string | undefined = undefined;
-  public finishRentTime: string | undefined = undefined;
 
   constructor(
-    private rentalCenterService: RentalCenterService,
+    private rentalCenterService: RentalCenterService
   ) {
   }
 
@@ -59,10 +61,9 @@ export class RentalCentersComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.dateFillInRequired()) {
-      this.setFilterDates();
-    }
-    this.rentalCenterService.getFilteredRentalCenters(this.filter)
+    const filter : RentalCenterFilter = this.getFilter();
+    console.log(filter);
+    this.rentalCenterService.getFilteredRentalCenters(filter)
       .subscribe(
         centers => {
           this.centers = centers;
@@ -70,35 +71,34 @@ export class RentalCentersComponent implements OnInit {
       );
   }
 
-  private setFilterDates(): void {
-    this.filter.startRent = new Date(this.startRentDate + ' ' + this.startRentTime);
-    this.filter.finishRent = new Date(this.finishRentDate + ' ' + this.finishRentTime);
-  }
-
-  public dateFillInRequired(): boolean {
-    return !!(this.startRentDate
-      || this.startRentTime
-      || this.finishRentDate
-      || this.finishRentTime);
-  }
-
-  public initFilter(): RentalCenterFilter {
-    return {
-      country: undefined,
-      city: undefined,
-      minimumAvailableCarsNumber: undefined,
-      startRent: undefined,
-      finishRent: undefined
-    }
-  }
-
-  public resetFilter(): void {
-    this.filter = this.initFilter();
-    this.finishRentDate = undefined;
-    this.startRentDate = undefined;
-    this.startRentTime = undefined;
-    this.finishRentTime = undefined;
+  public resetFiltration(): void {
+    this.filterForm.reset();
+    this.dateForm.reset();
 
     this.getRentalCenters();
+  }
+
+  public getRentPeriodFilter(): RentPeriodFilter | undefined {
+    if(this.dateForm.valid && this.dateForm.dirty) {
+      return {
+        startRent: new Date(this.dateForm.controls.startDate.value + ' ' + this.dateForm.controls.startTime.value),
+        finishRent: new Date(this.dateForm.controls.finishDate.value + ' ' + this.dateForm.controls.finishTime.value)
+      }
+    }
+
+    return undefined;
+  }
+
+  private getFilter(): RentalCenterFilter {
+    return {
+      country: this.filterForm.controls.country.value,
+      city: this.filterForm.controls.city.value,
+      minimumCarsAvailable: this.filterForm.controls.minimumCarsAvailable.value,
+      rentPeriodFilter: this.getRentPeriodFilter()
+    };
+  }
+
+  nothing() {
+
   }
 }

@@ -22,7 +22,7 @@ import { RentalCentersComponent } from './rental-centers/rental-centers.componen
 import { RentalCenterInfoComponent } from './rental-center-info/rental-center-info.component';
 import { OrderComponent } from './order/order.component';
 import { CarComponent } from './car/car.component';
-import { DateTimeRangeFormComponent } from './date-time-range-form/date-time-range-form.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -36,8 +36,7 @@ import { DateTimeRangeFormComponent } from './date-time-range-form/date-time-ran
     RentalCentersComponent,
     RentalCenterInfoComponent,
     OrderComponent,
-    CarComponent,
-    DateTimeRangeFormComponent,
+    CarComponent
   ],
   imports: [
     AppRoutingModule,
@@ -45,7 +44,8 @@ import { DateTimeRangeFormComponent } from './date-time-range-form/date-time-ran
     BrowserModule,
     FormsModule,
     NoopAnimationsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgbModule
   ],
   providers: [
     AuthService,

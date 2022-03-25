@@ -1,56 +1,58 @@
 <div class="m-3" *ngIf="user">
-  <div *ngIf="editRolesFailed && !rolesChanged" class="alert alert-danger">
-    {{errorMessage}}
-  </div>
-  <table class="table table-hover table-sm">
-    <thead>
-    <tr>
-      <th scope="col">Username</th>
-      <th scope="col">Name</th>
-      <th scope="col">Surname</th>
-      <th scope="col">Date of birth</th>
-      <th scope="col">Passport</th>
-      <th scope="col">Driver license</th>
-      <th scope="col">Email</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-      <td>{{user.username}}</td>
-      <td>{{user.name}}</td>
-      <td>{{user.surname}}</td>
-      <td>{{showDateOfBirth(user)}}</td>
-      <td>{{user.passportNumber}}</td>
-      <td>{{user.driverLicenseSerialNumber || 'NULL'}}</td>
-      <td>{{user.email}}</td>
-    </tr>
-    </tbody>
-  </table>
-  <div class="card col-2 p-0 m-3">
-    <h5 class="card-header m-0">User roles</h5>
-    <div class="card-body">
-      <form (ngSubmit)="onSubmit()">
-        <div
-          class="form-check"
-          *ngFor="let role of allRoles"
-          id="roles"
-        >
-          <input
-            type="checkbox"
-            class="form-check-input"
-            [checked]="checkUserRole(role)"
-            [disabled]="isNoneRole(role)"
-            (change)="editRoles(role)"
-          >
-          {{showRole(role)}}
-        </div>
-        <div class="d-grid gap-2 d-md-flex mt-3">
-          <button type="submit" class="btn btn-success mr-1" [disabled]="editRolesFailed || !rolesChanged">Submit</button>
-          <button type="button" class="btn btn-secondary" (click)="resetRolesChanging()">Reset</button>
-        </div>
-      </form>
+    <div *ngIf="editRolesFailed && !rolesChanged" class="alert alert-danger">
+        {{errorMessage}}
     </div>
-  </div>
-  <button class="btn btn-primary btn-sm" (click)="goBack()">go back</button>
+    <table class="table table-hover table-sm">
+        <thead>
+        <tr>
+            <th scope="col">Username</th>
+            <th scope="col">Name</th>
+            <th scope="col">Surname</th>
+            <th scope="col">Date of birth</th>
+            <th scope="col">Passport</th>
+            <th scope="col">Driver license</th>
+            <th scope="col">Email</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{user.username}}</td>
+            <td>{{user.name}}</td>
+            <td>{{user.surname}}</td>
+            <td>{{showDateOfBirth(user)}}</td>
+            <td>{{user.passportNumber}}</td>
+            <td>{{user.driverLicenseSerialNumber || 'NULL'}}</td>
+            <td>{{user.email}}</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="card col-2 p-0 m-3">
+        <h5 class="card-header m-0">User roles</h5>
+        <div class="card-body">
+            <form (ngSubmit)="onSubmit()">
+                <div
+                    class="form-check"
+                    *ngFor="let role of allRoles"
+                    id="roles"
+                >
+                    <input
+                        type="checkbox"
+                        class="form-check-input"
+                        [checked]="checkUserRole(role)"
+                        [disabled]="isNoneRole(role)"
+                        (change)="editRoles(role)"
+                    >
+                    {{showRole(role)}}
+                </div>
+                <div class="d-grid gap-2 d-md-flex mt-3">
+                    <button type="submit" class="btn btn-success mr-1" [disabled]="editRolesFailed || !rolesChanged">
+                        Submit
+                    </button>
+                    <button type="button" class="btn btn-secondary" (click)="resetRolesChanging()">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <button class="btn btn-primary btn-sm" (click)="goBack()">go back</button>
 </div>
 

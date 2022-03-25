@@ -1,7 +1,8 @@
+import { RentPeriodFilter } from "./rent-period-filter";
+
 export interface RentalCenterFilter {
   country: string | undefined;
   city: string  | undefined;
-  minimumAvailableCarsNumber: number | undefined;
-  startRent: Date | undefined;
-  finishRent: Date | undefined;
+  minimumCarsAvailable: number | undefined;
+  rentPeriodFilter: RentPeriodFilter | undefined;
 }
