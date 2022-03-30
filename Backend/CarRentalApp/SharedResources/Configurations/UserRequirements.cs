@@ -7,5 +7,7 @@
         public int ClientMinimumAge { get; set; }
 
         public int AdminMinimumAge { get; set; }
+
+        public int MinimumRentalPeriodDurationMinutes { get; set; }
     }
 }

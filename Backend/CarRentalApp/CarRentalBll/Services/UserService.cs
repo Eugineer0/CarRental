@@ -127,6 +127,28 @@ namespace CarRentalBll.Services
         }
 
         /// <summary>
+        /// Finds user with specified <paramref name="username"/> and returns it model representation.
+        /// </summary>
+        /// <param name="username">unique credential of user.</param>
+        /// <returns>Model of existing user.</returns>
+        public async Task<UserModel> GetByAsync(string username)
+        {
+            var user = await GetUserByAsync(username);
+            return user.Adapt<UserModel>();
+        }
+
+        /// <summary>
+        /// Returns all existing users.
+        /// </summary>
+        /// <returns>Existing user models.</returns>
+        public IQueryable<UserModel> GetAll()
+        {
+            return _carRentalDbContext.Users
+                .Include(user => user.Roles)
+                .Select(user => user.Adapt<UserModel>());
+        }
+
+        /// <summary>
         /// Updates user found by passed username with client role.
         /// </summary>
         /// <param name="username">unique credential of user.</param>
@@ -194,6 +216,19 @@ namespace CarRentalBll.Services
             }
 
             await UpdateRolesAsync(user, roles);
+        }
+
+        /// <summary>
+        /// Checks if <paramref name="userModel"/> has specified driver license but does not have one of clients role.
+        /// </summary>
+        /// <param name="userModel">user to check.</param>
+        /// <returns>
+        /// True - if <paramref name="userModel"/> is ready to receive clients role, else - false.
+        /// </returns>
+        public static bool CheckIfApprovalRequested(UserModel userModel)
+        {
+            return userModel.DriverLicenseSerialNumber != null
+                && !userModel.Roles.ContainsAny(RolesConstants.ClientRoles);
         }
 
         /// <summary>

@@ -8,5 +8,10 @@ namespace SharedResources.Helpers
         {
             return target.FirstOrDefault(candidate.Contains) != default;
         }
+
+        public static bool ContainsAll<T>(this IEnumerable<T> source, IEnumerable<T> target)
+        {
+            return target.All(source.Contains);
+        }
     }
 }
