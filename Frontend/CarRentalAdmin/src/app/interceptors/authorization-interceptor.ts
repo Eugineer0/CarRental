@@ -27,12 +27,14 @@ export class AuthorizationInterceptor implements HttpInterceptor {
         const accessToken = this.localStorageService.getAccessToken();
 
         if (accessToken) {
+            // HttpRequest represents an outgoing request, including URL, method, headers, body, and other request configuration options. Instances should be assumed to be immutable. To modify a HttpRequest, the clone method should be used.
+
             const headers = request.headers.set(
                 'Authorization',
                 'Bearer ' + accessToken
-            );
+            ); // A clone of the HTTP headers object with the newly set header value.
 
-            request = request.clone({ headers });
+            request = request.clone({ headers }); // A clone of the HTTP request object with the updated headers value.
         }
 
         return request;
