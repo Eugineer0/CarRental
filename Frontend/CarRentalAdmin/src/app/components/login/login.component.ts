@@ -63,7 +63,7 @@ export class LoginComponent implements OnInit {
                 },
                 _ => {
                     this.authFailed = true;
-                    this.authFailedMessage = 'Something went wrong'
+                    this.authFailedMessage = 'Something went wrong';
                 }
             );
     }

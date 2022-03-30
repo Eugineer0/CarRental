@@ -12,11 +12,11 @@ import { LocalStorageService } from './local-storage.service';
 @Injectable()
 export class AuthService {
     private readonly baseUrl: string = '/api/auth';
-    private loggedIn = new BehaviorSubject(false);
+    private loggedIn: BehaviorSubject<boolean> = new BehaviorSubject(this.localStorageService.hasTokens());
 
     constructor(
         private http: HttpClient,
-        private tokenService: LocalStorageService
+        private localStorageService: LocalStorageService
     ) {
     }
 
@@ -58,12 +58,12 @@ export class AuthService {
     }
 
     public closeSession(): void {
-        this.tokenService.removeTokens();
+        this.localStorageService.removeTokens();
         this.loggedIn.next(false);
     }
 
     private setSession(authResult: AuthResponse): void {
-        this.tokenService.setTokens(authResult);
+        this.localStorageService.setTokens(authResult);
         this.loggedIn.next(true);
     }
 }

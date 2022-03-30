@@ -29,4 +29,10 @@ export class LocalStorageService {
         localStorage.removeItem(this.accessTokenKey);
         localStorage.removeItem(this.refreshTokenKey);
     }
+
+    public hasTokens(): boolean {
+        return localStorage.hasOwnProperty(this.accessTokenKey)
+            && localStorage.hasOwnProperty(this.refreshTokenKey);
+    }
+
 }
