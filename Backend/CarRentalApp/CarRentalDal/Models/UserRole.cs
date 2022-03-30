@@ -6,7 +6,7 @@ namespace CarRentalDal.Models
     {
         public int Id { get; set; }
 
-        public Roles Role { get; set; }
+        public Role Role { get; set; }
 
         public Guid UserId { get; set; }
     }

@@ -55,22 +55,22 @@ namespace CarRentalBll.Services
             var validatedAsClient = new ValidatedUser()
             {
                 User = userModel,
-                Status = UserStatuses.Ok
+                Status = UserStatus.Ok
             };
 
             if (userModel.Roles.ContainsAny(RolesConstants.ClientRoles))
             {
-                validatedAsClient.Status = UserStatuses.Ok;
-                return validatedAsClient;
+                validatedAsClient.Status = UserStatus.Ok;
             }
-
-            if (userModel.DriverLicenseSerialNumber == null)
+            else if (userModel.DriverLicenseSerialNumber == null)
             {
-                validatedAsClient.Status = UserStatuses.NotEnoughInfo;
-                return validatedAsClient;
+                validatedAsClient.Status = UserStatus.NotEnoughInfo;
+            }
+            else
+            {
+                validatedAsClient.Status = UserStatus.Unapproved;
             }
 
-            validatedAsClient.Status = UserStatuses.Unapproved;
             return validatedAsClient;
         }
 
@@ -89,12 +89,12 @@ namespace CarRentalBll.Services
             var validatedAsAdmin = new ValidatedUser()
             {
                 User = userModel,
-                Status = UserStatuses.Ok
+                Status = UserStatus.Ok
             };
 
             if (userModel.Roles.ContainsAny(RolesConstants.AdminRoles))
             {
-                validatedAsAdmin.Status = UserStatuses.Unapproved;
+                validatedAsAdmin.Status = UserStatus.Unapproved;
             }
 
             return validatedAsAdmin;
@@ -137,8 +137,8 @@ namespace CarRentalBll.Services
 
             if (
                 user.Roles
-                    .Select(userRole => userRole.Role)
-                    .ContainsAny(RolesConstants.ClientRoles)
+                .Select(userRole => userRole.Role)
+                .ContainsAny(RolesConstants.ClientRoles)
             )
             {
                 return;
@@ -156,8 +156,8 @@ namespace CarRentalBll.Services
                 );
             }
 
-            user.Roles.Add(new UserRole() { Role = Roles.Client });
-            user.Roles.RemoveAll(role => role.Role == Roles.None);
+            user.Roles.Add(new UserRole() { Role = Role.Client });
+            user.Roles.RemoveAll(role => role.Role == Role.None);
             await _carRentalDbContext.SaveChangesAsync();
         }
 
@@ -167,7 +167,7 @@ namespace CarRentalBll.Services
         /// <param name="username">unique credential of user.</param>
         /// <param name="roles">object, containing array of roles.</param>
         /// <exception cref="SharedException">Cannot specify client role without additional info.</exception>
-        public async Task ModifyRolesAsync(string username, IReadOnlySet<Roles> roles)
+        public async Task ModifyRolesAsync(string username, IReadOnlySet<Role> roles)
         {
             ValidateRoles(roles);
             var user = await GetUserByAsync(username);
@@ -248,7 +248,7 @@ namespace CarRentalBll.Services
         /// <param name="roles">set of roles to validate.</param>
         /// <exception cref="SharedException">Empty roles set.</exception>
         /// <exception cref="SharedException">Inconsistent role set.</exception>
-        private void ValidateRoles(IReadOnlySet<Roles> roles)
+        private void ValidateRoles(IReadOnlySet<Role> roles)
         {
             if (roles.Count < 1)
             {
@@ -259,7 +259,7 @@ namespace CarRentalBll.Services
                 );
             }
 
-            if (roles.Contains(Roles.None) && roles.Count > 1)
+            if (roles.Contains(Role.None) && roles.Count > 1)
             {
                 throw new SharedException(
                     ErrorTypes.Invalid,
@@ -281,7 +281,7 @@ namespace CarRentalBll.Services
             user.Salt = _passwordService.GenerateSalt();
             user.HashedPassword = _passwordService.DigestPassword(registrationModel.Password, user.Salt);
 
-            user.Roles = new List<UserRole>() { new UserRole() { Role = Roles.None } };
+            user.Roles = new List<UserRole>() { new UserRole() { Role = Role.None } };
 
             return user;
         }
@@ -336,12 +336,12 @@ namespace CarRentalBll.Services
         /// </summary>
         /// <param name="user">entity to be updated.</param>
         /// <param name="roles">set of roles.</param>
-        private Task UpdateRolesAsync(User user, IReadOnlySet<Roles> roles)
+        private Task UpdateRolesAsync(User user, IReadOnlySet<Role> roles)
         {
             if (
                 user.Roles
-                    .Select(role => role.Role)
-                    .SequenceEqual(roles)
+                .Select(role => role.Role)
+                .SequenceEqual(roles)
             )
             {
                 return Task.CompletedTask;

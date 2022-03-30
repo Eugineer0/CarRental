@@ -4,10 +4,10 @@
     {
         public UserModel User { get; set; } = null!;
 
-        public UserStatuses Status { get; set; }
+        public UserStatus Status { get; set; }
     }
 
-    public enum UserStatuses
+    public enum UserStatus
     {
         Ok,
         NotEnoughInfo,

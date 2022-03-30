@@ -11,11 +11,11 @@ namespace CarRentalWeb.Validation
     {
         public ClientRegistrationRequestValidator(IOptions<UserRequirements> userRequirementsOptions)
         {
-            var clientMinimimAge = userRequirementsOptions.Value.ClientMinimumAge;
+            var clientMinimumAge = userRequirementsOptions.Value.ClientMinimumAge;
 
             RuleFor(x => x.DateOfBirth)
-                .Must(dateOfBirth => dateOfBirth?.WasYearsAgo(clientMinimimAge) ?? false)
-                .WithMessage(String.Format(ValidationConstants.InvalidAgeErrorMessage, clientMinimimAge));
+                .Must(dateOfBirth => dateOfBirth?.WasYearsAgo(clientMinimumAge) ?? false)
+                .WithMessage(String.Format(ValidationConstants.InvalidAgeErrorMessage, clientMinimumAge));
         }
     }
 }

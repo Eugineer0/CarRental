@@ -21,6 +21,6 @@ namespace CarRentalBll.Models
 
         public string? DriverLicenseSerialNumber { get; set; }
 
-        public IEnumerable<Roles> Roles { get; set; } = null!;
+        public IEnumerable<Role> Roles { get; set; } = null!;
     }
 }

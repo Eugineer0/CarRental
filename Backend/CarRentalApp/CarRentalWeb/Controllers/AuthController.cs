@@ -37,11 +37,11 @@ namespace CarRentalWeb.Controllers
             var possiblyClient = await _userService.ValidateAsClientAsync(model);
             switch (possiblyClient.Status)
             {
-                case UserStatuses.Ok:
+                case UserStatus.Ok:
                 {
                     return await AuthenticateAsync(possiblyClient.User);
                 }
-                case UserStatuses.NotEnoughInfo:
+                case UserStatus.NotEnoughInfo:
                 {
                     var token = _jwtService.GenerateToken(possiblyClient.User.Id);
                     throw new SharedException(
@@ -50,7 +50,7 @@ namespace CarRentalWeb.Controllers
                         "Registration completion required"
                     );
                 }
-                case UserStatuses.Unapproved:
+                case UserStatus.Unapproved:
                 {
                     throw new SharedException(
                         ErrorTypes.AccessDenied,
@@ -70,11 +70,11 @@ namespace CarRentalWeb.Controllers
             var possiblyAdmin = await _userService.ValidateAsAdminAsync(model);
             switch (possiblyAdmin.Status)
             {
-                case UserStatuses.Ok:
+                case UserStatus.Ok:
                 {
                     return await AuthenticateAsync(possiblyAdmin.User);
                 }
-                case UserStatuses.Unapproved:
+                case UserStatus.Unapproved:
                 {
                     throw new SharedException(
                         ErrorTypes.AccessDenied,
