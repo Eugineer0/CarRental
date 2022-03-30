@@ -5,7 +5,7 @@
         </div>
         <div class="card-body">
             <div *ngIf="authFailed" class="alert alert-danger">
-                {{authFailedMessage}}
+                {{ authFailedMessage }}
             </div>
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                 <div class="form-group">
@@ -19,13 +19,13 @@
                         (change)="resetAuthStatus()"
                     >
                     <div
-                        *ngIf="checkIfErrorsOccurred(loginForm.controls.username)"
+                        *ngIf="checkIfErrorsOccurred('username')"
                         class="alert alert-danger"
                     >
-                        <div *ngIf="loginForm.controls.username.errors?.['required']">
+                        <div *ngIf="getControlBy('username').hasError('required')">
                             Username is required.
                         </div>
-                        <div *ngIf="loginForm.controls.username.errors?.['maxlength']">
+                        <div *ngIf="getControlBy('username').hasError('maxlength')">
                             Username must be shorter.
                         </div>
                     </div>
@@ -36,7 +36,7 @@
                             class="form-control"
                             id="password"
                             formControlName="password"
-                            [type]="isVisiblePassword ? 'text' : 'password'"
+                            [type]="passwordVisible ? 'text' : 'password'"
                             (change)="resetAuthStatus()"
                         >
                         <button
@@ -44,17 +44,17 @@
                             class="btn btn-light"
                             (click)="changePasswordType()"
                         >
-                            {{isVisiblePassword ? 'Hide' : 'Show'}}
+                            {{ passwordVisible ? 'Hide' : 'Show' }}
                         </button>
                     </div>
                     <div
-                        *ngIf="checkIfErrorsOccurred(loginForm.controls.password)"
+                        *ngIf="checkIfErrorsOccurred('password')"
                         class="alert alert-danger"
                     >
-                        <div *ngIf="loginForm.controls.password.errors?.['required']">
+                        <div *ngIf="getControlBy('password').hasError('required')">
                             Password is required.
                         </div>
-                        <div *ngIf="loginForm.controls.password.errors?.['maxlength']">
+                        <div *ngIf="getControlBy('password').hasError('maxlength')">
                             Password must be shorter.
                         </div>
                     </div>

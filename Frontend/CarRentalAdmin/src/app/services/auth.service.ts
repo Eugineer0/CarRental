@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { LoginRequest } from '../models/login-request';
-import { AuthResponse } from '../models/auth-responce';
+import { AuthResponse } from '../models/auth-response';
 import { RefreshTokenRequest } from '../models/refresh-token-request';
 
 import { LocalStorageService } from './local-storage.service';

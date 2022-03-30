@@ -28,7 +28,7 @@ export class LoginComponent implements OnInit {
     });
 
     public authFailed: boolean = false;
-    public isVisiblePassword: boolean = false;
+    public passwordVisible: boolean = false;
 
     public authFailedMessage: string = '';
     private returnUrl: string = '';
@@ -50,7 +50,7 @@ export class LoginComponent implements OnInit {
     }
 
     public changePasswordType(): void {
-        this.isVisiblePassword = !this.isVisiblePassword;
+        this.passwordVisible = !this.passwordVisible;
     }
 
     public onSubmit(): void {
@@ -68,7 +68,12 @@ export class LoginComponent implements OnInit {
             );
     }
 
-    public checkIfErrorsOccurred(formControl: AbstractControl): boolean {
-        return formControl.invalid && (formControl.dirty || formControl.touched)
+    public checkIfErrorsOccurred(formControlName: string): boolean {
+        const formControl = this.getControlBy(formControlName);
+        return formControl.invalid && (formControl.dirty || formControl.touched);
+    }
+
+    public getControlBy(name: string): AbstractControl {
+        return this.loginForm.controls[name];
     }
 }

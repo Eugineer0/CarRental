@@ -21,18 +21,15 @@ export class AuthorizationInterceptor implements HttpInterceptor {
     private Authorize(request: HttpRequest<any>): HttpRequest<any> {
         const accessToken = this.localStorageService.getAccessToken();
 
-        if (!accessToken) {
-            return request;
+        if (accessToken) {
+            const headers = request.headers.set(
+                'Authorization',
+                'Bearer ' + accessToken
+            );
+
+            request = request.clone({ headers });
         }
 
-        return request.clone(
-            {
-                headers:
-                    request.headers.set(
-                        'Authorization',
-                        'Bearer ' + accessToken
-                    )
-            }
-        );
+        return request;
     }
 }

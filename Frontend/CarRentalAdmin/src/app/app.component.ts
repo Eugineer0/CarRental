@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { RefreshTokenRequest } from '../../models/refresh-token-request';
+import { RefreshTokenRequest } from './models/refresh-token-request';
 
-import { AuthService } from '../../services/auth.service';
-import { LocalStorageService } from '../../services/local-storage.service';
+import { AuthService } from './services/auth.service';
+import { LocalStorageService } from './services/local-storage.service';
 
 @Component({
     selector: 'app-root',
@@ -22,11 +22,12 @@ export class AppComponent implements OnInit {
     }
 
     public ngOnInit(): void {
-        this.authService.getLoggedInStatus().subscribe(
-            next => {
-                this.loggedIn = next
-            }
-        )
+        this.authService.getLoggedInStatus()
+            .subscribe(
+                status => {
+                    this.loggedIn = status;
+                }
+            );
     }
 
     public logout(): void {
@@ -40,7 +41,7 @@ export class AppComponent implements OnInit {
             this.authService.logout(refreshTokenRequest)
                 .subscribe(
                     _ => {
-                        this.router.navigateByUrl('home');
+                        this.router.navigateByUrl('');
                     }
                 );
         }
