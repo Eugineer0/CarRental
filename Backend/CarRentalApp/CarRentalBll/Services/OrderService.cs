@@ -56,14 +56,14 @@ namespace CarRentalBll.Services
                 .Select(order => order.Adapt<OrderModel>());
         }
 
-        public Task CreateOrderAsync(OrderModel model)
+        public Task CreateAsync(OrderModel model)
         {
             var order = model.Adapt<Order>();
             _carRentalDbContext.Orders.Add(order);
             return _carRentalDbContext.SaveChangesAsync();
         }
 
-        public async void ValidateOrderAsync(OrderModel orderModel)
+        public async void ValidateAsync(OrderModel orderModel)
         {
             if (orderModel.Car.RentalCenterId != orderModel.RentalCenter.Id)
             {

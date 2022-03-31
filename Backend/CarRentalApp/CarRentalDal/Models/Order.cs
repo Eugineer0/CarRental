@@ -18,7 +18,5 @@
         public Guid CarId { get; set; }
 
         public Car Car { get; set; } = null!;
-
-        public RentalCenter RentalCenter { get; set; } = null!;
     }
 }

@@ -37,6 +37,7 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<PasswordService>();
+builder.Services.AddScoped<CarService>();
 builder.Services.AddScoped<OrderService>();
 
 var accessJwtConfig = new AccessJwtConfig();

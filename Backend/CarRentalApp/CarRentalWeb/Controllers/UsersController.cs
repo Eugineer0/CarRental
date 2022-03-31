@@ -81,8 +81,8 @@ namespace CarRentalWeb.Controllers
             }
 
             var model = orderRequest.Adapt<OrderModel>();
-            _orderService.ValidateOrderAsync(model);
-            await _orderService.CreateOrderAsync(model);
+            _orderService.ValidateAsync(model);
+            await _orderService.CreateAsync(model);
 
             return Created($"{username}/orders", model);
         }
