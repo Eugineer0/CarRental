@@ -24,8 +24,8 @@ export class CarComponent implements OnInit {
     availableServices: []
   }
 
-
-  constructor() { }
+  constructor() {
+  }
 
   public ngOnInit(): void {
   }

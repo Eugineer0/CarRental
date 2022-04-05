@@ -1,0 +1,19 @@
+<div class="card" *ngIf="center">
+    <H2>{{center.name}} rental center</H2>
+    <table class="table table-hover table-sm">
+        <thead>
+        <tr>
+            <th scope="col">Country</th>
+            <th scope="col">City</th>
+            <th scope="col">Address</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{center.country}}</td>
+            <td>{{center.city}}</td>
+            <td>{{center.address}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

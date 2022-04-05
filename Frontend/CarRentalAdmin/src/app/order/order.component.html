@@ -1,16 +1,24 @@
-<form (ngSubmit)="onSubmit()">
-  <div
-    class="form-check"
-    *ngFor="let service of car.availableServices"
-    id="roles"
-  >
-    <input
-      type="checkbox"
-      class="form-check-input"
-    >
-    {{service.name}}: {{service.price}}$
-  </div>
-  <div class="d-grid gap-2 d-md-flex mt-3">
-    <button type="submit" class="btn btn-success">Proceed</button>
-  </div>
-</form>
+<div class="card" *ngIf="order">
+    {{order.car.brand}}
+    <app-car [car]="order.car"></app-car>
+    {{order.rentalCenter}}
+    <app-rental-center [center]="order.rentalCenter"></app-rental-center>
+    <table class="table table-hover table-sm">
+        <thead>
+        <tr>
+            <th scope="col">Additional services</th>
+            <th scope="col">Price</th>
+            <th scope="col">Start rent</th>
+            <th scope="col">Finish rent</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{order.orderCarServices}}</td>
+            <td>{{order.overallPrice}}</td>
+            <td>{{order.startRent}}</td>
+            <td>{{order.finishRent}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

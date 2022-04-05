@@ -23,6 +23,9 @@ import { RentalCenterInfoComponent } from './rental-center-info/rental-center-in
 import { OrderComponent } from './order/order.component';
 import { CarComponent } from './car/car.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { UserComponent } from './user/user.component';
+import { MakeOrderComponent } from './make-order/make-order.component';
+import { RentalCenterComponent } from './rental-center/rental-center.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +39,10 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     RentalCentersComponent,
     RentalCenterInfoComponent,
     OrderComponent,
-    CarComponent
+    CarComponent,
+    UserComponent,
+    MakeOrderComponent,
+    RentalCenterComponent
   ],
   imports: [
     AppRoutingModule,

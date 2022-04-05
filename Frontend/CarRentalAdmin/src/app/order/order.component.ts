@@ -1,59 +1,18 @@
-import { Component, OnInit } from '@angular/core';
-import { Location } from "@angular/common";
-import { ActivatedRoute } from "@angular/router";
+import { Component, Input, OnInit } from '@angular/core';
 
-import { RentalCenterService } from "../_services/rental-center.service";
-import { Car } from "../_models/car/car";
+import { Order } from "../_models/user/order";
 
 @Component({
-  selector: 'app-order',
-  templateUrl: './order.component.html',
-  styleUrls: ['./order.component.css']
+    selector: 'app-order',
+    templateUrl: './order.component.html',
+    styleUrls: ['./order.component.css']
 })
 export class OrderComponent implements OnInit {
-  public registrationNumber: string | null = null;
-  public centerName: string | null = null;
+    @Input() order: Order | undefined;
 
-  public car: Car = {
-    registrationNumber: '',
-    brand: '',
-    model: '',
-    seatPlaces: 0,
-    averageConsumption: 0,
-    gearboxType: 0,
-    weight: 0,
-    length: 0,
-    power: 0,
-    pricePerMinute: 0,
-    pricePerHour: 0,
-    pricePerDay: 0,
-    availableServices: []
-  }
-
-  constructor(
-    private location: Location,
-    private rentalCenterService: RentalCenterService,
-    private route: ActivatedRoute
-  ) {
-  }
-
-  ngOnInit(): void {
-    this.centerName = this.route.snapshot.paramMap.get('name');
-    this.registrationNumber = this.route.snapshot.paramMap.get('registrationNumber');
-    this.getCar();
-  }
-
-  private getCar(): void {
-    if (this.centerName && this.registrationNumber) {
-      this.rentalCenterService.getCar(this.centerName, this.registrationNumber)
-        .subscribe(car => {
-            this.car = car;
-          }
-        );
+    constructor() {
     }
-  }
 
-  onSubmit() {
-
-  }
+    public ngOnInit(): void {
+    }
 }

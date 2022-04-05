@@ -5,7 +5,7 @@ export interface User {
   surname: string;
   dateOfBirth: Date;
   passportNumber: string;
-  driverLicenseSerialNumber?: string;
+  driverLicenseSerialNumber: string | null;
   roles: Roles[];
   approvalRequested: boolean;
 }

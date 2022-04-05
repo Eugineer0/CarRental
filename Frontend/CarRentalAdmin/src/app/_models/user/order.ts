@@ -6,7 +6,7 @@ export interface Order {
     overallPrice: number;
     startRent: Date;
     finishRent: Date;
-    carServices: CarService[];
+    orderCarServices: CarService[];
     car: Car;
     rentalCenter: RentalCenter;
 }

@@ -83,25 +83,7 @@
         </div>
     </div>
     <div class="col">
-        <H2>{{centerName}} rental center</H2>
-        <table class="table table-hover table-sm">
-            <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Country</th>
-                <th scope="col">City</th>
-                <th scope="col">Address</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngIf="center">
-                <td>{{center.name}}</td>
-                <td>{{center.country}}</td>
-                <td>{{center.city}}</td>
-                <td>{{center.address}}</td>
-            </tr>
-            </tbody>
-        </table>
+        <app-rental-center [center]="center"></app-rental-center>
         <H2>Cars</H2>
         <div class="row row-cols-auto">
             <div class="col my-2" *ngFor="let car of cars">

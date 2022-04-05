@@ -4,7 +4,7 @@ import { Location } from '@angular/common';
 import { Order } from '../_models/user/order';
 
 import { UserService } from '../_services/user.service';
-import { Roles, User } from '../_models/user/user-full';
+import { Roles, User } from '../_models/user/user';
 
 @Component({
     selector: 'app-user-info',
@@ -123,8 +123,11 @@ export class UserInfoComponent implements OnInit {
         this.userService.getOrders(username)
             .subscribe(orders => {
                     this.orders = orders;
+                    console.log(this.orders.length);
+                    console.log(orders.map(order => order.orderCarServices.length));
                 }
             );
+
     }
 
     private rolesEqual(target: Roles[], candidate: Roles[]): boolean {
