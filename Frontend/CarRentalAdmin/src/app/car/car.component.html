@@ -34,7 +34,7 @@
             <th scope="col">Available services</th>
             <td>
                 <span *ngFor="let service of car.availableServices">
-                    {{service.name}}<br>
+                    {{service.name}} - {{service.price}}$<br>
                 </span>
             </td>
         </tr>

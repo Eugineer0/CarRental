@@ -1,20 +1,22 @@
 <div class="card" *ngIf="order">
-    {{order.car.brand}}
     <app-car [car]="order.car"></app-car>
-    {{order.rentalCenter}}
     <app-rental-center [center]="order.rentalCenter"></app-rental-center>
     <table class="table table-hover table-sm">
         <thead>
         <tr>
             <th scope="col">Additional services</th>
-            <th scope="col">Price</th>
+            <th scope="col">Total price</th>
             <th scope="col">Start rent</th>
             <th scope="col">Finish rent</th>
         </tr>
         </thead>
         <tbody>
         <tr>
-            <td>{{order.orderCarServices}}</td>
+            <td>
+                <span *ngFor="let service of order.orderCarServices">
+                    {{service.name}} - {{service.price}}$<br>
+                </span>
+            </td>
             <td>{{order.overallPrice}}</td>
             <td>{{order.startRent}}</td>
             <td>{{order.finishRent}}</td>

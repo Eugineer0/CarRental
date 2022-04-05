@@ -27,7 +27,7 @@
       <td>{{user.email}}</td>
       <td>{{user.name}}</td>
       <td>{{user.surname}}</td>
-      <td>{{showDateOfBirth(user)}}</td>
+      <td>{{user.dateOfBirth | date}}</td>
       <td>{{user.passportNumber}}</td>
       <td>{{user.driverLicenseSerialNumber || 'NULL'}}</td>
       <td>
@@ -37,8 +37,10 @@
           data-bs-placement="left"
           title="Click to assign client role"
           *ngIf="user.approvalRequested"
-          (click)="approveClient(user.username)"
-        >Approve</button>
+          (click)="approveClient(user)"
+        >
+            Approve
+        </button>
       </td>
     </tr>
   </tbody>
