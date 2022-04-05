@@ -1,9 +1,11 @@
-﻿using SharedResources.EnumsAndConstants;
+﻿using Mapster;
+using SharedResources.EnumsAndConstants;
 
 namespace CarRentalBll.Models
 {
     public class CarTypeModel
     {
+        [AdaptIgnore]
         public int Id { get; set; }
 
         public string Brand { get; set; } = null!;
@@ -27,5 +29,7 @@ namespace CarRentalBll.Models
         public decimal PricePerHour { get; set; }
 
         public decimal PricePerDay { get; set; }
+
+        public IEnumerable<CarServiceModel> AvailableServices { get; set; } = null!;
     }
 }

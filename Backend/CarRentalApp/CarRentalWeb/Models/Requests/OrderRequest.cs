@@ -10,8 +10,8 @@
 
         public IEnumerable<int> OrderCarServicesId { get; set; } = null!;
 
-        public string CarRegistrationNumber { get; set; } = null!;
+        public Guid CarId { get; set; }
 
-        public string RentalCenterName { get; set; } = null!;
+        public Guid RentalCenterId { get; set; }
     }
 }

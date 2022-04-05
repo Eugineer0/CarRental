@@ -61,7 +61,7 @@ namespace CarRentalWeb.Controllers
         {
             if (CheckIfInRoles(this.User, RolesConstants.AdminRoles) || username == GetCurrentUsername(this.User))
             {
-                var orderModels = _orderService.GetOrdersBy(username);
+                var orderModels =  _orderService.GetOrdersBy(username);
                 var response = await orderModels
                     .Select(orderModel => orderModel.Adapt<OrderResponse>())
                     .ToListAsync();
@@ -109,7 +109,7 @@ namespace CarRentalWeb.Controllers
 
         private string GetCurrentUsername(ClaimsPrincipal user)
         {
-            return _jwtService.GetClaimValue(user.Claims, JwtRegisteredClaimNames.UniqueName);
+            return _jwtService.GetClaimValue(user.Claims, ClaimTypes.Name);
         }
 
         private bool CheckIfInRoles(ClaimsPrincipal user, IEnumerable<Role> roles)

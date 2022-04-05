@@ -50,10 +50,44 @@ namespace CarRentalBll.Services
         {
             return _carRentalDbContext.Orders
                 .Include(order => order.Client)
+                .ThenInclude(client => client.Roles)
                 .Where(order => order.Client.Username == username)
                 .Include(order => order.OrderCarServices)
                 .Include(order => order.Car)
+                .ThenInclude(car => car.Type)
+                .ThenInclude(carType => carType.CarServicePrices)
+                .ThenInclude(carTypeServicePrice => carTypeServicePrice.CarService)
+                .Include(order => order.Car)
+                .ThenInclude(car => car.RentalCenter)
+                .Include(order => order.Car)
+                .ThenInclude(car => car.Type)
                 .Select(order => order.Adapt<OrderModel>());
+        }
+
+        // private OrderModel Convert(Order order)
+        // {
+        //     var orderModel = order.Adapt<OrderModel>();
+        //     foreach (var orderService in order.OrderCarServices)
+        //     {
+        //         orderModel.OrderCarServices
+        //     }
+        //     orderModel.OrderCarServices.Select(orderService => orderService.Price) = order.OrderCarServices.Select(orderCarService => orderCarService.Service.Prices.Where);
+        // }
+
+        private decimal GetOrderServicePrice(Order order, CarRentalDal.Models.CarService orderCarService)
+        {
+            var service = orderCarService.Prices
+                .FirstOrDefault(price => price.CarTypeId == order.Car.Type.Id);
+
+            if (service == null)
+            {
+                throw new SharedException(
+                    ErrorTypes.Invalid,
+                    "Inconsistent order services for specified car"
+                );
+            }
+
+            return service.Price;
         }
 
         public Task CreateAsync(OrderModel model)
@@ -75,8 +109,8 @@ namespace CarRentalBll.Services
             }
 
             if (orderModel.StartRent.CheckPeriodDuration(
-                orderModel.FinishRent,
-                _userRequirements.MinimumRentalPeriodDurationMinutes
+                    orderModel.FinishRent,
+                    _userRequirements.MinimumRentalPeriodDurationMinutes
                 )
             )
             {
@@ -90,9 +124,9 @@ namespace CarRentalBll.Services
             var availableServices = _carRentalDbContext.CarServicePrices
                 .Where(carService => carService.CarTypeId == orderModel.Car.CarType.Id)
                 .Include(carService => carService.CarService)
-                .Select(carService => carService.CarService.Adapt<CarServiceModel>());
+                .Select(carService => carService.Id);
 
-            if (!availableServices.ContainsAll(orderModel.CarServices))
+            if (!availableServices.ContainsAll(orderModel.OrderCarServices.Select(service => service.Id)))
             {
                 throw new SharedException(
                     ErrorTypes.NotFound,
@@ -125,7 +159,11 @@ namespace CarRentalBll.Services
         private async Task<decimal> GetOverallPriceAsync(OrderModel orderModel)
         {
             var servicePrices = _carRentalDbContext.CarServicePrices
-                .Where(service => orderModel.CarServices.Contains(service.Adapt<CarServiceModel>()))
+                .Where(
+                    servicePrice =>
+                        servicePrice.CarTypeId == orderModel.Car.CarType.Id
+                        && orderModel.OrderCarServices.Select(service => service.Id).Contains(servicePrice.Id)
+                )
                 .Aggregate(Decimal.Zero, (result, service) => result + service.Price);
 
             var rentalPrice = await _carService.GetRentalPriceAsync(

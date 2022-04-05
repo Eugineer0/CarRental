@@ -8,9 +8,9 @@
 
         public DateTime FinishRent { get; set; }
 
-        public ICollection<CarServiceModel> CarServices { get; set; } = null!;
+        public ICollection<CarServiceModel> OrderCarServices { get; set; } = null!;
 
-        public UserModel Client { get; set; } = null!;
+        public UserModel ClientId { get; set; } = null!;
 
         public CarModel Car { get; set; } = null!;
 

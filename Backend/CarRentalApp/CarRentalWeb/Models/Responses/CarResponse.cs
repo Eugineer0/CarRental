@@ -4,6 +4,8 @@ namespace CarRentalWeb.Models.Responses
 {
     public class CarResponse
     {
+        public Guid Id { get; set; }
+
         public string RegistrationNumber { get; set; } = null!;
 
         public string Brand { get; set; } = null!;
@@ -27,5 +29,7 @@ namespace CarRentalWeb.Models.Responses
         public decimal PricePerHour { get; set; }
 
         public decimal PricePerDay { get; set; }
+
+        public IEnumerable<CarServiceResponse> AvailableServices { get; set; } = null!;
     }
 }

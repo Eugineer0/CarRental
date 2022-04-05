@@ -22,6 +22,8 @@ namespace CarRentalBll.Services
             var car = await _carRentalDbContext.Cars
                 .Include(car => car.Orders)
                 .Include(car => car.Type)
+                .ThenInclude(carType => carType.CarServicePrices)
+                .ThenInclude(carTypeServicePrice => carTypeServicePrice.CarService)
                 .FirstOrDefaultAsync(car => car.Id == carId);
             if (car == null)
             {

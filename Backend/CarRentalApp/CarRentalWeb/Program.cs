@@ -4,6 +4,7 @@ using CarRentalWeb.Middleware;
 using CarRentalBll.Configurations;
 using CarRentalBll.Services;
 using CarRentalDal.Contexts;
+using CarRentalWeb.Configurations;
 using CarRentalWeb.Configurations.JWT.Access;
 using CarRentalWeb.Configurations.JWT.Refresh;
 using CarRentalWeb.Services;
@@ -32,6 +33,7 @@ var configurationString = builder.Configuration.GetConnectionString("CarRentalDB
 builder.Services.AddDbContext<CarRentalDbContext>(options => options.UseSqlServer(configurationString));
 
 MapsterBllConfig.Configure();
+MapsterWebConfig.Configure();
 
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<TokenService>();
