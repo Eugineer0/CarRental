@@ -6,7 +6,7 @@
 
         public decimal Price { get; set; }
 
-        public int  CarServiceId { get; set; }
+        public int CarServiceId { get; set; }
 
         public CarService CarService { get; set; } = null!;
 

@@ -9,7 +9,11 @@ namespace CarRentalDal.Models
         [Column(TypeName="nchar(7)")]
         public string RegistrationNumber { get; set; } = null!;
 
+        public int TypeId { get; set; }
+
         public CarType Type { get; set; } = null!;
+
+        public Guid RentalCenterId { get; set; }
 
         public RentalCenter RentalCenter { get; set; } = null!;
 

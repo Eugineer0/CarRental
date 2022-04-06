@@ -13,6 +13,7 @@
         public ICollection<OrderCarService> OrderCarServices { get; set; } = null!;
 
         public Guid ClientId { get; set; }
+
         public User Client { get; set; } = null!;
 
         public Guid CarId { get; set; }

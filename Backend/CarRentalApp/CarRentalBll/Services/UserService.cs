@@ -237,7 +237,7 @@ namespace CarRentalBll.Services
         /// <param name="username">unique credential of user.</param>
         /// <returns> Existing user with <paramref name="username"/>.</returns>
         /// <exception cref="SharedException">User not found by <paramref name="username"/>.</exception>
-        private async Task<User> GetUserByAsync(string username)
+        public async Task<User> GetUserByAsync(string username)
         {
             var user = await _carRentalDbContext.Users
                 .Include(user => user.Roles)

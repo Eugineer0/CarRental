@@ -10,7 +10,7 @@
 
         public ICollection<CarServiceModel> OrderCarServices { get; set; } = null!;
 
-        public UserModel ClientId { get; set; } = null!;
+        public Guid ClientId { get; set; }
 
         public CarModel Car { get; set; } = null!;
 

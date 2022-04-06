@@ -9,7 +9,6 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.JsonWebTokens;
 using SharedResources.EnumsAndConstants;
 
 namespace CarRentalWeb.Controllers
@@ -80,9 +79,8 @@ namespace CarRentalWeb.Controllers
                 return Forbid();
             }
 
-            var model = orderRequest.Adapt<OrderModel>();
-            _orderService.ValidateAsync(model);
-            await _orderService.CreateAsync(model);
+            var model = orderRequest.Adapt<OrderRequestModel>();
+            await _orderService.CreateAsync(model, username);
 
             return Created($"{username}/orders", model);
         }

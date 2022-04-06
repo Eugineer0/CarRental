@@ -1,6 +1,7 @@
 ﻿using CarRentalBll.Models;
 using CarRentalDal.Models;
 using Mapster;
+using CarService = CarRentalBll.Services.CarService;
 
 namespace CarRentalBll.Configurations
 {
@@ -12,15 +13,15 @@ namespace CarRentalBll.Configurations
                 .NewConfig()
                 .Map(dest => dest.Roles, src => src.Roles.Select(role => role.Role));
 
-            TypeAdapterConfig<User, UserModel>
-                .NewConfig()
-                .Map(dest => dest.Roles, src => src.Roles.Select(role => role.Role));
-
             TypeAdapterConfig<Order, OrderModel>
                 .NewConfig()
                 .Map(
+                    dst => dst.ClientId,
+                    src => src.Client.Id
+                )
+                .Map(
                     dest => dest.OrderCarServices,
-                    src => src.OrderCarServices.Select(orderService => orderService.CarService.Adapt<CarServiceModel>())
+                    src => src.OrderCarServices.Select(orderService => orderService.Adapt<CarServiceModel>())
                 )
                 .Map(
                     dest => dest.RentalCenter,
@@ -42,7 +43,21 @@ namespace CarRentalBll.Configurations
                 .NewConfig()
                 .Map(
                     dest => dest.AvailableServices,
-                    src => src.CarServicePrices.Select(sp => sp.CarService.Adapt<CarServiceModel>())
+                    src => src.CarServicePrices.Select(carServicePrice => carServicePrice.Adapt<CarServiceModel>())
+                );
+
+            TypeAdapterConfig<OrderCarService, CarServiceModel>
+                .NewConfig()
+                .Map(
+                    dst => dst.Name,
+                    src => src.CarService.Name
+                );
+
+            TypeAdapterConfig<CarServicePrice, CarServiceModel>
+                .NewConfig()
+                .Map(
+                    dst => dst.Name,
+                    src => src.CarService.Name
                 );
         }
     }

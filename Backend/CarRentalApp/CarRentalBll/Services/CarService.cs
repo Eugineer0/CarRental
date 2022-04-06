@@ -20,7 +20,6 @@ namespace CarRentalBll.Services
         public async Task<CarModel> GetModelByAsync(Guid carId)
         {
             var car = await _carRentalDbContext.Cars
-                .Include(car => car.Orders)
                 .Include(car => car.Type)
                 .ThenInclude(carType => carType.CarServicePrices)
                 .ThenInclude(carTypeServicePrice => carTypeServicePrice.CarService)
@@ -41,6 +40,7 @@ namespace CarRentalBll.Services
         {
             var car = await _carRentalDbContext.Cars
                 .Include(car => car.Orders)
+                .Include(car => car.Type)
                 .FirstOrDefaultAsync(car => car.Id == carId);
             if (car == null)
             {
@@ -67,11 +67,9 @@ namespace CarRentalBll.Services
                 .All(period => finish < period.StartRent || period.FinishRent > start);
         }
 
-        public async Task<decimal> GetRentalPriceAsync(Guid carId, DateTime startRent, DateTime finishRent)
+        public decimal GetRentalPrice(Car car, DateTime startRent, DateTime finishRent)
         {
-            var car = await GetByAsync(carId);
-
-            var period = startRent.GetPeriod(finishRent);
+            var period = finishRent - startRent;
 
             return period.Days * car.Type.PricePerDay
                 + period.Hours * car.Type.PricePerHour

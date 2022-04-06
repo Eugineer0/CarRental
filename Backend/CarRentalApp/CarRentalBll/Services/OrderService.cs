@@ -15,15 +15,18 @@ namespace CarRentalBll.Services
         private readonly CarRentalDbContext _carRentalDbContext;
         private readonly CarService _carService;
         private readonly UserRequirements _userRequirements;
+        private readonly UserService _userService;
 
         public OrderService(
             CarRentalDbContext carRentalDbContext,
             CarService carService,
-            IOptions<UserRequirements> userRequirements
+            IOptions<UserRequirements> userRequirements,
+            UserService userService
         )
         {
             _carRentalDbContext = carRentalDbContext;
             _carService = carService;
+            _userService = userService;
             _userRequirements = userRequirements.Value;
         }
 
@@ -50,66 +53,94 @@ namespace CarRentalBll.Services
         {
             return _carRentalDbContext.Orders
                 .Include(order => order.Client)
-                .ThenInclude(client => client.Roles)
                 .Where(order => order.Client.Username == username)
                 .Include(order => order.OrderCarServices)
+                .ThenInclude(orderCarServices => orderCarServices.CarService)
                 .Include(order => order.Car)
                 .ThenInclude(car => car.Type)
                 .ThenInclude(carType => carType.CarServicePrices)
-                .ThenInclude(carTypeServicePrice => carTypeServicePrice.CarService)
                 .Include(order => order.Car)
                 .ThenInclude(car => car.RentalCenter)
-                .Include(order => order.Car)
-                .ThenInclude(car => car.Type)
                 .Select(order => order.Adapt<OrderModel>());
         }
 
-        // private OrderModel Convert(Order order)
-        // {
-        //     var orderModel = order.Adapt<OrderModel>();
-        //     foreach (var orderService in order.OrderCarServices)
-        //     {
-        //         orderModel.OrderCarServices
-        //     }
-        //     orderModel.OrderCarServices.Select(orderService => orderService.Price) = order.OrderCarServices.Select(orderCarService => orderCarService.Service.Prices.Where);
-        // }
-
-        private decimal GetOrderServicePrice(Order order, CarRentalDal.Models.CarService orderCarService)
+        public async Task CreateAsync(OrderRequestModel orderRequestModel, string username)
         {
-            var service = orderCarService.Prices
-                .FirstOrDefault(price => price.CarTypeId == order.Car.Type.Id);
+            var car = await ValidateCarAsync(orderRequestModel);
 
-            if (service == null)
-            {
-                throw new SharedException(
-                    ErrorTypes.Invalid,
-                    "Inconsistent order services for specified car"
-                );
-            }
+            ValidateRentalPeriod(orderRequestModel.StartRent, orderRequestModel.FinishRent);
 
-            return service.Price;
-        }
+            var orderCarServicesPrices = await ValidateServicesAsync(orderRequestModel.OrderCarServicesId, car);
 
-        public Task CreateAsync(OrderModel model)
-        {
-            var order = model.Adapt<Order>();
-            _carRentalDbContext.Orders.Add(order);
-            return _carRentalDbContext.SaveChangesAsync();
-        }
-
-        public async void ValidateAsync(OrderModel orderModel)
-        {
-            if (orderModel.Car.RentalCenterId != orderModel.RentalCenter.Id)
+            if (orderRequestModel.OverallPrice != GetOverallPriceAsync(orderRequestModel, orderCarServicesPrices, car))
             {
                 throw new SharedException(
                     ErrorTypes.Conflict,
-                    "Invalid rental center",
-                    "Car does not belongs to specified rental center"
+                    "Invalid price",
+                    "Received price does not match locally calculated"
                 );
             }
 
-            if (orderModel.StartRent.CheckPeriodDuration(
-                    orderModel.FinishRent,
+            var client = await _userService.GetUserByAsync(username);
+
+            var order = await InsertOrderAsync(client, car, orderRequestModel);
+
+            await InsertOrderCarServices(order, orderCarServicesPrices);
+        }
+
+        private async Task InsertOrderCarServices(Order order, ICollection<CarServicePrice> orderCarServicesPrices)
+        {
+            var orderCarServices = orderCarServicesPrices.Select(
+                carServicePrice => new OrderCarService()
+                {
+                    CarServiceId = carServicePrice.CarServiceId,
+                    Price = carServicePrice.Price,
+                    OrderId = order.Id
+                }
+            );
+
+            _carRentalDbContext.OrderCarServices.AddRange(orderCarServices);
+            await _carRentalDbContext.SaveChangesAsync();
+        }
+
+        private async Task<Order> InsertOrderAsync(User client, Car car, OrderRequestModel orderRequestModel)
+        {
+            var order = orderRequestModel.Adapt<Order>();
+            order.Car = car;
+            order.Client = client;
+
+            _carRentalDbContext.Orders.Add(order);
+            await _carRentalDbContext.SaveChangesAsync();
+
+            return order;
+        }
+
+        private async Task<ICollection<CarServicePrice>> ValidateServicesAsync(IEnumerable<int> orderCarServicesId, Car car)
+        {
+            var orderCarServicePrices = await _carRentalDbContext.CarServicePrices
+                .Where(carServicePrice =>
+                           carServicePrice.CarTypeId == car.TypeId
+                           && orderCarServicesId.Contains(carServicePrice.CarServiceId)
+                )
+                .Include(carServicePrice => carServicePrice.CarService)
+                .ToListAsync();
+
+            if (orderCarServicePrices.Count != orderCarServicesId.Count())
+            {
+                throw new SharedException(
+                    ErrorTypes.NotFound,
+                    "Inconsistent services",
+                    "Specified services are inapplicable to specified car"
+                );
+            }
+
+            return orderCarServicePrices;
+        }
+
+        private void ValidateRentalPeriod(DateTime startRent, DateTime finishRent)
+        {
+            if (startRent.HasDurationUntil(
+                    finishRent,
                     _userRequirements.MinimumRentalPeriodDurationMinutes
                 )
             )
@@ -120,24 +151,22 @@ namespace CarRentalBll.Services
                     $"Rental period must have duration more than {_userRequirements.MinimumRentalPeriodDurationMinutes} minutes"
                 );
             }
+        }
 
-            var availableServices = _carRentalDbContext.CarServicePrices
-                .Where(carService => carService.CarTypeId == orderModel.Car.CarType.Id)
-                .Include(carService => carService.CarService)
-                .Select(carService => carService.Id);
+        private async Task<Car> ValidateCarAsync(OrderRequestModel orderRequestModel)
+        {
+            var car = await _carService.GetByAsync(orderRequestModel.CarId);
 
-            if (!availableServices.ContainsAll(orderModel.OrderCarServices.Select(service => service.Id)))
+            if (car.RentalCenterId != orderRequestModel.RentalCenterId)
             {
                 throw new SharedException(
-                    ErrorTypes.NotFound,
-                    "Inconsistent services",
-                    "Specified services are inapplicable to specified car"
+                    ErrorTypes.Conflict,
+                    "Invalid rental center",
+                    "Car does not belongs to specified rental center"
                 );
             }
 
-            var car = await _carService.GetByAsync(orderModel.Car.Id);
-
-            if (!_carService.CheckIfAvailable(car, orderModel.StartRent, orderModel.FinishRent))
+            if (!_carService.CheckIfAvailable(car, orderRequestModel.StartRent, orderRequestModel.FinishRent))
             {
                 throw new SharedException(
                     ErrorTypes.Conflict,
@@ -146,33 +175,23 @@ namespace CarRentalBll.Services
                 );
             }
 
-            if (orderModel.OverallPrice != await GetOverallPriceAsync(orderModel))
-            {
-                throw new SharedException(
-                    ErrorTypes.Conflict,
-                    "Invalid price",
-                    "Received price does not match locally calculated"
-                );
-            }
+            return car;
         }
 
-        private async Task<decimal> GetOverallPriceAsync(OrderModel orderModel)
+        private decimal GetOverallPriceAsync(OrderRequestModel orderModel, IEnumerable<CarServicePrice> carServicePrices, Car car)
         {
-            var servicePrices = _carRentalDbContext.CarServicePrices
-                .Where(
-                    servicePrice =>
-                        servicePrice.CarTypeId == orderModel.Car.CarType.Id
-                        && orderModel.OrderCarServices.Select(service => service.Id).Contains(servicePrice.Id)
-                )
-                .Aggregate(Decimal.Zero, (result, service) => result + service.Price);
+            var carServicesPrice = carServicePrices.Aggregate(
+                decimal.Zero,
+                (result, service) => result + service.Price
+            );
 
-            var rentalPrice = await _carService.GetRentalPriceAsync(
-                orderModel.Car.Id,
+            var rentalPrice = _carService.GetRentalPrice(
+                car,
                 orderModel.StartRent,
                 orderModel.FinishRent
             );
 
-            return servicePrices + rentalPrice;
+            return carServicesPrice + rentalPrice;
         }
     }
 }
