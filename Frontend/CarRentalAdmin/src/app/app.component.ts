@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { RefreshTokenRequest } from './models/refresh-token-request';
+import { RefreshTokenRequest } from './models/requests/refresh-token-request';
 
 import { AuthService } from './services/auth.service';
 import { LocalStorageService } from './services/local-storage.service';
