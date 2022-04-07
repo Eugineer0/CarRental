@@ -73,14 +73,12 @@
                                     Passport number must consist of 2 capitals leading 7 digits.
                                 </div>
                             </div>
-                            <label class="mt-2" for="dateOfBirth">Passport number</label>
+                            <label class="mt-2" for="dateOfBirth">Date of birth</label>
                             <input
                                 type="date"
                                 class="form-control"
                                 id="dateOfBirth"
                                 formControlName="dateOfBirth"
-                                min="2017-01-01"
-                                max="2018-12-31"
                                 (change)="resetRegisterStatus()"
                             >
                             <div
@@ -88,10 +86,10 @@
                                 class="alert alert-danger"
                             >
                                 <div *ngIf="getControlBy('dateOfBirth').hasError('required')">
-                                    Passport number is required.
+                                    Date of birth is required.
                                 </div>
-                                <div *ngIf="getControlBy('dateOfBirth').hasError('fieldTemplate')">
-                                    Passport number must consist of 2 capitals leading 7 digits.
+                                <div *ngIf="getControlBy('dateOfBirth').hasError('minAge')">
+                                    Admin have to reach {{ minAge }} years.
                                 </div>
                             </div>
                         </div>

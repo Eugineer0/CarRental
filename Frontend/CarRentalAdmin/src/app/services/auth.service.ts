@@ -25,15 +25,8 @@ export class AuthService {
         return this.loggedIn;
     }
 
-    public register(registerRequest: RegisterRequest): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>(`${ this.baseUrl }/register-admin`, registerRequest)
-            .pipe(
-                tap(
-                    response => {
-                        this.setSession(response);
-                    }
-                )
-            );
+    public register(registerRequest: RegisterRequest): Observable<void> {
+        return this.http.post<void>(`${ this.baseUrl }/register-admin`, registerRequest);
     }
 
     public login(loginRequest: LoginRequest): Observable<AuthResponse> {

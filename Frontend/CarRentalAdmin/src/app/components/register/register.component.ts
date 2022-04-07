@@ -5,7 +5,8 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 import { FormErrorsHandlerService } from '../../services/form-errors-handler.service';
-import { fieldTemplateValidator } from '../../validators/fieldTemplateValidator';
+import { fieldTemplateValidator } from '../../validators/field-template-validator';
+import { minAgeValidator } from "../../validators/min-age-validator";
 
 @Component({
     selector: 'app-register',
@@ -13,6 +14,8 @@ import { fieldTemplateValidator } from '../../validators/fieldTemplateValidator'
     styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
+    public minAge: number = 14;
+
     public registerForm = new FormGroup({
         email: new FormControl(
             '',
@@ -20,7 +23,8 @@ export class RegisterComponent implements OnInit {
                 Validators.required,
                 Validators.minLength(3),
                 Validators.maxLength(254),
-                fieldTemplateValidator(/.*@.+/)
+                fieldTemplateValidator(/^(?!\.)(""([^""\r\\]|\\[""\r\\])*""|([-a-z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)@[a-z0-9][\w\.-]*[a-z0-9]\.[a-z][a-z\.]*[a-z]$/)
+
             ]
         ),
         username: new FormControl(
@@ -69,7 +73,7 @@ export class RegisterComponent implements OnInit {
             '',
             [
                 Validators.required,
-                Validators.maxLength(25)
+                minAgeValidator(this.minAge)
             ]
         )
     });
