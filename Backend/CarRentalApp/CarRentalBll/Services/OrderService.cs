@@ -57,7 +57,7 @@ namespace CarRentalBll.Services
                 .Include(order => order.OrderCarServices)
                 .ThenInclude(orderCarServices => orderCarServices.CarService)
                 .Include(order => order.Car)
-                .ThenInclude(car => car.Type)
+                .ThenInclude(car => car.CarType)
                 .ThenInclude(carType => carType.CarServicePrices)
                 .Include(order => order.Car)
                 .ThenInclude(car => car.RentalCenter)
@@ -119,7 +119,7 @@ namespace CarRentalBll.Services
         {
             var orderCarServicePrices = await _carRentalDbContext.CarServicePrices
                 .Where(carServicePrice =>
-                           carServicePrice.CarTypeId == car.TypeId
+                           carServicePrice.CarTypeId == car.CarTypeId
                            && orderCarServicesId.Contains(carServicePrice.CarServiceId)
                 )
                 .Include(carServicePrice => carServicePrice.CarService)

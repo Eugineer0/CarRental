@@ -20,7 +20,7 @@ namespace CarRentalBll.Services
         public async Task<CarModel> GetModelByAsync(Guid carId)
         {
             var car = await _carRentalDbContext.Cars
-                .Include(car => car.Type)
+                .Include(car => car.CarType)
                 .ThenInclude(carType => carType.CarServicePrices)
                 .ThenInclude(carTypeServicePrice => carTypeServicePrice.CarService)
                 .FirstOrDefaultAsync(car => car.Id == carId);
@@ -40,7 +40,7 @@ namespace CarRentalBll.Services
         {
             var car = await _carRentalDbContext.Cars
                 .Include(car => car.Orders)
-                .Include(car => car.Type)
+                .Include(car => car.CarType)
                 .FirstOrDefaultAsync(car => car.Id == carId);
             if (car == null)
             {
@@ -54,7 +54,7 @@ namespace CarRentalBll.Services
             return car;
         }
 
-        public IEnumerable<CarModel> GetAccessible(IEnumerable<Car> cars, DateTime startRent, DateTime finishRent)
+        public IEnumerable<CarModel> GetAvailable(IEnumerable<Car> cars, DateTime startRent, DateTime finishRent)
         {
             return cars.Where(car => CheckIfAvailable(car, startRent, finishRent))
                 .Select(car => car.Adapt<CarModel>());
@@ -71,9 +71,9 @@ namespace CarRentalBll.Services
         {
             var period = finishRent - startRent;
 
-            return period.Days * car.Type.PricePerDay
-                + period.Hours * car.Type.PricePerHour
-                + period.Minutes * car.Type.PricePerMinute;
+            return period.Days * car.CarType.PricePerDay
+                + period.Hours * car.CarType.PricePerHour
+                + period.Minutes * car.CarType.PricePerMinute;
         }
     }
 }

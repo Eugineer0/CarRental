@@ -28,6 +28,9 @@ namespace CarRentalDal.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("CarTypeId")
+                        .HasColumnType("int");
+
                     b.Property<string>("RegistrationNumber")
                         .IsRequired()
                         .HasColumnType("nchar(7)");
@@ -35,14 +38,11 @@ namespace CarRentalDal.Migrations
                     b.Property<Guid>("RentalCenterId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("TypeId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("RentalCenterId");
+                    b.HasIndex("CarTypeId");
 
-                    b.HasIndex("TypeId");
+                    b.HasIndex("RentalCenterId");
 
                     b.ToTable("Cars");
                 });
@@ -309,21 +309,21 @@ namespace CarRentalDal.Migrations
 
             modelBuilder.Entity("CarRentalDal.Models.Car", b =>
                 {
+                    b.HasOne("CarRentalDal.Models.CarType", "CarType")
+                        .WithMany()
+                        .HasForeignKey("CarTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("CarRentalDal.Models.RentalCenter", "RentalCenter")
                         .WithMany("Cars")
                         .HasForeignKey("RentalCenterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CarRentalDal.Models.CarType", "Type")
-                        .WithMany()
-                        .HasForeignKey("TypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("CarType");
 
                     b.Navigation("RentalCenter");
-
-                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("CarRentalDal.Models.CarServicePrice", b =>

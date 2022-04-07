@@ -32,7 +32,7 @@ namespace CarRentalBll.Configurations
                 .NewConfig()
                 .Map(
                     dest => dest.CarType,
-                    src => src.Type.Adapt<CarTypeModel>()
+                    src => src.CarType.Adapt<CarTypeModel>()
                 )
                 .Map(
                     dest => dest.RentalCenterId,
