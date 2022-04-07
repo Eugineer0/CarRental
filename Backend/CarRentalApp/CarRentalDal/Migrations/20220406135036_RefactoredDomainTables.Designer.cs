@@ -4,6 +4,7 @@ using CarRentalDal.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarRentalDal.Migrations
 {
     [DbContext(typeof(CarRentalDbContext))]
-    partial class CarRentalDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220406135036_RefactoredDomainTables")]
+    partial class RefactoredDomainTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,9 +30,6 @@ namespace CarRentalDal.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("CarTypeId")
-                        .HasColumnType("int");
-
                     b.Property<string>("RegistrationNumber")
                         .IsRequired()
                         .HasColumnType("nchar(7)");
@@ -38,11 +37,14 @@ namespace CarRentalDal.Migrations
                     b.Property<Guid>("RentalCenterId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("TypeId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CarTypeId");
-
                     b.HasIndex("RentalCenterId");
+
+                    b.HasIndex("TypeId");
 
                     b.ToTable("Cars");
                 });
@@ -309,21 +311,21 @@ namespace CarRentalDal.Migrations
 
             modelBuilder.Entity("CarRentalDal.Models.Car", b =>
                 {
-                    b.HasOne("CarRentalDal.Models.CarType", "CarType")
-                        .WithMany()
-                        .HasForeignKey("CarTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CarRentalDal.Models.RentalCenter", "RentalCenter")
                         .WithMany("Cars")
                         .HasForeignKey("RentalCenterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CarType");
+                    b.HasOne("CarRentalDal.Models.CarType", "Type")
+                        .WithMany()
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("RentalCenter");
+
+                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("CarRentalDal.Models.CarServicePrice", b =>
