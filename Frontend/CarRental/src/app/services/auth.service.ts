@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -18,7 +19,8 @@ export class AuthService {
 
     constructor(
         private http: HttpClient,
-        private localStorageService: LocalStorageService
+        private localStorageService: LocalStorageService,
+        private router: Router
     ) {
     }
 
@@ -44,6 +46,14 @@ export class AuthService {
                 tap(
                     response => {
                         this.setSession(response);
+                    },
+                    error => {
+                        if (error.status === 308) {
+                            this.router.navigate(
+                                ['complete-registration'],
+                                { queryParams: { token: error.error } }
+                            );
+                        }
                     }
                 )
             );

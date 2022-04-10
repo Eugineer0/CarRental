@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { AuthService } from '../../services/auth.service';
 import { FormErrorsHandlerService } from '../../services/form-errors-handler.service';
@@ -16,7 +17,7 @@ import { minAgeValidator } from '../../validators/min-age-validator';
 export class RegisterComponent implements OnInit {
     public readonly minAge: number = 19;
 
-    public readonly registerForm = new FormGroup({
+    public readonly registerForm: FormGroup = new FormGroup({
         email: new FormControl(
             '',
             [
@@ -68,7 +69,7 @@ export class RegisterComponent implements OnInit {
                 fieldTemplateValidator(/^[A-Z]{2}[0-9]{7}$/)
             ]
         ),
-        driverLicense: new FormControl(
+        driverLicenseSerialNumber: new FormControl(
             '',
             [
                 Validators.required,
@@ -92,11 +93,12 @@ export class RegisterComponent implements OnInit {
 
     constructor(
         private authService: AuthService,
-        private router: Router
+        private router: Router,
+        private modalService: NgbModal
     ) {
     }
 
-    ngOnInit(): void {
+    public ngOnInit(): void {
     }
 
     public resetRegisterStatus(): void {
@@ -115,7 +117,7 @@ export class RegisterComponent implements OnInit {
         this.authService.register(this.registerForm.value)
             .subscribe(
                 _ => {
-                    this.router.navigateByUrl('');
+                    this.router.navigateByUrl('login');
                 },
                 _ => {
                     this.registerFailed = true;
@@ -130,5 +132,9 @@ export class RegisterComponent implements OnInit {
 
     public getControlBy(formControlName: string): AbstractControl {
         return this.registerForm.controls[formControlName];
+    }
+
+    public open(content: TemplateRef<any>): void {
+        this.modalService.open(content);
     }
 }

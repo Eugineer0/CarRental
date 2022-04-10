@@ -1,0 +1,48 @@
+<div class="row">
+    <div class="col-md-5  mx-auto">
+        <div class=" card rounded-1">
+            <div class="card-header">
+                <h3>Complete registration by entering you driver license serial number</h3>
+            </div>
+            <div class="card-body">
+                <div *ngIf="completionFailed" class="alert alert-danger">
+                    {{ completionFailedMessage }}
+                </div>
+                <form [formGroup]="driverLicenseForm">
+                    <div class="form-group">
+                        <label for="serialNumber">Driver license</label>
+                        <input
+                            maxlength="9"
+                            type="text"
+                            class="form-control"
+                            id="serialNumber"
+                            formControlName="driverLicenseSerialNumber"
+                        >
+                        <div
+                            *ngIf="checkIfErrorsOccurred('driverLicenseSerialNumber')"
+                            class="alert alert-danger"
+                        >
+                            <div *ngIf="getControlBy('driverLicenseSerialNumber').hasError('required')">
+                                Driver license is required.
+                            </div>
+                            <div *ngIf="getControlBy('driverLicenseSerialNumber').hasError('fieldTemplate')">
+                                Driver license must consist of 1 digit leading 2 capitals followed by 6 digits.
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        class="btn btn-success mt-2"
+                        [disabled]="driverLicenseForm.invalid"
+                        (click)="open(content)"
+                    >
+                        Complete
+                    </button>
+                    <ng-template #content let-modal>
+                        <app-registration-modal (submit)="onSubmit()" (close)="modal.close()"></app-registration-modal>
+                    </ng-template>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

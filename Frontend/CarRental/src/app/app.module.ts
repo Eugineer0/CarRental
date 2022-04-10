@@ -6,8 +6,10 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 
 import { AppComponent } from './app.component';
+import { CompleteRegistrationComponent } from './components/complete-registration/complete-registration.component';
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
+import { RegistrationModalComponent } from './components/shared/registration-modal/registration-modal.component';
 
 import { AuthService } from './services/auth.service';
 
@@ -18,7 +20,9 @@ import { RefreshAccessInterceptor } from './interceptors/refresh-access-intercep
     declarations: [
         AppComponent,
         LoginComponent,
-        RegisterComponent
+        RegisterComponent,
+        CompleteRegistrationComponent,
+        RegistrationModalComponent
     ],
     imports: [
         AppRoutingModule,
