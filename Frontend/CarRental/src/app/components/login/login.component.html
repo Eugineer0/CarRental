@@ -1,0 +1,70 @@
+<div class="col-md-3 mx-auto">
+    <div class="card card-lg rounded-1">
+        <div class="card-header">
+            <h3>Enter your credentials</h3>
+        </div>
+        <div class="card-body">
+            <div *ngIf="authFailed" class="alert alert-danger">
+                {{ authFailedMessage }}
+            </div>
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input
+                        class="form-control"
+                        id="username"
+                        type="text"
+                        formControlName="username"
+                        (change)="resetAuthStatus()"
+                    >
+                    <div
+                        *ngIf="checkIfErrorsOccurred('username')"
+                        class="alert alert-danger"
+                    >
+                        <div *ngIf="getControlBy('username').hasError('required')">
+                            Username is required.
+                        </div>
+                        <div *ngIf="getControlBy('username').hasError('maxlength')">
+                            Username must be shorter.
+                        </div>
+                    </div>
+                    <label class="mt-2" for="password">Password</label>
+                    <div class="input-group">
+                        <input
+                            class="form-control"
+                            id="password"
+                            formControlName="password"
+                            [type]="passwordVisible ? 'text' : 'password'"
+                            (change)="resetAuthStatus()"
+                        >
+                        <button
+                            type="button"
+                            class="btn btn-light"
+                            (click)="changePasswordType()"
+                        >
+                            {{ passwordVisible ? 'Hide' : 'Show' }}
+                        </button>
+                    </div>
+                    <div
+                        *ngIf="checkIfErrorsOccurred('password')"
+                        class="alert alert-danger"
+                    >
+                        <div *ngIf="getControlBy('password').hasError('required')">
+                            Password is required.
+                        </div>
+                        <div *ngIf="getControlBy('password').hasError('maxlength')">
+                            Password must be shorter.
+                        </div>
+                    </div>
+                </div>
+                <button
+                    type="submit"
+                    class="btn btn-success mt-2"
+                    [disabled]="loginForm.invalid || loginForm.pristine"
+                >
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
