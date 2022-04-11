@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { AuthService } from '../../services/auth.service';
 
 import { FormErrorsHandlerService } from '../../services/form-errors-handler.service';
-import { fieldTemplateValidator } from '../../validators/field-template-validator';
-import { minAgeValidator } from "../../validators/min-age-validator";
+import { fieldTemplateValidator } from '../../validators/fieldTemplateValidator';
+import { minAgeValidator } from '../../validators/min-age-validator';
 
 @Component({
     selector: 'app-register',
@@ -14,9 +15,9 @@ import { minAgeValidator } from "../../validators/min-age-validator";
     styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
-    public minAge: number = 14;
+    public readonly minAge: number = 14;
 
-    public registerForm = new FormGroup({
+    public readonly registerForm: FormGroup = new FormGroup({
         email: new FormControl(
             '',
             [
@@ -24,7 +25,6 @@ export class RegisterComponent implements OnInit {
                 Validators.minLength(3),
                 Validators.maxLength(254),
                 fieldTemplateValidator(/^(?!\.)(""([^""\r\\]|\\[""\r\\])*""|([-a-z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)@[a-z0-9][\w\.-]*[a-z0-9]\.[a-z][a-z\.]*[a-z]$/)
-
             ]
         ),
         username: new FormControl(
@@ -84,11 +84,12 @@ export class RegisterComponent implements OnInit {
 
     constructor(
         private authService: AuthService,
-        private router: Router
+        private router: Router,
+        private modalService: NgbModal
     ) {
     }
 
-    ngOnInit(): void {
+    public ngOnInit(): void {
     }
 
     public resetRegisterStatus(): void {
@@ -121,6 +122,10 @@ export class RegisterComponent implements OnInit {
     }
 
     public getControlBy(formControlName: string): AbstractControl {
-        return FormErrorsHandlerService.getControlBy(this.registerForm, formControlName);
+        return this.registerForm.controls[formControlName];
+    }
+
+    public open(content: TemplateRef<any>): void {
+        this.modalService.open(content);
     }
 }

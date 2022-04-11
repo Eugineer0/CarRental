@@ -96,7 +96,7 @@
                     </div>
                     <label class="mt-2" for="email">Email</label>
                     <input
-                        type="text"
+                        type="email"
                         class="form-control"
                         id="email"
                         formControlName="email"
@@ -175,12 +175,16 @@
                     </div>
                 </div>
                 <button
-                    type="submit"
+                    type="button"
                     class="btn btn-success mt-2"
                     [disabled]="registerForm.invalid || registerForm.pristine"
+                    (click)="open(content)"
                 >
                     Register
                 </button>
+                <ng-template #content let-modal>
+                    <app-registration-modal (submit)="onSubmit()" (close)="modal.close()"></app-registration-modal>
+                </ng-template>
             </form>
         </div>
     </div>
