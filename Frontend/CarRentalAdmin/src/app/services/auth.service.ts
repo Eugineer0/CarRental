@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { LoginRequest } from '../models/requests/login-request';
@@ -13,16 +13,15 @@ import { LocalStorageService } from './local-storage.service';
 @Injectable()
 export class AuthService {
     private readonly baseUrl: string = '/api/auth';
-    private loggedIn: BehaviorSubject<boolean> = new BehaviorSubject(this.localStorageService.hasTokens());
+
+    public loggedIn: BehaviorSubject<boolean> = new BehaviorSubject(this.localStorageService.hasTokens());
+    public accessRefreshing: boolean = false;
+    public accessRefreshed: Subject<boolean> = new Subject<boolean>();
 
     constructor(
         private http: HttpClient,
         private localStorageService: LocalStorageService
     ) {
-    }
-
-    public getLoggedInStatus(): BehaviorSubject<boolean> {
-        return this.loggedIn;
     }
 
     public register(registerRequest: RegisterRequest): Observable<void> {
@@ -56,7 +55,12 @@ export class AuthService {
             .pipe(
                 tap(
                     response => {
+                        console.log(JSON.stringify(response));
                         this.setSession(response);
+                    },
+                    e => {
+                        console.log(JSON.stringify(e));
+                        this.closeSession();
                     }
                 )
             );

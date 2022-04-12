@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 import {
-    HttpErrorResponse,
     HttpHandler,
     HttpRequest,
     HttpInterceptor,
@@ -34,42 +33,74 @@ export class RefreshAccessInterceptor implements HttpInterceptor {
         return next.handle(request)
             .pipe(
                 catchError(
-                    this.handleError(request, next)
+                    error => {
+                        console.error(`${ request.method } ${ request.url } failed: ${ error.error }`);
+
+                        if (error.status === 401) {
+                            if (this.authService.accessRefreshing) {
+                                console.log(request.url + ' IS WAITING REFRESHING');
+
+                                return this.authService.accessRefreshed
+                                    .pipe(
+                                        switchMap(
+                                            value => {
+                                                console.log('received value: ' + value);
+                                                if (value) {
+                                                    return next.handle(request);
+                                                }
+
+                                                throw error;
+                                            }
+                                        )
+                                    );
+                            } else {
+                                const refreshToken = this.localStorageService.getRefreshToken();
+
+                                console.log(request.url + ' IS REFRESHING');
+
+                                if (refreshToken) {
+                                    this.authService.accessRefreshing = true;
+
+                                    const refreshTokenRequest: RefreshTokenRequest = {
+                                        refreshToken: refreshToken
+                                    };
+                                    return this.refreshAccess(request, next, refreshTokenRequest);
+                                }
+                            }
+                        }
+
+                        console.log('outer throw invoked');
+                        throw error;
+                    }
                 )
             );
     }
 
-    private handleError(
+    private refreshAccess(
         request: HttpRequest<any>,
-        handler: HttpHandler
-    ): (error: HttpErrorResponse) => never {
-        return (error: HttpErrorResponse) => {
-            console.error(`${ request.method } ${ request.url } failed: ${ error.error }`);
+        handler: HttpHandler,
+        refreshTokenRequest: RefreshTokenRequest
+    ): Observable<any> {
+        return this.authService.refresh(refreshTokenRequest)
+            .pipe(
+                catchError(
+                    error => {
+                        console.log('refresh catch error');
 
-            if (error.status === 401) {
-                const refreshToken = this.localStorageService.getRefreshToken();
-                this.authService.closeSession();
+                        this.authService.accessRefreshed.next(false);
+                        this.authService.accessRefreshing = false;
+                        throw error;
+                    }
+                ),
+                switchMap(
+                    _ => {
+                        console.log('refresh switch map');
 
-                if (refreshToken) {
-                    const refreshTokenRequest: RefreshTokenRequest = {
-                        refreshToken: refreshToken
-                    };
-
-                    this.authService.refresh(refreshTokenRequest)
-                        .subscribe(
-                            _ => {
-                                handler.handle(request);
-                            }
-                        );
-                } else {
-                    this.router.navigate(
-                        ['login'],
-                        { queryParams: { returnUrl: this.router.routerState.snapshot.url } }
-                    );
-                }
-            }
-
-            throw error;
-        };
+                        this.authService.accessRefreshed.next(true);
+                        this.authService.accessRefreshing = false;
+                        return handler.handle(request);
+                    }
+                )
+            );
     }
 }
