@@ -28,7 +28,7 @@ export class SecretComponent implements OnInit {
                 }
             )
 
-        this.http.get('/api/users')
+        this.http.get('/api/users/Qwert')
             .subscribe(
                 response => {
                     console.log(JSON.stringify(response));
@@ -38,7 +38,7 @@ export class SecretComponent implements OnInit {
                 }
             )
 
-        this.http.get('/api/users')
+        this.http.get('/api/users/Qwer/orders')
             .subscribe(
                 response => {
                     console.log(JSON.stringify(response));

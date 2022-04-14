@@ -44,7 +44,7 @@ export class RefreshAccessInterceptor implements HttpInterceptor {
                                     .pipe(
                                         switchMap(
                                             value => {
-                                                console.log('received value: ' + value);
+                                                console.log(request.url + ' received value: ' + value);
                                                 if (value) {
                                                     return next.handle(request);
                                                 }
