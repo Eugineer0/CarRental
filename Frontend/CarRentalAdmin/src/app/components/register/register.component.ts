@@ -5,8 +5,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { AuthService } from '../../services/auth.service';
 
-import { FormErrorsHandlerService } from '../../services/form-errors-handler.service';
-import { fieldTemplateValidator } from '../../validators/fieldTemplateValidator';
+import { FormErrorsRecognizerService } from '../../services/form-errors-recognizer.service';
 import { minAgeValidator } from '../../validators/min-age-validator';
 
 @Component({
@@ -24,7 +23,7 @@ export class RegisterComponent implements OnInit {
                 Validators.required,
                 Validators.minLength(3),
                 Validators.maxLength(254),
-                fieldTemplateValidator(/^(?!\.)(""([^""\r\\]|\\[""\r\\])*""|([-a-z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)@[a-z0-9][\w\.-]*[a-z0-9]\.[a-z][a-z\.]*[a-z]$/)
+                Validators.pattern(/^(?!\.)(""([^""\r\\]|\\[""\r\\])*""|([-a-z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)@[a-z0-9][\w\.-]*[a-z0-9]\.[a-z][a-z\.]*[a-z]$/)
             ]
         ),
         username: new FormControl(
@@ -32,7 +31,7 @@ export class RegisterComponent implements OnInit {
             [
                 Validators.required,
                 Validators.maxLength(25),
-                fieldTemplateValidator(/^\w*$/)
+                Validators.pattern(/^\w*$/)
             ]
         ),
         password: new FormControl(
@@ -41,7 +40,7 @@ export class RegisterComponent implements OnInit {
                 Validators.required,
                 Validators.minLength(5),
                 Validators.maxLength(25),
-                fieldTemplateValidator(/(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])/)
+                Validators.pattern(/(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])/)
             ]
         ),
         name: new FormControl(
@@ -49,7 +48,7 @@ export class RegisterComponent implements OnInit {
             [
                 Validators.required,
                 Validators.maxLength(64),
-                fieldTemplateValidator(/^[A-Z][a-z]*(-[A-Z])?[a-z]*$/)
+                Validators.pattern(/^[A-Z][a-z]*(-[A-Z])?[a-z]*$/)
             ]
         ),
         surname: new FormControl(
@@ -57,7 +56,7 @@ export class RegisterComponent implements OnInit {
             [
                 Validators.required,
                 Validators.maxLength(64),
-                fieldTemplateValidator(/^[A-Z][a-z]*((-[A-Z])?[a-z]*)*$/)
+                Validators.pattern(/^[A-Z][a-z]*((-[A-Z])?[a-z]*)*$/)
             ]
         ),
         passportNumber: new FormControl(
@@ -66,7 +65,7 @@ export class RegisterComponent implements OnInit {
                 Validators.required,
                 Validators.minLength(9),
                 Validators.maxLength(9),
-                fieldTemplateValidator(/^[A-Z]{2}[0-9]{7}$/)
+                Validators.pattern(/^[A-Z]{2}[0-9]{7}$/)
             ]
         ),
         dateOfBirth: new FormControl(
@@ -93,7 +92,6 @@ export class RegisterComponent implements OnInit {
     }
 
     public resetRegisterStatus(): void {
-
         this.registerFailedMessage = '';
         this.registerFailed = false;
     }
@@ -118,11 +116,11 @@ export class RegisterComponent implements OnInit {
     }
 
     public checkIfErrorsOccurred(formControlName: string): boolean {
-        return FormErrorsHandlerService.checkIfErrorsOccurred(this.registerForm, formControlName);
+        return FormErrorsRecognizerService.checkIfErrorsOccurred(this.registerForm, formControlName);
     }
 
-    public getControlBy(formControlName: string): AbstractControl {
-        return this.registerForm.controls[formControlName];
+    public getControlBy(formControlName: string): AbstractControl | null {
+        return this.registerForm.get(formControlName);
     }
 
     public open(content: TemplateRef<any>): void {

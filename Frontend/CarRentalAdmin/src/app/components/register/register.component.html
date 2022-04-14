@@ -5,7 +5,7 @@
         </div>
         <div class="card-body">
             <div *ngIf="registerFailed" class="alert alert-danger">
-                {{registerFailedMessage}}
+                {{ registerFailedMessage }}
             </div>
             <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
                 <div class="form-group">
@@ -24,11 +24,11 @@
                                 *ngIf="checkIfErrorsOccurred('name')"
                                 class="alert alert-danger"
                             >
-                                <div *ngIf="getControlBy('name').hasError('required')">
+                                <div *ngIf="getControlBy('name')?.hasError('required')">
                                     Name is required.
                                 </div>
-                                <div *ngIf="getControlBy('name').hasError('fieldTemplate')">
-                                    Name must start from capital and contain only latin letters or hyphen in composite
+                                <div *ngIf="getControlBy('name')?.hasError('pattern')">
+                                    Name must start with capital and contain only latin letters or hyphen in composite
                                     variant.
                                 </div>
                             </div>
@@ -44,11 +44,11 @@
                                 *ngIf="checkIfErrorsOccurred('surname')"
                                 class="alert alert-danger"
                             >
-                                <div *ngIf="getControlBy('surname').hasError('required')">
+                                <div *ngIf="getControlBy('surname')?.hasError('required')">
                                     Surname is required.
                                 </div>
-                                <div *ngIf="getControlBy('surname').hasError('fieldTemplate')">
-                                    Surname must start from capital and contain only latin letters or hyphen in
+                                <div *ngIf="getControlBy('surname')?.hasError('pattern')">
+                                    Surname must start with capital and contain only latin letters or hyphen in
                                     composite
                                     variant.
                                 </div>
@@ -66,10 +66,10 @@
                                 *ngIf="checkIfErrorsOccurred('passportNumber')"
                                 class="alert alert-danger"
                             >
-                                <div *ngIf="getControlBy('passportNumber').hasError('required')">
+                                <div *ngIf="getControlBy('passportNumber')?.hasError('required')">
                                     Passport number is required.
                                 </div>
-                                <div *ngIf="getControlBy('passportNumber').hasError('fieldTemplate')">
+                                <div *ngIf="getControlBy('passportNumber')?.hasError('pattern')">
                                     Passport number must consist of 2 capitals leading 7 digits.
                                 </div>
                             </div>
@@ -85,10 +85,10 @@
                                 *ngIf="checkIfErrorsOccurred('dateOfBirth')"
                                 class="alert alert-danger"
                             >
-                                <div *ngIf="getControlBy('dateOfBirth').hasError('required')">
+                                <div *ngIf="getControlBy('dateOfBirth')?.hasError('required')">
                                     Date of birth is required.
                                 </div>
-                                <div *ngIf="getControlBy('dateOfBirth').hasError('minAge')">
+                                <div *ngIf="getControlBy('dateOfBirth')?.hasError('minAge')">
                                     Admin have to reach {{ minAge }} years.
                                 </div>
                             </div>
@@ -106,16 +106,16 @@
                         *ngIf="checkIfErrorsOccurred('email')"
                         class="alert alert-danger"
                     >
-                        <div *ngIf="getControlBy('email').hasError('required')">
+                        <div *ngIf="getControlBy('email')?.hasError('required')">
                             Email is required.
                         </div>
-                        <div *ngIf="getControlBy('email').hasError('minlength')">
+                        <div *ngIf="getControlBy('email')?.hasError('minlength')">
                             Email must be at least 3 characters long.
                         </div>
-                        <div *ngIf="getControlBy('email').hasError('maxlength')">
+                        <div *ngIf="getControlBy('email')?.hasError('maxlength')">
                             Email must be maximum 256 characters long.
                         </div>
-                        <div *ngIf="getControlBy('email').hasError('fieldTemplate')">
+                        <div *ngIf="getControlBy('email')?.hasError('pattern')">
                             Incorrect email format
                         </div>
                     </div>
@@ -131,13 +131,13 @@
                         *ngIf="checkIfErrorsOccurred('username')"
                         class="alert alert-danger"
                     >
-                        <div *ngIf="getControlBy('username').hasError('required')">
+                        <div *ngIf="getControlBy('username')?.hasError('required')">
                             Username is required.
                         </div>
-                        <div *ngIf="getControlBy('username').hasError('maxlength')">
+                        <div *ngIf="getControlBy('username')?.hasError('maxlength')">
                             Username must be shorter.
                         </div>
-                        <div *ngIf="getControlBy('username').hasError('fieldTemplate')">
+                        <div *ngIf="getControlBy('username')?.hasError('pattern')">
                             Please, use latin letters, digits and underscores for username.
                         </div>
                     </div>
@@ -163,13 +163,13 @@
                         *ngIf="checkIfErrorsOccurred('password')"
                         class="alert alert-danger"
                     >
-                        <div *ngIf="getControlBy('password').hasError('required')">
+                        <div *ngIf="getControlBy('password')?.hasError('required')">
                             Password is required.
                         </div>
-                        <div *ngIf="getControlBy('password').hasError('minlength')">
+                        <div *ngIf="getControlBy('password')?.hasError('minlength')">
                             Password must be at least 5 characters long.
                         </div>
-                        <div *ngIf="getControlBy('password').hasError('fieldTemplate')">
+                        <div *ngIf="getControlBy('password')?.hasError('pattern')">
                             Password must contain at least 1 digit, 1 lowercase and 1 uppercase.
                         </div>
                     </div>

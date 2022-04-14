@@ -3,7 +3,7 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
-import { FormErrorsHandlerService } from '../../services/form-errors-handler.service';
+import { FormErrorsRecognizerService } from '../../services/form-errors-recognizer.service';
 
 @Component({
     selector: 'app-login',
@@ -70,10 +70,10 @@ export class LoginComponent implements OnInit {
     }
 
     public checkIfErrorsOccurred(formControlName: string): boolean {
-        return FormErrorsHandlerService.checkIfErrorsOccurred(this.loginForm, formControlName);
+        return FormErrorsRecognizerService.checkIfErrorsOccurred(this.loginForm, formControlName);
     }
 
-    public getControlBy(formControlName: string): AbstractControl {
-        return FormErrorsHandlerService.getControlBy(this.loginForm, formControlName);
+    public getControlBy(formControlName: string): AbstractControl | null {
+        return this.loginForm.get(formControlName);
     }
 }
