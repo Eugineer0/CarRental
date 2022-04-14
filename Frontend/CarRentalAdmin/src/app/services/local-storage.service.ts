@@ -34,5 +34,4 @@ export class LocalStorageService {
         return localStorage.hasOwnProperty(this.accessTokenKey)
             && localStorage.hasOwnProperty(this.refreshTokenKey);
     }
-
 }

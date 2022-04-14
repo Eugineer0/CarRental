@@ -4,8 +4,8 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { AuthService } from '../../services/auth.service';
-
 import { FormErrorsRecognizerService } from '../../services/form-errors-recognizer.service';
+
 import { minAgeValidator } from '../../validators/min-age-validator';
 
 @Component({
