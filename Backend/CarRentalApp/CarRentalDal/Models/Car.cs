@@ -6,16 +6,16 @@ namespace CarRentalDal.Models
     {
         public Guid Id { get; set; }
 
-        [Column(TypeName="nchar(7)")]
-        public string RegistrationNumber { get; set; } = null!;
+        public Guid RentalCenterId { get; set; }
 
         public int CarTypeId { get; set; }
 
-        public CarType CarType { get; set; } = null!;
-
-        public Guid RentalCenterId { get; set; }
+        [Column(TypeName = "nchar(7)")]
+        public string RegistrationNumber { get; set; } = null!;
 
         public RentalCenter RentalCenter { get; set; } = null!;
+
+        public CarType CarType { get; set; } = null!;
 
         public ICollection<Order> Orders { get; set; } = null!;
     }

@@ -1,15 +1,13 @@
 ﻿namespace CarRentalDal.Models
 {
-    public class CarServicePrice
+    public class CarTypeCarService
     {
         public int Id { get; set; }
 
-        public decimal Price { get; set; }
+        public int CarTypeId { get; set; }
 
         public int CarServiceId { get; set; }
 
         public CarService CarService { get; set; } = null!;
-
-        public int CarTypeId { get; set; }
     }
 }

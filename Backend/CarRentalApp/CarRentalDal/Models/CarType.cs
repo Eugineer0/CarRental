@@ -25,12 +25,6 @@ namespace CarRentalDal.Models
 
         public int Power { get; set; }
 
-        public decimal PricePerMinute { get; set; }
-
-        public decimal PricePerHour { get; set; }
-
-        public decimal PricePerDay { get; set; }
-
-        public ICollection<CarServicePrice> CarServicePrices { get; set; } = null!;
+        public ICollection<CarTypeCarService> CarTypeCarServices { get; set; } = null!;
     }
 }
