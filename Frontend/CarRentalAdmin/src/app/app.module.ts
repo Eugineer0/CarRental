@@ -14,15 +14,13 @@ import { AuthService } from './services/auth.service';
 import { AuthorizationInterceptor } from './interceptors/authorization-interceptor';
 import { RefreshAccessInterceptor } from './interceptors/refresh-access-interceptor';
 import { RegistrationModalComponent } from './components/registration-modal/registration-modal.component';
-import { SecretComponent } from './components/secret/secret.component';
 
 @NgModule({
     declarations: [
         AppComponent,
         LoginComponent,
         RegisterComponent,
-        RegistrationModalComponent,
-        SecretComponent
+        RegistrationModalComponent
     ],
     imports: [
         AppRoutingModule,
