@@ -13,5 +13,7 @@
         public decimal PricePerHour { get; set; }
 
         public decimal PricePerDay { get; set; }
+
+        public CarType CarType { get; set; } = null!;
     }
 }

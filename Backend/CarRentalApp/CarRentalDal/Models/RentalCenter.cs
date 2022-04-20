@@ -19,5 +19,9 @@ namespace CarRentalDal.Models
         public string Address { get; set; } = null!;
 
         public IEnumerable<Car> Cars { get; set; } = null!;
+
+        public IEnumerable<CarTypeCarServicePrice> CarTypeCarServicePrices { get; set; } = null!;
+
+        public IEnumerable<CarTypePrice> CarTypePrices { get; set; } = null!;
     }
 }
