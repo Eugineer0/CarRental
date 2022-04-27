@@ -103,7 +103,7 @@ namespace CarRentalDal.Migrations
                     b.ToTable("CarTypes");
                 });
 
-            modelBuilder.Entity("CarRentalDal.Models.CarTypeCarService", b =>
+            modelBuilder.Entity("CarRentalDal.Models.CarTypeCarServicePrice", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -117,26 +117,6 @@ namespace CarRentalDal.Migrations
                     b.Property<int>("CarTypeId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("CarServiceId");
-
-                    b.HasIndex("CarTypeId");
-
-                    b.ToTable("CarTypeCarServices");
-                });
-
-            modelBuilder.Entity("CarRentalDal.Models.CarTypeCarServicePrice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("CarTypeCarServiceId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -145,7 +125,9 @@ namespace CarRentalDal.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CarTypeCarServiceId");
+                    b.HasIndex("CarServiceId");
+
+                    b.HasIndex("CarTypeId");
 
                     b.HasIndex("RentalCenterId");
 
@@ -372,28 +354,17 @@ namespace CarRentalDal.Migrations
                     b.Navigation("RentalCenter");
                 });
 
-            modelBuilder.Entity("CarRentalDal.Models.CarTypeCarService", b =>
+            modelBuilder.Entity("CarRentalDal.Models.CarTypeCarServicePrice", b =>
                 {
                     b.HasOne("CarRentalDal.Models.CarService", "CarService")
-                        .WithMany("CarServiceCarTypes")
+                        .WithMany()
                         .HasForeignKey("CarServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CarRentalDal.Models.CarType", null)
-                        .WithMany("CarTypeCarServices")
-                        .HasForeignKey("CarTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CarService");
-                });
-
-            modelBuilder.Entity("CarRentalDal.Models.CarTypeCarServicePrice", b =>
-                {
-                    b.HasOne("CarRentalDal.Models.CarTypeCarService", "CarTypeCarService")
+                    b.HasOne("CarRentalDal.Models.CarType", "CarType")
                         .WithMany()
-                        .HasForeignKey("CarTypeCarServiceId")
+                        .HasForeignKey("CarTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -403,7 +374,9 @@ namespace CarRentalDal.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CarTypeCarService");
+                    b.Navigation("CarService");
+
+                    b.Navigation("CarType");
                 });
 
             modelBuilder.Entity("CarRentalDal.Models.CarTypePrice", b =>
@@ -473,16 +446,6 @@ namespace CarRentalDal.Migrations
             modelBuilder.Entity("CarRentalDal.Models.Car", b =>
                 {
                     b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("CarRentalDal.Models.CarService", b =>
-                {
-                    b.Navigation("CarServiceCarTypes");
-                });
-
-            modelBuilder.Entity("CarRentalDal.Models.CarType", b =>
-                {
-                    b.Navigation("CarTypeCarServices");
                 });
 
             modelBuilder.Entity("CarRentalDal.Models.Order", b =>

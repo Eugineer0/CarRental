@@ -8,7 +8,5 @@ namespace CarRentalDal.Models
 
         [Column(TypeName="nvarchar(64)")]
         public string Name { get; set; } = null!;
-
-        public ICollection<CarTypeCarService> CarServiceCarTypes { get; set; } = null!;
     }
 }

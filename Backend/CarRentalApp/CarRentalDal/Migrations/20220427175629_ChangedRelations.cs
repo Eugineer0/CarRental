@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace CarRentalDal.Migrations
 {
-    public partial class ChangedPricesRelations : Migration
+    public partial class ChangedRelations : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -39,27 +39,35 @@ namespace CarRentalDal.Migrations
                 newName: "IX_Cars_CarTypeId");
 
             migrationBuilder.CreateTable(
-                name: "CarTypeCarServices",
+                name: "CarTypeCarServicePrices",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    RentalCenterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CarTypeId = table.Column<int>(type: "int", nullable: false),
-                    CarServiceId = table.Column<int>(type: "int", nullable: false)
+                    CarServiceId = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CarTypeCarServices", x => x.Id);
+                    table.PrimaryKey("PK_CarTypeCarServicePrices", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CarTypeCarServices_CarServices_CarServiceId",
+                        name: "FK_CarTypeCarServicePrices_CarServices_CarServiceId",
                         column: x => x.CarServiceId,
                         principalTable: "CarServices",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CarTypeCarServices_CarTypes_CarTypeId",
+                        name: "FK_CarTypeCarServicePrices_CarTypes_CarTypeId",
                         column: x => x.CarTypeId,
                         principalTable: "CarTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CarTypeCarServicePrices_RentalCenters_RentalCenterId",
+                        column: x => x.RentalCenterId,
+                        principalTable: "RentalCenters",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -93,52 +101,20 @@ namespace CarRentalDal.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "CarTypeCarServicePrices",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RentalCenterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CarTypeCarServiceId = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CarTypeCarServicePrices", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CarTypeCarServicePrices_CarTypeCarServices_CarTypeCarServiceId",
-                        column: x => x.CarTypeCarServiceId,
-                        principalTable: "CarTypeCarServices",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CarTypeCarServicePrices_RentalCenters_RentalCenterId",
-                        column: x => x.RentalCenterId,
-                        principalTable: "RentalCenters",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.CreateIndex(
+                name: "IX_CarTypeCarServicePrices_CarServiceId",
+                table: "CarTypeCarServicePrices",
+                column: "CarServiceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CarTypeCarServicePrices_CarTypeCarServiceId",
+                name: "IX_CarTypeCarServicePrices_CarTypeId",
                 table: "CarTypeCarServicePrices",
-                column: "CarTypeCarServiceId");
+                column: "CarTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CarTypeCarServicePrices_RentalCenterId",
                 table: "CarTypeCarServicePrices",
                 column: "RentalCenterId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CarTypeCarServices_CarServiceId",
-                table: "CarTypeCarServices",
-                column: "CarServiceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CarTypeCarServices_CarTypeId",
-                table: "CarTypeCarServices",
-                column: "CarTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CarTypesPrices_CarTypeId",
@@ -170,9 +146,6 @@ namespace CarRentalDal.Migrations
 
             migrationBuilder.DropTable(
                 name: "CarTypesPrices");
-
-            migrationBuilder.DropTable(
-                name: "CarTypeCarServices");
 
             migrationBuilder.RenameColumn(
                 name: "CarTypeId",

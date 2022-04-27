@@ -6,10 +6,14 @@
 
         public Guid RentalCenterId { get; set; }
 
-        public int CarTypeCarServiceId { get; set; }
+        public int CarTypeId { get; set; }
+
+        public int CarServiceId { get; set; }
 
         public decimal Price { get; set; }
 
-        public CarTypeCarService CarTypeCarService { get; set; } = null!;
+        public CarService CarService { get; set; } = null!;
+
+        public CarType CarType { get; set; } = null!;
     }
 }

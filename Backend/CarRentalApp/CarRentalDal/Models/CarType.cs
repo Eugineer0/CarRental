@@ -7,10 +7,10 @@ namespace CarRentalDal.Models
     {
         public int Id { get; set; }
 
-        [Column(TypeName="nvarchar(32)")]
+        [Column(TypeName = "nvarchar(32)")]
         public string Brand { get; set; } = null!;
 
-        [Column(TypeName="nvarchar(64)")]
+        [Column(TypeName = "nvarchar(64)")]
         public string Model { get; set; } = null!;
 
         public byte SeatPlaces { get; set; }
@@ -24,7 +24,5 @@ namespace CarRentalDal.Models
         public int Length { get; set; }
 
         public int Power { get; set; }
-
-        public ICollection<CarTypeCarService> CarTypeCarServices { get; set; } = null!;
     }
 }
