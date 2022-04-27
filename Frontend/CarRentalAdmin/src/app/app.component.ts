@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { RefreshTokenRequest } from './models/refresh-token-request';
+import { RefreshTokenRequest } from './models/requests/refresh-token-request';
 
 import { AuthService } from './services/auth.service';
 import { LocalStorageService } from './services/local-storage.service';
@@ -13,6 +13,7 @@ import { LocalStorageService } from './services/local-storage.service';
 })
 export class AppComponent implements OnInit {
     public loggedIn: boolean = false;
+    public isMenuCollapsed: boolean = true;
 
     constructor(
         private authService: AuthService,

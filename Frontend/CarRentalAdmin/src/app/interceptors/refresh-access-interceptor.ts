@@ -13,7 +13,7 @@ import {
 import { AuthService } from '../services/auth.service';
 import { LocalStorageService } from '../services/local-storage.service';
 
-import { RefreshTokenRequest } from '../models/refresh-token-request';
+import { RefreshTokenRequest } from '../models/requests/refresh-token-request';
 
 @Injectable({
     providedIn: 'root'

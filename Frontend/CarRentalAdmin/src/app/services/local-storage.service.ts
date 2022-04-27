@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { AuthResponse } from '../models/auth-response';
+import { AuthResponse } from '../models/responses/auth-response';
 
 @Injectable({
     providedIn: 'root'
@@ -20,9 +20,9 @@ export class LocalStorageService {
         return localStorage.getItem(this.refreshTokenKey);
     }
 
-    public setTokens(tokenPair: AuthResponse): void {
-        localStorage.setItem(this.accessTokenKey, tokenPair.accessToken);
-        localStorage.setItem(this.refreshTokenKey, tokenPair.refreshToken);
+    public setTokens(authResponse: AuthResponse): void {
+        localStorage.setItem(this.accessTokenKey, authResponse.accessToken);
+        localStorage.setItem(this.refreshTokenKey, authResponse.refreshToken);
     }
 
     public removeTokens(): void {
@@ -34,5 +34,4 @@ export class LocalStorageService {
         return localStorage.hasOwnProperty(this.accessTokenKey)
             && localStorage.hasOwnProperty(this.refreshTokenKey);
     }
-
 }

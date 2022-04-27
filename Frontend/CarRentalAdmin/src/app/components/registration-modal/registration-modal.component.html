@@ -1,0 +1,37 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">You are about become an admin...</h5>
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            (click)="onClose()"
+        >
+            <span aria-hidden="true"></span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <p>
+            After submitting this form you should give our managers some time to approve your personal data.
+            Unfortunately, during this period you won`t get access to our service, but we promise, you will be approved
+            as soon as possible.
+        </p>
+    </div>
+    <div class="modal-footer">
+        <button
+            class="btn btn-success"
+            (click)="onSubmit(); onClose()"
+        >
+            Submit
+        </button>
+        <button
+            type="button"
+            class="btn btn-warning"
+            data-bs-dismiss="modal"
+            (click)="onClose()"
+        >
+            Cancel
+        </button>
+    </div>
+</div>

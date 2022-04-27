@@ -3,13 +3,16 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { LoginRequest } from '../models/login-request';
-import { AuthResponse } from '../models/auth-response';
-import { RefreshTokenRequest } from '../models/refresh-token-request';
+import { LoginRequest } from '../models/requests/login-request';
+import { RegisterRequest } from '../models/requests/register-request';
+import { RefreshTokenRequest } from '../models/requests/refresh-token-request';
+import { AuthResponse } from '../models/responses/auth-response';
 
 import { LocalStorageService } from './local-storage.service';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class AuthService {
     private readonly baseUrl: string = '/api/auth';
     private loggedIn: BehaviorSubject<boolean> = new BehaviorSubject(this.localStorageService.hasTokens());
@@ -22,6 +25,10 @@ export class AuthService {
 
     public getLoggedInStatus(): BehaviorSubject<boolean> {
         return this.loggedIn;
+    }
+
+    public register(registerRequest: RegisterRequest): Observable<void> {
+        return this.http.post<void>(`${ this.baseUrl }/register-admin`, registerRequest);
     }
 
     public login(loginRequest: LoginRequest): Observable<AuthResponse> {

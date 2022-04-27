@@ -11,7 +11,6 @@
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input
-                        required
                         class="form-control"
                         id="username"
                         type="text"
@@ -22,17 +21,16 @@
                         *ngIf="checkIfErrorsOccurred('username')"
                         class="alert alert-danger"
                     >
-                        <div *ngIf="getControlBy('username').hasError('required')">
+                        <div *ngIf="getControlBy('username')?.hasError('required')">
                             Username is required.
                         </div>
-                        <div *ngIf="getControlBy('username').hasError('maxlength')">
+                        <div *ngIf="getControlBy('username')?.hasError('maxlength')">
                             Username must be shorter.
                         </div>
                     </div>
                     <label class="mt-2" for="password">Password</label>
                     <div class="input-group">
                         <input
-                            required
                             class="form-control"
                             id="password"
                             formControlName="password"
@@ -42,7 +40,7 @@
                         <button
                             type="button"
                             class="btn btn-light"
-                            (click)="changePasswordType()"
+                            (click)="passwordVisible = !passwordVisible"
                         >
                             {{ passwordVisible ? 'Hide' : 'Show' }}
                         </button>
@@ -51,10 +49,10 @@
                         *ngIf="checkIfErrorsOccurred('password')"
                         class="alert alert-danger"
                     >
-                        <div *ngIf="getControlBy('password').hasError('required')">
+                        <div *ngIf="getControlBy('password')?.hasError('required')">
                             Password is required.
                         </div>
-                        <div *ngIf="getControlBy('password').hasError('maxlength')">
+                        <div *ngIf="getControlBy('password')?.hasError('maxlength')">
                             Password must be shorter.
                         </div>
                     </div>
@@ -62,7 +60,7 @@
                 <button
                     type="submit"
                     class="btn btn-success mt-2"
-                    [disabled]="loginForm.invalid || loginForm.pristine"
+                    [disabled]="loginForm.invalid"
                 >
                     Login
                 </button>

@@ -3,6 +3,7 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
+import { FormErrorsRecognizerService } from '../../services/form-errors-recognizer.service';
 
 @Component({
     selector: 'app-login',
@@ -10,7 +11,7 @@ import { AuthService } from '../../services/auth.service';
     styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-    public loginForm = new FormGroup({
+    public loginForm: FormGroup = new FormGroup({
         username: new FormControl(
             '',
             [
@@ -49,13 +50,7 @@ export class LoginComponent implements OnInit {
         this.authFailedMessage = '';
     }
 
-    public changePasswordType(): void {
-        this.passwordVisible = !this.passwordVisible;
-    }
-
     public onSubmit(): void {
-        this.loginForm.markAsPristine();
-
         this.authService.login(this.loginForm.value)
             .subscribe(
                 _ => {
@@ -69,11 +64,10 @@ export class LoginComponent implements OnInit {
     }
 
     public checkIfErrorsOccurred(formControlName: string): boolean {
-        const formControl = this.getControlBy(formControlName);
-        return formControl.invalid && (formControl.dirty || formControl.touched);
+        return FormErrorsRecognizerService.checkIfErrorsOccurred(this.loginForm, formControlName);
     }
 
-    public getControlBy(name: string): AbstractControl {
-        return this.loginForm.controls[name];
+    public getControlBy(formControlName: string): AbstractControl | null {
+        return this.loginForm.get(formControlName);
     }
 }
