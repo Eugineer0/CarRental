@@ -89,12 +89,12 @@ namespace CarRentalBll.Services
             var validatedAsAdmin = new ValidatedUser()
             {
                 User = userModel,
-                Status = UserStatus.Ok
+                Status = UserStatus.Unapproved
             };
 
             if (userModel.Roles.ContainsAny(RolesConstants.AdminRoles))
             {
-                validatedAsAdmin.Status = UserStatus.Unapproved;
+                validatedAsAdmin.Status = UserStatus.Ok;
             }
 
             return validatedAsAdmin;

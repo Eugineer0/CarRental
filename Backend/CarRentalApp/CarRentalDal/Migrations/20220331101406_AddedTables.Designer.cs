@@ -4,6 +4,7 @@ using CarRentalDal.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarRentalDal.Migrations
 {
     [DbContext(typeof(CarRentalDbContext))]
-    partial class CarRentalDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220331101406_AddedTables")]
+    partial class AddedTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,9 +30,6 @@ namespace CarRentalDal.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("CarTypeId")
-                        .HasColumnType("int");
-
                     b.Property<string>("RegistrationNumber")
                         .IsRequired()
                         .HasColumnType("nchar(7)");
@@ -38,11 +37,14 @@ namespace CarRentalDal.Migrations
                     b.Property<Guid>("RentalCenterId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("TypeId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CarTypeId");
-
                     b.HasIndex("RentalCenterId");
+
+                    b.HasIndex("TypeId");
 
                     b.ToTable("Cars");
                 });
@@ -62,6 +64,32 @@ namespace CarRentalDal.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CarServices");
+                });
+
+            modelBuilder.Entity("CarRentalDal.Models.CarServicePrice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("CarServiceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CarTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarServiceId");
+
+                    b.HasIndex("CarTypeId");
+
+                    b.ToTable("CarServicePrices");
                 });
 
             modelBuilder.Entity("CarRentalDal.Models.CarType", b =>
@@ -92,59 +120,6 @@ namespace CarRentalDal.Migrations
                     b.Property<int>("Power")
                         .HasColumnType("int");
 
-                    b.Property<byte>("SeatPlaces")
-                        .HasColumnType("tinyint");
-
-                    b.Property<int>("Weight")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CarTypes");
-                });
-
-            modelBuilder.Entity("CarRentalDal.Models.CarTypeCarServicePrice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("CarServiceId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CarTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("RentalCenterId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CarServiceId");
-
-                    b.HasIndex("CarTypeId");
-
-                    b.HasIndex("RentalCenterId");
-
-                    b.ToTable("CarTypeCarServicePrices");
-                });
-
-            modelBuilder.Entity("CarRentalDal.Models.CarTypePrice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("CarTypeId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("PricePerDay")
                         .HasColumnType("decimal(18,2)");
 
@@ -154,16 +129,15 @@ namespace CarRentalDal.Migrations
                     b.Property<decimal>("PricePerMinute")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid>("RentalCenterId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<byte>("SeatPlaces")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("Weight")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CarTypeId");
-
-                    b.HasIndex("RentalCenterId");
-
-                    b.ToTable("CarTypesPrices");
+                    b.ToTable("CarTypes");
                 });
 
             modelBuilder.Entity("CarRentalDal.Models.Order", b =>
@@ -211,9 +185,6 @@ namespace CarRentalDal.Migrations
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -337,63 +308,38 @@ namespace CarRentalDal.Migrations
 
             modelBuilder.Entity("CarRentalDal.Models.Car", b =>
                 {
-                    b.HasOne("CarRentalDal.Models.CarType", "CarType")
-                        .WithMany()
-                        .HasForeignKey("CarTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CarRentalDal.Models.RentalCenter", "RentalCenter")
                         .WithMany("Cars")
                         .HasForeignKey("RentalCenterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CarType");
+                    b.HasOne("CarRentalDal.Models.CarType", "Type")
+                        .WithMany()
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("RentalCenter");
+
+                    b.Navigation("Type");
                 });
 
-            modelBuilder.Entity("CarRentalDal.Models.CarTypeCarServicePrice", b =>
+            modelBuilder.Entity("CarRentalDal.Models.CarServicePrice", b =>
                 {
                     b.HasOne("CarRentalDal.Models.CarService", "CarService")
-                        .WithMany()
+                        .WithMany("Prices")
                         .HasForeignKey("CarServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CarRentalDal.Models.CarType", "CarType")
-                        .WithMany()
+                    b.HasOne("CarRentalDal.Models.CarType", null)
+                        .WithMany("CarServicePrices")
                         .HasForeignKey("CarTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CarRentalDal.Models.RentalCenter", null)
-                        .WithMany("CarTypeCarServicePrices")
-                        .HasForeignKey("RentalCenterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CarService");
-
-                    b.Navigation("CarType");
-                });
-
-            modelBuilder.Entity("CarRentalDal.Models.CarTypePrice", b =>
-                {
-                    b.HasOne("CarRentalDal.Models.CarType", "CarType")
-                        .WithMany()
-                        .HasForeignKey("CarTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CarRentalDal.Models.RentalCenter", null)
-                        .WithMany("CarTypePrices")
-                        .HasForeignKey("RentalCenterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CarType");
                 });
 
             modelBuilder.Entity("CarRentalDal.Models.Order", b =>
@@ -448,6 +394,16 @@ namespace CarRentalDal.Migrations
                     b.Navigation("Orders");
                 });
 
+            modelBuilder.Entity("CarRentalDal.Models.CarService", b =>
+                {
+                    b.Navigation("Prices");
+                });
+
+            modelBuilder.Entity("CarRentalDal.Models.CarType", b =>
+                {
+                    b.Navigation("CarServicePrices");
+                });
+
             modelBuilder.Entity("CarRentalDal.Models.Order", b =>
                 {
                     b.Navigation("OrderCarServices");
@@ -455,10 +411,6 @@ namespace CarRentalDal.Migrations
 
             modelBuilder.Entity("CarRentalDal.Models.RentalCenter", b =>
                 {
-                    b.Navigation("CarTypeCarServicePrices");
-
-                    b.Navigation("CarTypePrices");
-
                     b.Navigation("Cars");
                 });
 
