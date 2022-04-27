@@ -13,6 +13,7 @@ import { LocalStorageService } from './services/local-storage.service';
 })
 export class AppComponent implements OnInit {
     public loggedIn: boolean = false;
+    public isMenuCollapsed: boolean = true;
 
     constructor(
         private authService: AuthService,

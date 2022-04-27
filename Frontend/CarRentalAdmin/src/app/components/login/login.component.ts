@@ -11,7 +11,7 @@ import { FormErrorsRecognizerService } from '../../services/form-errors-recogniz
     styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-    public loginForm = new FormGroup({
+    public loginForm: FormGroup = new FormGroup({
         username: new FormControl(
             '',
             [
@@ -50,13 +50,7 @@ export class LoginComponent implements OnInit {
         this.authFailedMessage = '';
     }
 
-    public changePasswordType(): void {
-        this.passwordVisible = !this.passwordVisible;
-    }
-
     public onSubmit(): void {
-        this.loginForm.markAsPristine();
-
         this.authService.login(this.loginForm.value)
             .subscribe(
                 _ => {

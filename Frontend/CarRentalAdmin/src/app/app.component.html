@@ -1,9 +1,16 @@
 <div>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
         <div class="container-fluid">
             <span class="navbar-brand">Car rental Admin®</span>
-            <div class="collapse navbar-collapse">
-                <ul class="nav justify-content-end ms-auto">
+            <button
+                class="navbar-toggler"
+                type="button"
+                (click)="isMenuCollapsed = !isMenuCollapsed"
+            >
+                &#9776;
+            </button>
+            <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse">
+                <ul class="navbar-nav justify-content-end ms-auto">
                     <li
                         *ngIf="loggedIn else loggedOut"
                         class="nav-item"

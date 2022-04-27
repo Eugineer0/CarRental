@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AppRoutingModule } from './app-routing.module';
 
@@ -24,7 +25,8 @@ import { RefreshAccessInterceptor } from './interceptors/refresh-access-intercep
         AppRoutingModule,
         HttpClientModule,
         BrowserModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        NgbModule
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: RefreshAccessInterceptor, multi: true },

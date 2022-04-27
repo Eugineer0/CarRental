@@ -1,7 +1,8 @@
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, TemplateRef } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { environment } from '../../../environments/environment';
 
 import { AuthService } from '../../services/auth.service';
 import { FormErrorsRecognizerService } from '../../services/form-errors-recognizer.service';
@@ -13,8 +14,8 @@ import { minAgeValidator } from '../../validators/min-age-validator';
     templateUrl: './register.component.html',
     styleUrls: ['./register.component.css']
 })
-export class RegisterComponent implements OnInit {
-    public readonly minAge: number = 14;
+export class RegisterComponent {
+    public readonly minAge: number = environment.minAge;
 
     public readonly registerForm: FormGroup = new FormGroup({
         email: new FormControl(
@@ -88,21 +89,12 @@ export class RegisterComponent implements OnInit {
     ) {
     }
 
-    public ngOnInit(): void {
-    }
-
     public resetRegisterStatus(): void {
         this.registerFailedMessage = '';
         this.registerFailed = false;
     }
 
-    public changePasswordType(): void {
-        this.passwordVisible = !this.passwordVisible;
-    }
-
     public onSubmit(): void {
-        this.registerForm.markAsPristine();
-
         this.authService.register(this.registerForm.value)
             .subscribe(
                 _ => {

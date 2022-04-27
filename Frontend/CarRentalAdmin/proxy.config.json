@@ -1,6 +1,6 @@
 {
-  "/api/*": {
-    "target": "http://localhost:5001/",
-    "logLevel": "debug"
-  }
+    "/api/*": {
+        "target": "http://localhost:5001/",
+        "logLevel": "debug"
+    }
 }

@@ -1,11 +1,11 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 
 @Component({
     selector: 'app-registration-modal',
     templateUrl: './registration-modal.component.html',
     styleUrls: ['./registration-modal.component.css']
 })
-export class RegistrationModalComponent implements OnInit {
+export class RegistrationModalComponent {
     @Output()
     private readonly close: EventEmitter<void> = new EventEmitter();
 
@@ -15,14 +15,11 @@ export class RegistrationModalComponent implements OnInit {
     constructor() {
     }
 
-    public ngOnInit(): void {
-    }
-
-    public onClose() {
+    public onClose(): void {
         this.close.emit();
     }
 
-    public onSubmit() {
+    public onSubmit(): void {
         this.submit.emit();
     }
 }

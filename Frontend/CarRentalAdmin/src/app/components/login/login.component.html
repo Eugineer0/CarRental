@@ -40,7 +40,7 @@
                         <button
                             type="button"
                             class="btn btn-light"
-                            (click)="changePasswordType()"
+                            (click)="passwordVisible = !passwordVisible"
                         >
                             {{ passwordVisible ? 'Hide' : 'Show' }}
                         </button>
@@ -60,7 +60,7 @@
                 <button
                     type="submit"
                     class="btn btn-success mt-2"
-                    [disabled]="loginForm.invalid || loginForm.pristine"
+                    [disabled]="loginForm.invalid"
                 >
                     Login
                 </button>

@@ -154,7 +154,7 @@
                             type="button"
                             class="btn btn-light"
                             id="button-addon2"
-                            (click)="changePasswordType()"
+                            (click)="passwordVisible = !passwordVisible"
                         >
                             {{ passwordVisible ? 'Hide' : 'Show' }}
                         </button>
@@ -177,7 +177,7 @@
                 <button
                     type="button"
                     class="btn btn-success mt-2"
-                    [disabled]="registerForm.invalid || registerForm.pristine"
+                    [disabled]="registerForm.invalid"
                     (click)="open(content)"
                 >
                     Register
